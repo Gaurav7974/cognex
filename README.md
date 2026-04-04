@@ -34,6 +34,58 @@ Your AI forgets everything between sessions. **Cognex** fixes that.
 
 ---
 
+## Quick Install
+
+### Option A — One command (Terminal)
+
+**Mac/Linux:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/Gaurav7974/cognex/main/install.sh | sh
+```
+
+**Windows (PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/Gaurav7974/cognex/main/install.ps1 | iex
+```
+
+These scripts automatically:
+- Install cognex via pip
+- Detect your AI tool (Claude Code, OpenCode, Cursor, Codex)
+- Write the correct config file
+- Print confirmation when done
+
+---
+
+### Option B — Paste this prompt into your AI agent
+
+If you're already inside Claude Code, OpenCode, Cursor or any MCP-compatible tool,
+just paste this prompt and your AI will configure everything:
+
+```
+Install and configure the cognex MCP server on my system.
+
+Steps:
+1. Run: pip install cognex
+2. Detect which AI tool I am using (Claude Code / OpenCode / Cursor / Codex / VS Code)
+3. Find the correct MCP config file for this tool
+4. Add cognex to the config:
+   - command: "cognex"
+   - no extra args needed
+5. Tell me to restart my AI tool
+6. After I restart, call substrate_start_session with session_id "setup-verify" to confirm it works
+```
+
+Copy that prompt → paste into your AI tool → it handles the rest.
+
+---
+
+### Option C — Manual (full control)
+
+See the [Configuration](#configuration-by-cli-tool) section below
+for step-by-step setup per tool.
+
+---
+
 ## Supported AI Tools
 
 | Tool | Works? |
