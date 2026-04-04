@@ -153,74 +153,53 @@ uvx cognex --help
 
 ---
 
-## Configuration by CLI Tool
+## Configuration
 
-### OpenCode
+### Claude Code
 
-**Config location:** `~/.config/opencode/opencode.json` (Linux/Mac) or `%USERPROFILE%\.config\opencode\opencode.json` (Windows)
+Config file: `~/.claude.json` (global) or `.mcp.json` (project root)
 
-**With uvx (no install):**
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "mcp": {
-    "cognex": {
-      "type": "local",
-      "command": ["uvx", "cognex"],
-      "enabled": true
-    }
-  }
-}
+Add via CLI (recommended):
+```bash
+claude mcp add cognex -- uvx cognex
 ```
 
-**With pipx:**
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "mcp": {
-    "cognex": {
-      "type": "local",
-      "command": ["pipx", "run", "cognex"],
-      "enabled": true
-    }
-  }
-}
-```
-
-**With pip (simplest):**
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "mcp": {
-    "cognex": {
-      "type": "local",
-      "command": ["cognex"],
-      "enabled": true
-    }
-  }
-}
-```
-
----
-
-### Claude Code / Claude Desktop
-
-**Config location (Windows):** `%APPDATA%\Claude\claude_desktop_config.json`
-
-**Config location (Mac):** `~/Library/Application Support/Claude/claude_desktop_config.json`
-
-**With pip:**
+Or manually add to `~/.claude.json`:
 ```json
 {
   "mcpServers": {
     "cognex": {
-      "command": "cognex"
+      "command": "uvx",
+      "args": ["cognex"]
     }
   }
 }
 ```
 
-**With uvx:**
+Or add to `.mcp.json` in your project root (team-shared):
+```json
+{
+  "mcpServers": {
+    "cognex": {
+      "command": "uvx",
+      "args": ["cognex"]
+    }
+  }
+}
+```
+
+Note: `.mcp.json` in project root is version-controlled and shared with your team.
+`~/.claude.json` is user-specific and works across all projects.
+
+---
+
+### Claude Desktop
+
+Config file:
+  Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+  Mac:     `~/Library/Application Support/Claude/claude_desktop_config.json`
+  Linux:   `~/.config/Claude/claude_desktop_config.json`
+
 ```json
 {
   "mcpServers": {
@@ -234,28 +213,57 @@ uvx cognex --help
 
 ---
 
-### Cursor
+### OpenCode
 
-**Config location (Windows):** `%USERPROFILE%\.cursor\mcp.json`
+Config file: `~/.config/opencode/opencode.json` (global)
+             `opencode.json` in project root (project-specific)
 
-**Config location (Mac):** `~/.cursor/mcp.json`
-
-**With pip:**
 ```json
 {
-  "mcpServers": {
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
     "cognex": {
-      "command": "cognex"
+      "type": "local",
+      "command": ["uvx", "cognex"],
+      "enabled": true
     }
   }
 }
 ```
 
+Note: OpenCode uses `"mcp"` key (not `"mcpServers"`) and requires `"type": "local"`
+for stdio servers. Config files are merged, not replaced — safe to add to
+existing config.
+
 ---
 
-### VS Code (with MCP extension)
+### Cursor
 
-Create `.vscode/mcp.json` in your project:
+Config file:
+  Windows: `%USERPROFILE%\.cursor\mcp.json`
+  Mac/Linux: `~/.cursor/mcp.json`
+
+```json
+{
+  "mcpServers": {
+    "cognex": {
+      "command": "uvx",
+      "args": ["cognex"]
+    }
+  }
+}
+```
+
+Note: Cursor caps at 40 tools per config. Cognex uses 18 tools, well within limit.
+
+---
+
+### VS Code (GitHub Copilot Agent Mode)
+
+Config file: `.vscode/mcp.json` in your workspace (team-shared)
+             Or run: MCP: Open User Configuration from Command Palette (global)
+
+Note: VS Code uses `"servers"` key not `"mcpServers"`
 
 ```json
 {
@@ -270,18 +278,119 @@ Create `.vscode/mcp.json` in your project:
 
 ---
 
-### Codex
+### Cline (VS Code Extension)
 
-Add to your Codex config (`~/.codex/config.json`):
+Config file: Managed via Cline UI
+  Windows: `%APPDATA%\Code\User\globalStorage\saoudrizwan.claude-dev\settings\cline_mcp_settings.json`
+  Mac: `~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`
+
+Open Cline → click MCP Servers icon → Configure tab → Edit Config
+
+Add under mcpServers:
+```json
+{
+  "mcpServers": {
+    "cognex": {
+      "command": "uvx",
+      "args": ["cognex"],
+      "disabled": false,
+      "alwaysAllow": []
+    }
+  }
+}
+```
+
+---
+
+### Kilo Code (VS Code Extension)
+
+Same format as Cline. Open Kilo Code → MCP Servers → Configure.
 
 ```json
 {
   "mcpServers": {
     "cognex": {
-      "command": "cognex"
+      "command": "uvx",
+      "args": ["cognex"],
+      "disabled": false
     }
   }
 }
+```
+
+---
+
+### Windsurf
+
+Config file: `~/.codeium/windsurf/mcp_config.json`
+
+```json
+{
+  "mcpServers": {
+    "cognex": {
+      "command": "uvx",
+      "args": ["cognex"]
+    }
+  }
+}
+```
+
+---
+
+### Zed
+
+Config file: `~/.config/zed/settings.json`
+
+Add under `context_servers` key:
+```json
+{
+  "context_servers": {
+    "cognex": {
+      "command": {
+        "path": "uvx",
+        "args": ["cognex"]
+      }
+    }
+  }
+}
+```
+
+---
+
+## Config format reference
+
+| Tool | Key | Config file |
+|------|-----|-------------|
+| Claude Code | mcpServers | `~/.claude.json` or `.mcp.json` |
+| Claude Desktop | mcpServers | `claude_desktop_config.json` |
+| OpenCode | mcp | `opencode.json` |
+| Cursor | mcpServers | `~/.cursor/mcp.json` |
+| VS Code Copilot | servers | `.vscode/mcp.json` |
+| Cline | mcpServers | `cline_mcp_settings.json` |
+| Kilo Code | mcpServers | `cline_mcp_settings.json` |
+| Windsurf | mcpServers | `mcp_config.json` |
+| Zed | context_servers | `settings.json` |
+
+Key difference: OpenCode uses `"mcp"` and VS Code uses `"servers"`.
+All others use `"mcpServers"`.
+
+---
+
+## After adding config
+
+Completely close and reopen your AI tool.
+You should see 18 new cognex tools available.
+
+To verify in Claude Code:
+```
+/mcp
+→ Should show: cognex: connected
+```
+
+To verify in OpenCode:
+```
+Type /mcp in the chat
+→ Should show cognex listed with Connected status
 ```
 
 ---
