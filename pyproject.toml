@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cognex"
+version = "0.1.0"
+description = "Persistent memory layer for AI agents — survives sessions, learns patterns, enables continuity"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+  {name = "Cognex Contributors"}
+]
+keywords = [
+  "mcp",
+  "memory",
+  "ai-agents",
+  "persistent-memory",
+  "claude",
+  "llm",
+  "model-context-protocol"
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "mcp>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.0",
+  "pytest-asyncio>=0.21",
+  "build>=0.10",
+  "twine>=4.0",
+]
+
+[project.scripts]
+cognex = "substrate_mcp.server:main"
+
+[project.urls]
+Homepage = "https://github.com/YOUR_USERNAME/cognex"
+Repository = "https://github.com/YOUR_USERNAME/cognex"
+Issues = "https://github.com/YOUR_USERNAME/cognex/issues"
+Changelog = "https://github.com/YOUR_USERNAME/cognex/blob/main/CHANGELOG.md"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

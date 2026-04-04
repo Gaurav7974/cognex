@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Database files
+*.db
+.substrate/
+.cognex/
+
+# Local MCP config (has machine-specific paths)
+mcp.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Distribution
+*.tar.gz
+*.whl
+
+# OpenCode agent internals
+.sisyphus/
+
+# Ruff cache
+.ruff_cache/
+
+# Debug logs
+*.log
+nul
+
+# Local test scripts
+test_handshake.py
+test_mcp_connection.py
