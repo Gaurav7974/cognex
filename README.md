@@ -4,9 +4,10 @@
 
 Give your AI coding assistant long-term memory, decision tracking, and trust management.
 
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![MCP](https://img.shields.io/badge/MCP-1.0%2B-purple)
-![Tests](https://img.shields.io/badge/tests-79%2F84%20passing-brightgreen)
+[![PyPI version](https://badge.fury.io/py/cognex.svg)](https://pypi.org/project/cognex/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io)
 
 ---
 
@@ -25,11 +26,11 @@ Your AI forgets everything between sessions. **Cognex** fixes that.
 
 | Feature | What It Does |
 |---------|-------------|
-| 🧠 **Persistent Memory** | Remembers preferences, facts, patterns across sessions |
-| 📝 **Decision Ledger** | Tracks choices made and their outcomes |
-| 🛡️ **Trust Engine** | Learns which tools you approve vs deny |
-| 🔄 **Teleportation** | Export your brain, load it on another machine |
-| 🐝 **Swarm Mode** | Turn natural language into multi-agent plans |
+| **Persistent Memory** | Remembers preferences, facts, patterns across sessions |
+| **Decision Ledger** | Tracks choices made and their outcomes |
+| **Trust Engine** | Learns which tools you approve vs deny |
+| **Teleportation** | Export your brain, load it on another machine |
+| **Swarm Mode** | Turn natural language into multi-agent plans |
 
 ---
 
@@ -54,10 +55,22 @@ Your AI forgets everything between sessions. **Cognex** fixes that.
 uvx cognex
 ```
 
+# Verify installation
+```bash
+uvx cognex --help
+# Should show: usage: cognex [-h] [--db-path ...] [--project ...] [--name ...] [--debug]
+```
+
 ### Option 2: pipx (isolated environment)
 
 ```bash
 pipx install cognex
+```
+
+# Verify installation
+```bash
+uvx cognex --help
+# Should show: usage: cognex [-h] [--db-path ...] [--project ...] [--name ...] [--debug]
 ```
 
 ### Option 3: pip (system-wide install)
@@ -66,11 +79,24 @@ pipx install cognex
 pip install cognex
 ```
 
-### Option 4: Install from this folder (development)
+# Verify installation
+```bash
+uvx cognex --help
+# Should show: usage: cognex [-h] [--db-path ...] [--project ...] [--name ...] [--debug]
+```
+
+### Option 4: Install from source (development)
 
 ```bash
-cd D:\COGNITIVE\cognitive-substrate
+git clone https://github.com/Gaurav7974/cognex
+cd cognex
 pip install -e .
+```
+
+# Verify installation
+```bash
+uvx cognex --help
+# Should show: usage: cognex [-h] [--db-path ...] [--project ...] [--name ...] [--debug]
 ```
 
 ---
@@ -79,7 +105,7 @@ pip install -e .
 
 ### OpenCode
 
-**Config location:** `%USERPROFILE%\.config\opencode\opencode.json`
+**Config location:** `~/.config/opencode/opencode.json` (Linux/Mac) or `%USERPROFILE%\.config\opencode\opencode.json` (Windows)
 
 **With uvx (no install):**
 ```json
@@ -302,14 +328,14 @@ AI asks: "Can I delete everything?"
 
 All data stays local on your machine in SQLite:
 
-```
-%USERPROFILE%\.cognex\
-└── cognex.db
-    ├── memories      (your persistent memories)
-    ├── sessions      (session history)
-    ├── trust_records (tool approval history)
-    └── decisions     (decision ledger)
-```
+Linux/Mac:   `~/.cognex/cognex.db`
+Windows:     `%USERPROFILE%\.cognex\cognex.db`
+
+Contains:
+- memories      — persistent memories
+- sessions      — session history
+- trust_records — tool approval history
+- decisions     — decision ledger
 
 ---
 
@@ -337,15 +363,10 @@ Or use uvx in your config:
 ## Development
 
 ```bash
-# Run tests
-cd D:\COGNITIVE\cognitive-substrate
-python tests/test_mcp_server.py
-
-# Run pytest
-python -m pytest tests/ -v -k "not mcp_server"
-
-# Run demo
-python demo/run_demo.py
+git clone https://github.com/Gaurav7974/cognex
+cd cognex
+pip install -e ".[dev]"
+pytest tests/ -v
 ```
 
 ---
@@ -353,30 +374,37 @@ python demo/run_demo.py
 ## File Structure
 
 ```
-D:\COGNITIVE\cognitive-substrate\
-├── README.md              ← You are here!
-├── mcp.json               ← MCP config ready to copy
-├── pyproject.toml         ← Package config (name: cognex)
-├── demo/
-│   ├── run_demo.py        ← Simple demo
-│   └── run_full_demo.py   ← Full workflow demo
+cognex/
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml
+│   │   └── publish.yml
+│   └── ISSUE_TEMPLATE/
+│       ├── bug_report.md
+│       └── feature_request.md
+├── docs/
+│   ├── configuration.md
+│   ├── tools.md
+│   └── examples.md
+├── examples/
+│   ├── basic_usage.py
+│   ├── session_workflow.py
+│   └── teleport_example.py
 ├── src/
 │   ├── substrate/         ← Core memory system
-│   │   ├── substrate.py   ← Main orchestrator
-│   │   ├── store.py       ← SQLite storage
-│   │   ├── extractor.py   ← Memory extraction
-│   │   ├── retriever.py   ← Memory retrieval
-│   │   ├── ledger.py      ← Decision tracking
-│   │   ├── trust.py       ← Trust engine
-│   │   ├── teleport.py    ← State export/import
-│   │   └── swarm.py       ← Multi-agent planning
-│   └── substrate_mcp/     ← MCP server
-│       ├── server.py      ← MCP server entry
-│       └── tools/         ← 18 tool implementations
-└── tests/
-    ├── test_substrate.py  ← Core tests
-    ├── test_layers.py     ← Layer tests
-    └── test_mcp_server.py ← Tool tests
+│   └── substrate_mcp/     ← MCP server with 18 tools
+├── tests/
+│   ├── test_substrate.py
+│   ├── test_layers.py
+│   └── test_mcp_server.py
+├── demo/
+├── .gitignore
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── README.md
+├── mcp.example.json       ← copy this to configure
+└── pyproject.toml
 ```
 
 ---
@@ -389,6 +417,6 @@ MIT — free to use, modify, and distribute.
 
 ## Need Help?
 
-- 📂 Source code: `D:\COGNITIVE\cognitive-substrate\src\`
-- 🧪 Run tests: `python tests/test_mcp_server.py`
-- 🔧 Tool implementations: `src\substrate_mcp\tools\`
+- Open an issue: https://github.com/Gaurav7974/cognex/issues
+- PyPI page: https://pypi.org/project/cognex/
+- Read the docs: see docs/ folder
