@@ -4,33 +4,67 @@ set -e
 echo "Installing cognex..."
 pip install cognex
 
-echo "Detecting AI tool config..."
+echo "Detecting AI tool configs..."
 
 # Claude Code
-CLAUDE_CONFIG="$HOME/.claude/settings.json"
-# OpenCode  
+CLAUDE_CONFIG="$HOME/.claude.json"
+CLAUDE_DESKTOP_CONFIG="$HOME/.config/Claude/claude_desktop_config.json"
+# OpenCode
 OPENCODE_CONFIG="$HOME/.config/opencode/opencode.json"
 # Cursor
 CURSOR_CONFIG="$HOME/.cursor/mcp.json"
+# Cline
+CLINE_CONFIG="$HOME/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json"
+# Zed
+ZED_CONFIG="$HOME/.config/zed/settings.json"
+# Windsurf
+WINDSURF_CONFIG="$HOME/.codeium/windsurf/mcp_config.json"
 
-install_claude() {
-    mkdir -p "$(dirname $CLAUDE_CONFIG)"
+configured=false
+
+install_claude_code() {
+    mkdir -p "$(dirname "$CLAUDE_CONFIG")"
     if [ -f "$CLAUDE_CONFIG" ]; then
-        echo "Found Claude config at $CLAUDE_CONFIG"
-        echo "Add this to mcpServers in $CLAUDE_CONFIG:"
-        echo '    "cognex": { "command": "cognex" }'
+        echo "Found Claude Code config at $CLAUDE_CONFIG"
+        echo "Add cognex to mcpServers in $CLAUDE_CONFIG"
     else
-        echo '{"mcpServers": {"cognex": {"command": "cognex"}}}' > "$CLAUDE_CONFIG"
-        echo "Created Claude config at $CLAUDE_CONFIG"
+        cat > "$CLAUDE_CONFIG" << 'EOF'
+{
+  "mcpServers": {
+    "cognex": {
+      "command": "uvx",
+      "args": ["cognex"]
+    }
+  }
+}
+EOF
+        echo "Created Claude Code config at $CLAUDE_CONFIG"
+    fi
+}
+
+install_claude_desktop() {
+    mkdir -p "$(dirname "$CLAUDE_DESKTOP_CONFIG")"
+    if [ -f "$CLAUDE_DESKTOP_CONFIG" ]; then
+        echo "Found Claude Desktop config at $CLAUDE_DESKTOP_CONFIG"
+    else
+        cat > "$CLAUDE_DESKTOP_CONFIG" << 'EOF'
+{
+  "mcpServers": {
+    "cognex": {
+      "command": "uvx",
+      "args": ["cognex"]
+    }
+  }
+}
+EOF
+        echo "Created Claude Desktop config at $CLAUDE_DESKTOP_CONFIG"
     fi
 }
 
 install_opencode() {
-    mkdir -p "$(dirname $OPENCODE_CONFIG)"
+    mkdir -p "$(dirname "$OPENCODE_CONFIG")"
     if [ -f "$OPENCODE_CONFIG" ]; then
         echo "Found OpenCode config at $OPENCODE_CONFIG"
-        echo "Add this to mcp in $OPENCODE_CONFIG:"
-        echo '    "cognex": {"type": "local", "command": ["cognex"], "enabled": true}'
     else
         cat > "$OPENCODE_CONFIG" << 'EOF'
 {
@@ -38,7 +72,7 @@ install_opencode() {
   "mcp": {
     "cognex": {
       "type": "local",
-      "command": ["cognex"],
+      "command": ["uvx", "cognex"],
       "enabled": true
     }
   }
@@ -49,28 +83,125 @@ EOF
 }
 
 install_cursor() {
-    mkdir -p "$(dirname $CURSOR_CONFIG)"
+    mkdir -p "$(dirname "$CURSOR_CONFIG")"
     if [ -f "$CURSOR_CONFIG" ]; then
         echo "Found Cursor config at $CURSOR_CONFIG"
-        echo "Add this to mcpServers in $CURSOR_CONFIG:"
-        echo '    "cognex": { "command": "cognex" }'
     else
-        echo '{"mcpServers": {"cognex": {"command": "cognex"}}}' > "$CURSOR_CONFIG"
+        cat > "$CURSOR_CONFIG" << 'EOF'
+{
+  "mcpServers": {
+    "cognex": {
+      "command": "uvx",
+      "args": ["cognex"]
+    }
+  }
+}
+EOF
         echo "Created Cursor config at $CURSOR_CONFIG"
     fi
 }
 
-# Detect and install
-if [ -d "$HOME/.claude" ] || [ -f "$CLAUDE_CONFIG" ]; then
-    install_claude
-elif [ -d "$HOME/.config/opencode" ] || [ -f "$OPENCODE_CONFIG" ]; then
+install_cline() {
+    mkdir -p "$(dirname "$CLINE_CONFIG")"
+    if [ -f "$CLINE_CONFIG" ]; then
+        echo "Found Cline config at $CLINE_CONFIG"
+    else
+        cat > "$CLINE_CONFIG" << 'EOF'
+{
+  "mcpServers": {
+    "cognex": {
+      "command": "uvx",
+      "args": ["cognex"],
+      "disabled": false,
+      "alwaysAllow": []
+    }
+  }
+}
+EOF
+        echo "Created Cline config at $CLINE_CONFIG"
+    fi
+}
+
+install_zed() {
+    mkdir -p "$(dirname "$ZED_CONFIG")"
+    if [ -f "$ZED_CONFIG" ]; then
+        echo "Found Zed config at $ZED_CONFIG"
+    else
+        cat > "$ZED_CONFIG" << 'EOF'
+{
+  "context_servers": {
+    "cognex": {
+      "command": {
+        "path": "uvx",
+        "args": ["cognex"]
+      }
+    }
+  }
+}
+EOF
+        echo "Created Zed config at $ZED_CONFIG"
+    fi
+}
+
+install_windsurf() {
+    mkdir -p "$(dirname "$WINDSURF_CONFIG")"
+    if [ -f "$WINDSURF_CONFIG" ]; then
+        echo "Found Windsurf config at $WINDSURF_CONFIG"
+    else
+        cat > "$WINDSURF_CONFIG" << 'EOF'
+{
+  "mcpServers": {
+    "cognex": {
+      "command": "uvx",
+      "args": ["cognex"]
+    }
+  }
+}
+EOF
+        echo "Created Windsurf config at $WINDSURF_CONFIG"
+    fi
+}
+
+# Detect and install all found tools
+if [ -f "$CLAUDE_CONFIG" ] || [ -d "$HOME/.claude" ]; then
+    install_claude_code
+    configured=true
+fi
+
+if [ -d "$HOME/.config/Claude" ]; then
+    install_claude_desktop
+    configured=true
+fi
+
+if [ -d "$HOME/.config/opencode" ] || [ -f "$OPENCODE_CONFIG" ]; then
     install_opencode
-elif [ -d "$HOME/.cursor" ] || [ -f "$CURSOR_CONFIG" ]; then
+    configured=true
+fi
+
+if [ -d "$HOME/.cursor" ] || [ -f "$CURSOR_CONFIG" ]; then
     install_cursor
-else
+    configured=true
+fi
+
+if [ -d "$HOME/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev" ]; then
+    install_cline
+    configured=true
+fi
+
+if [ -d "$HOME/.config/zed" ] || [ -f "$ZED_CONFIG" ]; then
+    install_zed
+    configured=true
+fi
+
+if [ -d "$HOME/.codeium/windsurf" ] || [ -f "$WINDSURF_CONFIG" ]; then
+    install_windsurf
+    configured=true
+fi
+
+if [ "$configured" = false ]; then
     echo "No AI tool detected. Installing cognex globally."
     echo "Add cognex to your MCP config manually."
-    echo "See: https://github.com/Gaurav7974/cognex#configuration-by-cli-tool"
+    echo "See: https://github.com/Gaurav7974/cognex#configuration"
 fi
 
 echo ""
