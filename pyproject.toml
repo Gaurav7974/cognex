@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cognex"
-version = "0.1.1"
+version = "0.1.2"
 description = "Persistent memory layer for AI agents — survives sessions, learns patterns, enables continuity"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -46,12 +46,13 @@ dev = [
 
 [project.scripts]
 cognex = "substrate_mcp.server:main"
+cognex-install = "substrate_mcp.installer:run_install"
 
 [project.urls]
-Homepage = "https://github.com/YOUR_USERNAME/cognex"
-Repository = "https://github.com/YOUR_USERNAME/cognex"
-Issues = "https://github.com/YOUR_USERNAME/cognex/issues"
-Changelog = "https://github.com/YOUR_USERNAME/cognex/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/Gaurav7974/cognex"
+Repository = "https://github.com/Gaurav7974/cognex"
+Issues = "https://github.com/Gaurav7974/cognex/issues"
+Changelog = "https://github.com/Gaurav7974/cognex/blob/main/CHANGELOG.md"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
