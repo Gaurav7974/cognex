@@ -7,6 +7,7 @@ import sqlite3
 from pathlib import Path
 from typing import Optional
 
+from .migrations import run_migrations
 from .models import MemoryEntry, MemoryScope, MemoryType, SessionSnapshot
 
 
@@ -135,6 +136,9 @@ class MemoryStore:
             except Exception:
                 # FTS5 not available - continue without it
                 pass
+
+            # Run schema migrations for upgrades
+            run_migrations(conn)
 
     # ── Memory CRUD ───────────────────────────────────────────
 
