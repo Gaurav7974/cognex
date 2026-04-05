@@ -1,8 +1,8 @@
-# 🧠 Cognex
+# Cognex
 
 **Persistent memory layer for AI agents — survives sessions, learns patterns, enables continuity.**
 
-Give your AI coding assistant long-term memory, decision tracking, and trust management.
+Give your AI coding assistant long-term memory, decision tracking, and trust management. Benchmarked to reduce context tokens by ~70% compared to manual context pasting.
 
 [![PyPI version](https://badge.fury.io/py/cognex.svg)](https://pypi.org/project/cognex/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -31,12 +31,23 @@ Your AI forgets everything between sessions. **Cognex** fixes that.
 | **Trust Engine** | Learns which tools you approve vs deny |
 | **Teleportation** | Export your brain, load it on another machine |
 | **Swarm Mode** | Turn natural language into multi-agent plans |
+| **MCP Prompts** | 5 built-in prompts for common workflows |
+| **Auto-Installer** | One command setup for 7+ AI platforms |
 
 ---
 
 ## Quick Install
 
-### Option A — One command (Terminal)
+### Option A — Auto-installer (Recommended)
+
+```bash
+# Install and auto-configure for your AI tool
+uvx cognex --install
+```
+
+This detects your AI tool (Claude Code, OpenCode, Cursor, VS Code, etc.) and writes the correct config automatically.
+
+### Option B — One command (Terminal)
 
 **Mac/Linux:**
 ```bash
@@ -56,7 +67,7 @@ These scripts automatically:
 
 ---
 
-### Option B — Paste this prompt into your AI agent
+### Option C — Paste this prompt into your AI agent
 
 If you're already inside Claude Code, OpenCode, Cursor or any MCP-compatible tool,
 just paste this prompt and your AI will configure everything:
@@ -79,7 +90,7 @@ Copy that prompt → paste into your AI tool → it handles the rest.
 
 ---
 
-### Option C — Manual (full control)
+### Option D — Manual (full control)
 
 See the [Configuration](#configuration-by-cli-tool) section below
 for step-by-step setup per tool.
@@ -403,7 +414,7 @@ After adding the config, **completely close and reopen** your AI tool. You shoul
 
 ## The 18 Tools
 
-### 🗓️ Session Management
+### Session Management
 | Tool | Description |
 |------|-------------|
 | `substrate_start_session` | Start a new work session |
@@ -411,7 +422,7 @@ After adding the config, **completely close and reopen** your AI tool. You shoul
 | `substrate_process_transcript` | Extract memories from conversation |
 | `substrate_report` | Get memory health report |
 
-### 💾 Memory
+### Memory
 | Tool | Description |
 |------|-------------|
 | `memory_add` | Add a memory (fact, preference, decision, pattern) |
@@ -419,7 +430,7 @@ After adding the config, **completely close and reopen** your AI tool. You shoul
 | `memory_get_context` | Get relevant context for current work |
 | `memory_decay` | Age memories (auto-cleanup old ones) |
 
-### 🛡️ Trust Engine
+### Trust Engine
 | Tool | Description |
 |------|-------------|
 | `trust_check` | Check if tool needs approval |
@@ -427,23 +438,39 @@ After adding the config, **completely close and reopen** your AI tool. You shoul
 | `trust_get` | Get trust score for a tool |
 | `trust_summary` | Get trust overview |
 
-### 📖 Decision Ledger
+### Decision Ledger
 | Tool | Description |
 |------|-------------|
 | `ledger_record` | Record a decision made |
 | `ledger_outcome` | Record what happened after |
 | `ledger_find_similar` | Find similar past decisions |
 
-### 🚀 Teleportation
+### Teleportation
 | Tool | Description |
 |------|-------------|
 | `teleport_create_bundle` | Export your brain to JSON |
 | `teleport_rehydrate` | Import brain from another machine |
 
-### 🐝 Swarm
+### Swarm
 | Tool | Description |
 |------|-------------|
 | `swarm_compile_intent` | Turn "build me an API" into a multi-agent plan |
+
+---
+
+## MCP Prompts
+
+Cognex includes 5 built-in prompts accessible via MCP prompt protocol:
+
+| Prompt | Description |
+|--------|-------------|
+| `cognex://start-session` | Initialize session with relevant memories |
+| `cognex://end-session` | Generate session summary and save insights |
+| `cognex://context-for-task` | Load context for a specific task |
+| `cognex://remember` | Save important information to memory |
+| `cognex://weekly-summary` | Get weekly activity and decision summary |
+
+Use these in any MCP-compatible client that supports prompts.
 
 ---
 
