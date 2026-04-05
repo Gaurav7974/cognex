@@ -1,5 +1,7 @@
 # Tools Reference
 
+> For practical usage examples and copy-paste prompts, see [Usage Guide](guides.md).
+
 Cognex provides **18 MCP tools** across 6 categories.
 
 ---
