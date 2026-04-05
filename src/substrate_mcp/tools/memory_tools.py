@@ -4,6 +4,18 @@ from typing import Any
 
 from substrate import MemoryType, MemoryScope
 from substrate_mcp.context import SubstrateContext
+from substrate_mcp.sanitizer import (
+    sanitize_content,
+    sanitize_project,
+    sanitize_tags,
+    sanitize_query,
+)
+
+# Hard limits - never exceed these
+MAX_SEARCH_LIMIT = 50
+MAX_CONTEXT_LIMIT = 10
+MAX_DECAY_FACTOR_HIGH = 1.0
+MAX_DECAY_FACTOR_LOW = 0.0
 
 
 async def memory_add(
@@ -15,12 +27,18 @@ async def memory_add(
     context: str = "",
 ) -> dict[str, Any]:
     """Add a memory to the cognitive substrate."""
+    # Sanitize inputs
+    content = sanitize_content(content)
+    project = sanitize_project(project)
+    tags_list = sanitize_tags(tags or [])
+    context = sanitize_content(context)
+
     if not content:
-        raise ValueError("content is required")
+        raise ValueError("content is required and cannot be empty")
 
     ctx = SubstrateContext.get_instance()
 
-    tags_tuple = tuple(tags or [])
+    tags_tuple = tuple(tags_list)
 
     # Convert string to enum
     try:
@@ -60,9 +78,17 @@ async def memory_search(
     limit: int = 20,
 ) -> dict[str, Any]:
     """Search memories with filters."""
+    # Sanitize inputs
+    query = sanitize_query(query or "")
+    project = sanitize_project(project)
+    tags_list = sanitize_tags(tags or [])
+
+    # Apply hard limit
+    limit = min(int(limit), MAX_SEARCH_LIMIT)
+
     ctx = SubstrateContext.get_instance()
 
-    tags_tuple = tuple(tags or [])
+    tags_tuple = tuple(tags_list)
 
     # Convert string to enum
     mem_type = None
@@ -80,7 +106,7 @@ async def memory_search(
             pass
 
     memories = ctx.substrate.store.search(
-        query=query or "",
+        query=query,
         memory_type=mem_type,
         project=project,
         scope=mem_scope,
@@ -120,14 +146,16 @@ async def memory_get_context(
         limit: Max memories to return (capped at 10)
         format: Output format - 'minimal', 'medium', or 'full'
     """
+    # Sanitize inputs
+    query = sanitize_query(query or "")
+    project = sanitize_project(project)
+
+    # Apply hard limit
+    limit = min(int(limit), MAX_CONTEXT_LIMIT)
+
     ctx = SubstrateContext.get_instance()
 
-    # Cap limit at 10 for performance
-    limit = min(limit, 10)
-
-    memories = ctx.substrate.get_context(
-        query=query or "", project=project, limit=limit
-    )
+    memories = ctx.substrate.get_context(query=query, project=project, limit=limit)
 
     def compress(m):
         if format == "minimal":
@@ -166,7 +194,8 @@ async def memory_decay(
             f"factor must be a number between 0 and 1, got {type(factor).__name__}"
         )
 
-    if factor < 0 or factor > 1:
+    factor = float(factor)
+    if not (MAX_DECAY_FACTOR_LOW <= factor <= MAX_DECAY_FACTOR_HIGH):
         raise ValueError(f"factor must be between 0 and 1, got {factor}")
 
     removed_count = ctx.substrate.decay_memories(factor=factor)
