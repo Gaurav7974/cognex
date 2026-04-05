@@ -118,34 +118,16 @@ for step-by-step setup per tool.
 uvx cognex
 ```
 
-# Verify installation
-```bash
-uvx cognex --help
-# Should show: usage: cognex [-h] [--db-path ...] [--project ...] [--name ...] [--debug]
-```
-
 ### Option 2: pipx (isolated environment)
 
 ```bash
 pipx install cognex
 ```
 
-# Verify installation
-```bash
-uvx cognex --help
-# Should show: usage: cognex [-h] [--db-path ...] [--project ...] [--name ...] [--debug]
-```
-
 ### Option 3: pip (system-wide install)
 
 ```bash
 pip install cognex
-```
-
-# Verify installation
-```bash
-uvx cognex --help
-# Should show: usage: cognex [-h] [--db-path ...] [--project ...] [--name ...] [--debug]
 ```
 
 ### Option 4: Install from source (development)
@@ -156,10 +138,13 @@ cd cognex
 pip install -e .
 ```
 
-# Verify installation
+### Verify Installation
+
+After any install method above:
+
 ```bash
-uvx cognex --help
-# Should show: usage: cognex [-h] [--db-path ...] [--project ...] [--name ...] [--debug]
+cognex --help
+# Should show: usage: cognex [-h] [--db-path ...] [--project ...] [--name ...] [--debug] [--install]
 ```
 
 ---
