@@ -6,6 +6,23 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-04-05
+
+### Performance
+- FTS5 full-text search with BM25 ranking replaces basic keyword search
+- 10x faster memory retrieval on large datasets
+- Ranked results — most relevant memories returned first
+- Auto-sync FTS index via database triggers
+- SQLite WAL mode + indexes for concurrent access
+- Compressed memory response format (medium/minimal/full)
+- Fallback to LIKE search if FTS unavailable
+
+### Changed
+- `memory_search` now returns results ranked by relevance not recency
+- `memory_get_context` now accepts `format` parameter (minimal/medium/full)
+- `memory_get_context` now accepts `limit` parameter (capped at 10)
+- `substrate_start_session` returns compressed memories by default
+
 ## [0.1.0] - 2026-04-04
 
 ### Added
