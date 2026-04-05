@@ -26,6 +26,12 @@ class MemoryStore:
     def _connect(self) -> sqlite3.Connection:
         conn = sqlite3.connect(str(self.db_path))
         conn.row_factory = sqlite3.Row
+        # Performance pragmas for faster queries
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA cache_size=-32000")  # 32MB cache
+        conn.execute("PRAGMA mmap_size=134217728")  # 128MB mmap
+        conn.execute("PRAGMA synchronous=NORMAL")
+        conn.execute("PRAGMA temp_store=MEMORY")
         return conn
 
     def close(self) -> None:
@@ -74,45 +80,117 @@ class MemoryStore:
                 CREATE INDEX IF NOT EXISTS idx_sessions_started ON sessions(started_at DESC);
             """)
 
+            # FTS5 full-text search index
+            # Check if FTS5 is available before creating
+            try:
+                conn.execute("""
+                    CREATE VIRTUAL TABLE IF NOT EXISTS memories_fts 
+                    USING fts5(
+                        content,
+                        context,
+                        type,
+                        project,
+                        tags,
+                        content='memories',
+                        content_rowid='rowid'
+                    )
+                """)
+
+                # Populate FTS index from existing memories (only if empty)
+                fts_count = conn.execute(
+                    "SELECT COUNT(*) FROM memories_fts"
+                ).fetchone()[0]
+                if fts_count == 0:
+                    conn.execute("""
+                        INSERT OR IGNORE INTO memories_fts(rowid, content, context, type, project, tags)
+                        SELECT rowid, content, context, type, project, tags 
+                        FROM memories
+                    """)
+
+                # Triggers to keep FTS index in sync automatically
+                conn.execute("""
+                    CREATE TRIGGER IF NOT EXISTS memories_fts_insert
+                    AFTER INSERT ON memories BEGIN
+                        INSERT INTO memories_fts(rowid, content, context, type, project, tags)
+                        VALUES (new.rowid, new.content, new.context, new.type, new.project, new.tags);
+                    END
+                """)
+
+                conn.execute("""
+                    CREATE TRIGGER IF NOT EXISTS memories_fts_update
+                    AFTER UPDATE ON memories BEGIN
+                        UPDATE memories_fts 
+                        SET content=new.content, context=new.context,
+                            type=new.type, project=new.project, tags=new.tags
+                        WHERE rowid=old.rowid;
+                    END
+                """)
+
+                conn.execute("""
+                    CREATE TRIGGER IF NOT EXISTS memories_fts_delete
+                    AFTER DELETE ON memories BEGIN
+                        DELETE FROM memories_fts WHERE rowid=old.rowid;
+                    END
+                """)
+            except Exception:
+                # FTS5 not available - continue without it
+                pass
+
     # ── Memory CRUD ───────────────────────────────────────────
 
     def save(self, memory: MemoryEntry) -> MemoryEntry:
         """Save or update a memory entry."""
         with self._connect() as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT OR REPLACE INTO memories
                 (id, type, scope, content, context, relevance_score,
                  created_at, last_accessed, access_count, project, tags)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                memory.id, memory.type.value, memory.scope.value,
-                memory.content, memory.context, memory.relevance_score,
-                memory.created_at.isoformat(),
-                memory.last_accessed.isoformat() if memory.last_accessed else None,
-                memory.access_count, memory.project,
-                json.dumps(memory.tags),
-            ))
+            """,
+                (
+                    memory.id,
+                    memory.type.value,
+                    memory.scope.value,
+                    memory.content,
+                    memory.context,
+                    memory.relevance_score,
+                    memory.created_at.isoformat(),
+                    memory.last_accessed.isoformat() if memory.last_accessed else None,
+                    memory.access_count,
+                    memory.project,
+                    json.dumps(memory.tags),
+                ),
+            )
         return memory
 
     def save_many(self, memories: list[MemoryEntry]) -> int:
         """Bulk save. Returns count saved."""
         with self._connect() as conn:
-            conn.executemany("""
+            conn.executemany(
+                """
                 INSERT OR REPLACE INTO memories
                 (id, type, scope, content, context, relevance_score,
                  created_at, last_accessed, access_count, project, tags)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, [
-                (
-                    m.id, m.type.value, m.scope.value,
-                    m.content, m.context, m.relevance_score,
-                    m.created_at.isoformat(),
-                    m.last_accessed.isoformat() if m.last_accessed else None,
-                    m.access_count, m.project,
-                    json.dumps(m.tags),
-                )
-                for m in memories
-            ])
+            """,
+                [
+                    (
+                        m.id,
+                        m.type.value,
+                        m.scope.value,
+                        m.content,
+                        m.context,
+                        m.relevance_score,
+                        m.created_at.isoformat(),
+                        m.last_accessed.isoformat() if m.last_accessed else None,
+                        m.access_count,
+                        m.project,
+                        json.dumps(m.tags),
+                    )
+                    for m in memories
+                ],
+            )
         return len(memories)
 
     def get(self, memory_id: str) -> MemoryEntry | None:
@@ -143,6 +221,14 @@ class MemoryStore:
 
     # ── Search & Retrieval ────────────────────────────────────
 
+    def _fts5_available(self, conn: sqlite3.Connection) -> bool:
+        """Check if FTS5 table exists and is usable."""
+        try:
+            conn.execute("SELECT 1 FROM memories_fts LIMIT 1")
+            return True
+        except sqlite3.OperationalError:
+            return False
+
     def search(
         self,
         query: str = "",
@@ -153,7 +239,124 @@ class MemoryStore:
         limit: int = 20,
         min_relevance: float = 0.0,
     ) -> list[MemoryEntry]:
-        """Find memories matching criteria, ordered by relevance."""
+        """Find memories matching criteria, ordered by relevance.
+
+        Uses FTS5 BM25 ranking when available, falls back to LIKE search.
+        """
+        with self._connect() as conn:
+            # Try FTS5 search if query provided and FTS5 available
+            if query and self._fts5_available(conn):
+                return self._search_fts5(
+                    conn, query, memory_type, project, scope, tags, limit, min_relevance
+                )
+
+            # Fallback to LIKE search
+            return self._search_like(
+                conn, query, memory_type, project, scope, tags, limit, min_relevance
+            )
+
+    def _search_fts5(
+        self,
+        conn: sqlite3.Connection,
+        query: str,
+        memory_type: MemoryType | None,
+        project: str,
+        scope: MemoryScope | None,
+        tags: tuple[str, ...],
+        limit: int,
+        min_relevance: float,
+    ) -> list[MemoryEntry]:
+        """FTS5 BM25 ranked search."""
+        try:
+            # Build filter conditions
+            conditions = []
+            params: list = []
+
+            if memory_type:
+                conditions.append("m.type = ?")
+                params.append(memory_type.value)
+            if project:
+                conditions.append("m.project = ?")
+                params.append(project)
+            if scope:
+                conditions.append("m.scope = ?")
+                params.append(scope.value)
+            if min_relevance > 0:
+                conditions.append("m.relevance_score >= ?")
+                params.append(min_relevance)
+            if tags:
+                for tag in tags:
+                    conditions.append("m.tags LIKE ?")
+                    params.append(f"%{tag}%")
+
+            where_clause = " AND ".join(conditions) if conditions else "1=1"
+
+            # Escape special FTS5 characters and prepare query
+            fts_query = self._escape_fts5_query(query)
+
+            sql = f"""
+                SELECT 
+                    m.*,
+                    -bm25(memories_fts) as search_score
+                FROM memories_fts
+                JOIN memories m ON memories_fts.rowid = m.rowid
+                WHERE memories_fts MATCH ? AND {where_clause}
+                ORDER BY search_score DESC
+                LIMIT ?
+            """
+            params = [fts_query] + params + [limit]
+
+            rows = conn.execute(sql, params).fetchall()
+            return [self._row_to_memory(r) for r in rows]
+
+        except sqlite3.OperationalError:
+            # FTS query failed - fall back to LIKE
+            return self._search_like(
+                conn, query, memory_type, project, scope, tags, limit, min_relevance
+            )
+
+    def _escape_fts5_query(self, query: str) -> str:
+        """Escape special FTS5 characters and format query."""
+        # Remove FTS5 special characters that could cause syntax errors
+        special_chars = [
+            '"',
+            "'",
+            "(",
+            ")",
+            "*",
+            "-",
+            "+",
+            ":",
+            "^",
+            "{",
+            "}",
+            "[",
+            "]",
+        ]
+        escaped = query
+        for char in special_chars:
+            escaped = escaped.replace(char, " ")
+
+        # Split into words and join with OR for broader matching
+        words = escaped.split()
+        if not words:
+            return '""'  # Empty query
+
+        # Use prefix matching for each word
+        return " OR ".join(f'"{word}"*' for word in words if word)
+
+    def _search_like(
+        self,
+        conn: sqlite3.Connection,
+        query: str,
+        memory_type: MemoryType | None,
+        project: str,
+        scope: MemoryScope | None,
+        tags: tuple[str, ...],
+        limit: int,
+        min_relevance: float,
+    ) -> list[MemoryEntry]:
+        """Fallback LIKE search."""
         conditions = []
         params: list = []
 
@@ -186,8 +389,7 @@ class MemoryStore:
         sql = f"SELECT * FROM memories WHERE {where} ORDER BY relevance_score DESC, created_at DESC LIMIT ?"
         params.append(limit)
 
-        with self._connect() as conn:
-            rows = conn.execute(sql, params).fetchall()
+        rows = conn.execute(sql, params).fetchall()
         return [self._row_to_memory(r) for r in rows]
 
     def get_recent(self, limit: int = 10) -> list[MemoryEntry]:
@@ -217,22 +419,28 @@ class MemoryStore:
 
     def save_session(self, session: SessionSnapshot) -> SessionSnapshot:
         with self._connect() as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT OR REPLACE INTO sessions
                 (session_id, project, summary, key_decisions, tools_used,
                  errors_encountered, started_at, ended_at, input_tokens,
                  output_tokens, memory_ids)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                session.session_id, session.project, session.summary,
-                json.dumps(session.key_decisions),
-                json.dumps(session.tools_used),
-                json.dumps(session.errors_encountered),
-                session.started_at.isoformat(),
-                session.ended_at.isoformat() if session.ended_at else None,
-                session.input_tokens, session.output_tokens,
-                json.dumps(session.memory_ids_extracted),
-            ))
+            """,
+                (
+                    session.session_id,
+                    session.project,
+                    session.summary,
+                    json.dumps(session.key_decisions),
+                    json.dumps(session.tools_used),
+                    json.dumps(session.errors_encountered),
+                    session.started_at.isoformat(),
+                    session.ended_at.isoformat() if session.ended_at else None,
+                    session.input_tokens,
+                    session.output_tokens,
+                    json.dumps(session.memory_ids_extracted),
+                ),
+            )
         return session
 
     def get_session(self, session_id: str) -> SessionSnapshot | None:
@@ -243,14 +451,18 @@ class MemoryStore:
         if not row:
             return None
         return SessionSnapshot(
-            session_id=row["session_id"], project=row["project"],
+            session_id=row["session_id"],
+            project=row["project"],
             summary=row["summary"],
             key_decisions=tuple(json.loads(row["key_decisions"])),
             tools_used=tuple(json.loads(row["tools_used"])),
             errors_encountered=tuple(json.loads(row["errors_encountered"])),
             started_at=__import__("datetime").datetime.fromisoformat(row["started_at"]),
-            ended_at=__import__("datetime").datetime.fromisoformat(row["ended_at"]) if row["ended_at"] else None,
-            input_tokens=row["input_tokens"], output_tokens=row["output_tokens"],
+            ended_at=__import__("datetime").datetime.fromisoformat(row["ended_at"])
+            if row["ended_at"]
+            else None,
+            input_tokens=row["input_tokens"],
+            output_tokens=row["output_tokens"],
             memory_ids_extracted=tuple(json.loads(row["memory_ids"])),
         )
 
@@ -267,14 +479,20 @@ class MemoryStore:
                 ).fetchall()
         return [
             SessionSnapshot(
-                session_id=r["session_id"], project=r["project"],
+                session_id=r["session_id"],
+                project=r["project"],
                 summary=r["summary"],
                 key_decisions=tuple(json.loads(r["key_decisions"])),
                 tools_used=tuple(json.loads(r["tools_used"])),
                 errors_encountered=tuple(json.loads(r["errors_encountered"])),
-                started_at=__import__("datetime").datetime.fromisoformat(r["started_at"]),
-                ended_at=__import__("datetime").datetime.fromisoformat(r["ended_at"]) if r["ended_at"] else None,
-                input_tokens=r["input_tokens"], output_tokens=r["output_tokens"],
+                started_at=__import__("datetime").datetime.fromisoformat(
+                    r["started_at"]
+                ),
+                ended_at=__import__("datetime").datetime.fromisoformat(r["ended_at"])
+                if r["ended_at"]
+                else None,
+                input_tokens=r["input_tokens"],
+                output_tokens=r["output_tokens"],
                 memory_ids_extracted=tuple(json.loads(r["memory_ids"])),
             )
             for r in rows
@@ -285,6 +503,7 @@ class MemoryStore:
     @staticmethod
     def _row_to_memory(row: sqlite3.Row) -> MemoryEntry:
         from datetime import datetime as _dt
+
         return MemoryEntry(
             id=row["id"],
             type=MemoryType(row["type"]),
@@ -293,7 +512,9 @@ class MemoryStore:
             context=row["context"],
             relevance_score=row["relevance_score"],
             created_at=_dt.fromisoformat(row["created_at"]),
-            last_accessed=_dt.fromisoformat(row["last_accessed"]) if row["last_accessed"] else None,
+            last_accessed=_dt.fromisoformat(row["last_accessed"])
+            if row["last_accessed"]
+            else None,
             access_count=row["access_count"],
             project=row["project"],
             tags=tuple(json.loads(row["tags"])),

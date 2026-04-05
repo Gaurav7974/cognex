@@ -109,23 +109,49 @@ async def memory_search(
 async def memory_get_context(
     query: str | None = None,
     project: str = "",
+    limit: int = 5,
+    format: str = "medium",
 ) -> dict[str, Any]:
-    """Get relevant context memories for a query."""
+    """Get relevant context memories for a query.
+
+    Args:
+        query: Search query for finding relevant memories
+        project: Filter to specific project
+        limit: Max memories to return (capped at 10)
+        format: Output format - 'minimal', 'medium', or 'full'
+    """
     ctx = SubstrateContext.get_instance()
 
-    memories = ctx.substrate.get_context(query=query or "", project=project)
+    # Cap limit at 10 for performance
+    limit = min(limit, 10)
 
-    return {
-        "count": len(memories),
-        "memories": [
-            {
-                "id": m.id,
+    memories = ctx.substrate.get_context(
+        query=query or "", project=project, limit=limit
+    )
+
+    def compress(m):
+        if format == "minimal":
+            return f"[{m.type.value}] {m.content[:100]}"
+        elif format == "medium":
+            return {
+                "c": m.content,
+                "t": m.type.value,
+                "s": round(m.relevance_score, 2),
+            }
+        else:  # full
+            return {
                 "content": m.content,
                 "type": m.type.value,
+                "score": round(m.relevance_score, 2),
                 "tags": list(m.tags),
+                "id": m.id,
             }
-            for m in memories
-        ],
+
+    return {
+        "memories": [compress(m) for m in memories],
+        "count": len(memories),
+        "query": query or "",
+        "search_type": "fts5_bm25",
     }
 
 

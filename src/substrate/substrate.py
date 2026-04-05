@@ -14,6 +14,7 @@ from .retriever import MemoryRetriever
 @dataclass
 class SubstrateReport:
     """Summary of the substrate's current state."""
+
     total_memories: int
     memories_by_type: dict[str, int]
     total_sessions: int
@@ -133,17 +134,20 @@ class CognitiveSubstrate:
         )
         return self.store.save(entry)
 
-    def get_context(self, query: str = "", project: str = "") -> list[MemoryEntry]:
+    def get_context(
+        self, query: str = "", project: str = "", limit: int = 10
+    ) -> list[MemoryEntry]:
         """Get relevant memories for the current context."""
         proj = project or self._current_project
         if query:
-            return self.retriever.find_relevant(query=query, project=proj)
-        return self.retriever.get_session_context(project=proj)
+            return self.retriever.find_relevant(query=query, project=proj, limit=limit)
+        return self.retriever.get_session_context(project=proj, limit=limit)
 
     def find_similar_decisions(self, situation: str) -> list[MemoryEntry]:
         """Find past decisions similar to current situation."""
         return self.retriever.find_similar_decisions(
-            situation, project=self._current_project,
+            situation,
+            project=self._current_project,
         )
 
     # ── Maintenance ───────────────────────────────────────────
@@ -169,17 +173,16 @@ class CognitiveSubstrate:
             for mem in self.store.search(memory_type=mt, limit=9999):
                 if mem.project:
                     project_counts[mem.project] = project_counts.get(mem.project, 0) + 1
-        top_projects = sorted(project_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+        top_projects = sorted(project_counts.items(), key=lambda x: x[1], reverse=True)[
+            :5
+        ]
 
         from datetime import datetime, timezone
+
         now = datetime.now(timezone.utc)
         all_mems = self.store.search(limit=9999)
-        oldest = max(
-            ((now - m.created_at).days for m in all_mems), default=0
-        )
-        newest = min(
-            ((now - m.created_at).days for m in all_mems), default=0
-        )
+        oldest = max(((now - m.created_at).days for m in all_mems), default=0)
+        newest = min(((now - m.created_at).days for m in all_mems), default=0)
 
         return SubstrateReport(
             total_memories=total,
