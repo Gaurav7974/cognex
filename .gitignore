@@ -57,3 +57,7 @@ nul
 # Local test scripts
 test_handshake.py
 test_mcp_connection.py
+
+# Benchmark results
+evaluate/results/
+*.benchmark
