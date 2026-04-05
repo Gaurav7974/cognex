@@ -6,6 +6,26 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-04-05
+
+### Added
+- 5 MCP Prompts: start-session, end-session, export-brain, what-do-you-know, daily-standup
+- `cognex --install` command for auto-configuring all AI tools
+- Database schema migrations (v1-v5) for seamless upgrades
+- Input sanitization against prompt injection
+- AGENTS.md for automatic AI tool instructions
+- Hard limits on search and decay operations
+- Benchmark tool for measuring token savings (~69% reduction)
+
+### Security
+- Sanitize memory content — strip control characters
+- Sanitize project names — alphanumeric only
+- FTS5 query sanitization to prevent injection
+- Hard caps on all search results (50 max) and context (10 max)
+
+### Changed
+- Updated pyproject.toml URLs to correct GitHub repository
+
 ## [0.1.1] - 2026-04-05
 
 ### Performance
