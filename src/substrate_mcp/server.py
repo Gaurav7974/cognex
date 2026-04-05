@@ -86,6 +86,107 @@ def create_server(name: str = "cognitive-substrate") -> Server:
                 ErrorData(code=INTERNAL_ERROR, message=f"Internal error: {str(e)}")
             )
 
+    @server.list_prompts()
+    async def handle_list_prompts() -> list[types.Prompt]:
+        """List all available MCP prompts."""
+        return [
+            types.Prompt(
+                name="start-session",
+                description="Start a new Cognex session and load relevant memories for current project",
+                arguments=[
+                    types.PromptArgument(
+                        name="project",
+                        description="Project name to load context for",
+                        required=False,
+                    )
+                ],
+            ),
+            types.Prompt(
+                name="end-session",
+                description="End current session, save key decisions and memories, generate summary",
+                arguments=[],
+            ),
+            types.Prompt(
+                name="export-brain",
+                description="Export all memories and decisions as a portable bundle for transfer",
+                arguments=[],
+            ),
+            types.Prompt(
+                name="what-do-you-know",
+                description="Show everything Cognex remembers about current project and preferences",
+                arguments=[
+                    types.PromptArgument(
+                        name="topic",
+                        description="Specific topic to query",
+                        required=False,
+                    )
+                ],
+            ),
+            types.Prompt(
+                name="daily-standup",
+                description="Summarize what was worked on recently and what decisions were made",
+                arguments=[],
+            ),
+        ]
+
+    @server.get_prompt()
+    async def handle_get_prompt(
+        name: str, arguments: dict | None
+    ) -> types.GetPromptResult:
+        """Get a specific prompt by name."""
+        project = (arguments or {}).get("project", "")
+        topic = (arguments or {}).get("topic", "")
+
+        prompts = {
+            "start-session": f"""
+Please start a new Cognex session now.
+1. Call substrate_start_session with a unique session_id (use current timestamp) and project="{project}"
+2. Call memory_get_context with query="current work preferences decisions" and project="{project}"
+3. Summarize what you found — preferences, recent decisions, patterns
+4. Tell me what context you loaded so I know what you remember
+""",
+            "end-session": """
+Please end the current Cognex session now.
+1. Call memory_add for each important fact, preference, or pattern from this session
+2. Call ledger_record for each significant decision made
+3. Call substrate_end_session with a clear summary and list of key decisions
+4. Tell me what you saved so I can verify nothing important was missed
+""",
+            "export-brain": """
+Please export my entire Cognex brain now.
+1. Call substrate_report to show current stats
+2. Call teleport_create_bundle to create a portable export
+3. Display the bundle JSON so I can save it
+4. Tell me how to import it on another machine
+""",
+            "what-do-you-know": f"""
+Please show me everything Cognex has stored about me.
+1. Call memory_search with query="{topic or "preferences decisions patterns"}" and no project filter
+2. Call trust_summary to show tool approval patterns
+3. Call substrate_report for overall stats
+4. Organize the results into categories: preferences, decisions, patterns, facts
+""",
+            "daily-standup": """
+Please give me a daily standup summary from Cognex.
+1. Call memory_search with query="yesterday recent completed" 
+2. Call ledger_find_similar with query="recent decisions"
+3. Call substrate_report for session stats
+4. Format as: What was done, What decisions were made, What to focus on next
+""",
+        }
+
+        return types.GetPromptResult(
+            description=f"Cognex prompt: {name}",
+            messages=[
+                types.PromptMessage(
+                    role="user",
+                    content=types.TextContent(
+                        type="text", text=prompts.get(name, "Unknown prompt")
+                    ),
+                )
+            ],
+        )
+
     return server
 
 
@@ -132,8 +233,31 @@ def main() -> None:
         "--name", type=str, default="cognitive-substrate", help="Server name"
     )
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument(
+        "--install",
+        action="store_true",
+        help="Auto-install Cognex config for all detected AI tools",
+    )
+    parser.add_argument(
+        "--platform",
+        type=str,
+        default=None,
+        help="Install for specific platform: claude-code, opencode, cursor, cline, vscode, windsurf",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview install without making changes",
+    )
 
     args = parser.parse_args()
+
+    # Handle install command
+    if args.install:
+        from substrate_mcp.installer import run_install
+
+        run_install(platform=args.platform, dry_run=args.dry_run)
+        return
 
     if args.debug:
         logger.setLevel(logging.DEBUG)
