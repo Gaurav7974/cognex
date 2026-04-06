@@ -157,30 +157,73 @@ async def memory_get_context(
 
     memories = ctx.substrate.get_context(query=query, project=project, limit=limit)
 
-    def compress(m):
-        if format == "minimal":
-            return f"[{m.type.value}] {m.content[:100]}"
-        elif format == "medium":
-            return {
-                "c": m.content,
-                "t": m.type.value,
-                "s": round(m.relevance_score, 2),
-            }
-        else:  # full
-            return {
-                "content": m.content,
-                "type": m.type.value,
-                "score": round(m.relevance_score, 2),
-                "tags": list(m.tags),
-                "id": m.id,
-            }
+    # Strip common filler prefixes to compress content
+    FILLER_PREFIXES = [
+        "User always ",
+        "User prefers ",
+        "User ",
+        "Always ",
+        "Never ",
+        "All ",
+        "The ",
+        "Must ",
+        "Should ",
+    ]
 
-    return {
-        "memories": [compress(m) for m in memories],
-        "count": len(memories),
-        "query": query or "",
-        "search_type": "fts5_bm25",
+    def strip_filler(text: str) -> str:
+        for prefix in FILLER_PREFIXES:
+            if text.startswith(prefix):
+                return text[len(prefix) :]
+        return text
+
+    type_short_map = {
+        "preference": "pref",
+        "decision": "dec",
+        "pattern": "pat",
+        "fact": "fact",
+        "lesson": "lesson",
     }
+
+    if format == "minimal":
+        # Group by type, merge into single dense lines
+        groups: dict[str, list[str]] = {}
+        for m in memories:
+            ts = type_short_map.get(m.type.value or "fact", "fact")
+            content = strip_filler(m.content)
+            # Truncate to keyword-length phrase
+            words = content.split()[:6]
+            phrase = " ".join(words)
+            groups.setdefault(ts, []).append(phrase)
+
+        lines: list[str] = []
+        for ts, phrases in groups.items():
+            lines.append(f"[{ts}] {'; '.join(phrases)}")
+        return {"context": "\n".join(lines), "count": len(memories)}
+
+    elif format == "medium":
+        # Group by type, return compact dict — no score, no id, no timestamps
+        groups: dict[str, list[str]] = {}
+        for m in memories:
+            ts = type_short_map.get(m.type.value or "fact", "fact")
+            content = strip_filler(m.content)
+            groups.setdefault(ts, []).append(content)
+
+        return {"memories": groups, "count": len(memories)}
+
+    else:  # full
+        return {
+            "memories": [
+                {
+                    "content": m.content,
+                    "type": m.type.value,
+                    "score": round(m.relevance_score, 2),
+                    "tags": list(m.tags),
+                    "id": m.id,
+                }
+                for m in memories
+            ],
+            "count": len(memories),
+        }
 
 
 async def memory_decay(
