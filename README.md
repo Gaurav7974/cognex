@@ -1,6 +1,6 @@
 # Cognex
 
-**Persistent memory layer for AI agents — survives sessions, learns patterns, enables continuity.**
+**Your AI forgets everything. Cognex doesn't. — survives sessions, learns patterns, enables continuity.**
 
 Give your AI coding assistant long-term memory, decision tracking, and trust management. Benchmarked to reduce context tokens by ~70% compared to manual context pasting.
 
