@@ -58,6 +58,9 @@ nul
 test_handshake.py
 test_mcp_connection.py
 
+# Internal context files (not for public)
+project_context.md
+
 # Benchmark results
 evaluate/results/
 *.benchmark
