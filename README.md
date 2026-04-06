@@ -5,6 +5,7 @@
 Give your AI coding assistant long-term memory, decision tracking, and trust management. Benchmarked to reduce context tokens by ~70% compared to manual context pasting.
 
 [![PyPI version](https://badge.fury.io/py/cognex.svg)](https://pypi.org/project/cognex/)
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/cognex?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/cognex)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io)
