@@ -1,6 +1,6 @@
 # Cognex Usage Guide
 
-Practical prompts you can copy-paste into any AI tool that has Cognex connected.
+Practical commands you can copy-paste into any AI tool that has Cognex connected.
 The AI will call the right tools automatically.
 
 ---
@@ -9,9 +9,11 @@ The AI will call the right tools automatically.
 
 Paste at the start of every coding session:
 
-> Start a new session for project [YOUR_PROJECT_NAME].
-> Load all relevant memories and context.
-> What do we need to know before we begin?
+```bash
+Start a new session for project "my-app".
+Load all relevant memories and context.
+What do we need to know before we begin?
+```
 
 ---
 
@@ -19,10 +21,12 @@ Paste at the start of every coding session:
 
 Paste when done for the day:
 
-> We are done for today. Please:
-> 1. Save any important decisions we made
-> 2. Save any preferences or patterns you noticed
-> 3. End the session with a summary
+```bash
+We are done for today. Please:
+1. Save any important decisions we made
+2. Save any preferences or patterns you noticed
+3. End the session with a summary
+```
 
 ---
 
@@ -30,38 +34,54 @@ Paste when done for the day:
 
 Paste at the start of next session:
 
-> I am back. Project is [YOUR_PROJECT_NAME].
-> Summarize what we did last time and what is left to do.
+```bash
+I am back. Project is "my-app".
+Summarize what we did last time and what is left to do.
+```
 
 ---
 
 ## Scenario 4 — Saving a preference
 
-> Remember that I always use type hints in Python.
-> Remember that I prefer pytest over unittest.
-> Remember that this project uses PostgreSQL not MySQL.
+```bash
+Remember that I always use type hints in Python.
+```
+
+```bash
+Remember that I prefer pytest over unittest.
+```
+
+```bash
+Remember that this project uses PostgreSQL not MySQL.
+```
 
 ---
 
 ## Scenario 5 — Tracking a decision
 
-> We just decided to use FastAPI over Flask.
-> Reasons: better async support, automatic OpenAPI docs.
-> Please record this decision.
+```bash
+We just decided to use FastAPI over Flask.
+Reasons: better async support, automatic OpenAPI docs.
+Please record this decision.
+```
 
 ---
 
 ## Scenario 6 — Revisiting a past decision
 
-> Why did we choose FastAPI for this project?
-> Check if we have any past decisions about this.
+```bash
+Why did we choose FastAPI for this project?
+Check if we have any past decisions about this.
+```
 
 ---
 
 ## Scenario 7 — Exporting your brain
 
-> Export everything — my memories, decisions, trust records
-> for project [YOUR_PROJECT_NAME] into a portable bundle.
+```bash
+Export everything — my memories, decisions, trust records
+for project "my-app" into a portable bundle.
+```
 
 Save the output JSON somewhere safe.
 
@@ -69,49 +89,78 @@ Save the output JSON somewhere safe.
 
 ## Scenario 8 — Importing on a new machine
 
-> I have a Cognex bundle from my other machine.
-> Please restore everything from it.
-> [PASTE THE BUNDLE JSON HERE]
+```bash
+I have a Cognex bundle from my other machine.
+Please restore everything from it.
+```
+
+Then paste the bundle JSON:
+
+```bash
+{
+  "bundle_id": "...",
+  "version": "1.0",
+  "memory_ids": [...],
+  "trust_records": [...],
+  ...
+}
+```
 
 ---
 
 ## Scenario 9 — Sharing context with a teammate
 
-> Create a teleport bundle for project [YOUR_PROJECT_NAME]
-> that my teammate can use to get up to speed.
+**On your machine:**
 
-Teammate pastes on their machine:
-> My teammate shared this project context bundle with me.
-> Please load it so I have full context on the project.
-> [PASTE BUNDLE JSON]
+```bash
+Create a teleport bundle for project "my-app"
+that my teammate can use to get up to speed.
+```
+
+**Teammate pastes on their machine:**
+
+```bash
+My teammate shared this project context bundle with me.
+Please load it so I have full context on the project.
+```
+
+Then paste the bundle JSON.
 
 ---
 
 ## Scenario 10 — Trust management
 
-> From now on, always ask me before running any delete,
-> remove, or drop commands. Record this as a trust rule.
+```bash
+From now on, always ask me before running any delete,
+remove, or drop commands. Record this as a trust rule.
+```
 
 ---
 
 ## Scenario 11 — Searching memory
 
-> What do you remember about my database preferences?
-> Search your memory for anything related to databases.
+```bash
+What do you remember about my database preferences?
+Search your memory for anything related to databases.
+```
 
 ---
 
 ## Scenario 12 — Health check
 
-> Give me a full report on what you have stored in Cognex.
-> How many memories, sessions, decisions?
+```bash
+Give me a full report on what you have stored in Cognex.
+How many memories, sessions, decisions?
+```
 
 ---
 
 ## Scenario 13 — Cleaning up old memories
 
-> Clean up old or irrelevant memories.
-> Keep only what is important.
+```bash
+Clean up old or irrelevant memories.
+Keep only what is important.
+```
 
 ---
 
@@ -125,15 +174,15 @@ stores, the other can read.
 
 ## Quick reference
 
-| You want to... | Say this |
-|----------------|----------|
-| Start session | "Start a new session for [project]" |
-| End session | "Save context and end session" |
-| Remember something | "Remember that..." |
-| Track a decision | "Record this decision: [decision]" |
-| Find past decision | "Why did we choose [X]?" |
-| Export brain | "Export my Cognex bundle" |
-| Import brain | "Load this bundle: [JSON]" |
-| Search memory | "What do you remember about [X]?" |
-| Health check | "Give me a Cognex report" |
-| Clean up | "Clean up old memories" |
+| You want to... | Copy-paste this |
+|----------------|-----------------|
+| Start session | `Start a new session for "my-project"` |
+| End session | `Save context and end session` |
+| Remember something | `Remember that [fact/preference]` |
+| Track a decision | `Record this decision: [decision]` |
+| Find past decision | `Why did we choose [X]?` |
+| Export brain | `Export my Cognex bundle for "my-project"` |
+| Import brain | `Load this bundle: [paste JSON]` |
+| Search memory | `What do you remember about [X]?` |
+| Health check | `Give me a Cognex report` |
+| Clean up | `Clean up old memories` |
