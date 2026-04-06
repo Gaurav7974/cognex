@@ -1,6 +1,19 @@
 """Tool dispatcher - handles routing tool calls to appropriate handlers."""
 
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+from functools import partial
 from typing import Any, Callable
+
+# Shared thread pool for running synchronous DB operations off the event loop
+_db_executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="cognex-db")
+
+
+async def run_in_thread(func: Callable, *args, **kwargs) -> Any:
+    """Run a synchronous function in a thread pool to avoid blocking the event loop."""
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(_db_executor, partial(func, *args, **kwargs))
+
 
 from substrate_mcp.tools.core_tools import (
     substrate_start_session,
@@ -74,10 +87,18 @@ async def handle_tool_call(tool_name: str, arguments: dict[str, Any]) -> Any:
         Tool result
 
     Raises:
-        ValueError: If tool not found
+        ValueError: If tool not found or times out
     """
     if tool_name not in TOOL_HANDLERS:
         raise ValueError(f"Unknown tool: {tool_name}")
 
     handler = TOOL_HANDLERS[tool_name]
-    return await handler(**arguments)
+
+    # Wrap with timeout to prevent blocking from SQLite locks
+    try:
+        return await asyncio.wait_for(handler(**arguments), timeout=25.0)
+    except asyncio.TimeoutError:
+        raise ValueError(
+            f"Tool '{tool_name}' timed out after 25 seconds. "
+            "This may indicate database lock contention from concurrent access."
+        )

@@ -10,6 +10,7 @@ from substrate_mcp.sanitizer import (
     sanitize_tags,
     sanitize_query,
 )
+from substrate_mcp.tools.dispatcher import run_in_thread
 
 # Hard limits - never exceed these
 MAX_SEARCH_LIMIT = 50
@@ -105,7 +106,8 @@ async def memory_search(
         except KeyError:
             pass
 
-    memories = ctx.substrate.store.search(
+    memories = await run_in_thread(
+        ctx.substrate.store.search,
         query=query,
         memory_type=mem_type,
         project=project,
@@ -155,7 +157,9 @@ async def memory_get_context(
 
     ctx = SubstrateContext.get_instance()
 
-    memories = ctx.substrate.get_context(query=query, project=project, limit=limit)
+    memories = await run_in_thread(
+        ctx.substrate.get_context, query=query, project=project, limit=limit
+    )
 
     # Strip common filler prefixes to compress content
     FILLER_PREFIXES = [

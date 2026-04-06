@@ -199,6 +199,14 @@ async def run_server(
     ctx = SubstrateContext.get_instance(db_path=db_path, project=project)
     logger.info(f"Starting Cognitive Substrate MCP Server (db: {ctx.db_path})")
 
+    # Health check: verify database is accessible
+    try:
+        count = ctx.substrate.store.count()
+        logger.info(f"Database health check passed: {count} memories")
+    except Exception as e:
+        logger.error(f"Database health check failed: {e}")
+        raise RuntimeError(f"Cannot start server: database not accessible - {e}")
+
     # Create server
     server = create_server(server_name)
 

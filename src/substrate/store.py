@@ -4,11 +4,52 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import time
 from pathlib import Path
 from typing import Optional
 
 from .migrations import run_migrations
 from .models import MemoryEntry, MemoryScope, MemoryType, SessionSnapshot
+
+
+def execute_with_retry(
+    conn: sqlite3.Connection,
+    sql: str,
+    params: tuple | None = None,
+    max_retries: int = 3,
+) -> sqlite3.Cursor:
+    """Execute SQL with exponential backoff retry for locked database.
+
+    Args:
+        conn: SQLite connection
+        sql: SQL statement to execute
+        params: Optional parameters for the SQL statement
+        max_retries: Maximum number of retry attempts
+
+    Returns:
+        Cursor from successful execution
+
+    Raises:
+        Last exception if all retries fail
+    """
+    last_error: sqlite3.OperationalError | None = None
+    for attempt in range(max_retries):
+        try:
+            if params:
+                return conn.execute(sql, params)
+            return conn.execute(sql)
+        except sqlite3.OperationalError as e:
+            last_error = e
+            is_lock_error = "locked" in str(e).lower()
+            is_last_attempt = attempt >= max_retries - 1
+            if is_lock_error and not is_last_attempt:
+                # Exponential backoff: 100ms, 200ms, 400ms...
+                time.sleep(0.1 * (2**attempt))
+                continue
+            raise e
+    # All retries exhausted - raise the last error
+    assert last_error is not None  # Type narrowing
+    raise last_error
 
 
 class MemoryStore:
@@ -27,8 +68,11 @@ class MemoryStore:
     def _connect(self) -> sqlite3.Connection:
         conn = sqlite3.connect(str(self.db_path))
         conn.row_factory = sqlite3.Row
+        # Concurrency pragmas for multi-client access
+        conn.execute("PRAGMA busy_timeout = 10000")  # Wait up to 10s for locks
+        conn.execute("PRAGMA journal_mode = WAL")  # Write-ahead logging
+        conn.execute("PRAGMA wal_autocheckpoint = 100")  # Checkpoint every 100 pages
         # Performance pragmas for faster queries
-        conn.execute("PRAGMA journal_mode=WAL")
         conn.execute("PRAGMA cache_size=-32000")  # 32MB cache
         conn.execute("PRAGMA mmap_size=134217728")  # 128MB mmap
         conn.execute("PRAGMA synchronous=NORMAL")
@@ -145,7 +189,8 @@ class MemoryStore:
     def save(self, memory: MemoryEntry) -> MemoryEntry:
         """Save or update a memory entry."""
         with self._connect() as conn:
-            conn.execute(
+            execute_with_retry(
+                conn,
                 """
                 INSERT OR REPLACE INTO memories
                 (id, type, scope, content, context, relevance_score,
@@ -411,19 +456,23 @@ class MemoryStore:
     def decay_all(self, factor: float = 0.95) -> int:
         """Age all memories. Returns count decayed."""
         with self._connect() as conn:
-            conn.execute(
+            execute_with_retry(
+                conn,
                 "UPDATE memories SET relevance_score = relevance_score * ? WHERE relevance_score > 0.01",
                 (factor,),
             )
             # Clean up memories that faded to nothing
-            cur = conn.execute("DELETE FROM memories WHERE relevance_score < 0.01")
+            cur = execute_with_retry(
+                conn, "DELETE FROM memories WHERE relevance_score < 0.01"
+            )
         return cur.rowcount
 
     # ── Session Snapshots ─────────────────────────────────────
 
     def save_session(self, session: SessionSnapshot) -> SessionSnapshot:
         with self._connect() as conn:
-            conn.execute(
+            execute_with_retry(
+                conn,
                 """
                 INSERT OR REPLACE INTO sessions
                 (session_id, project, summary, key_decisions, tools_used,

@@ -5,6 +5,7 @@ Core substrate tools - session management and reporting.
 from typing import Any
 
 from substrate_mcp.context import SubstrateContext
+from substrate_mcp.tools.dispatcher import run_in_thread
 
 
 async def substrate_start_session(
@@ -16,7 +17,9 @@ async def substrate_start_session(
         raise ValueError("session_id is required")
 
     ctx = SubstrateContext.get_instance()
-    memories = ctx.substrate.start_session(session_id=session_id, project=project)
+    memories = await run_in_thread(
+        ctx.substrate.start_session, session_id=session_id, project=project
+    )
 
     return {
         "session_id": session_id,

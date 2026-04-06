@@ -1,7 +1,7 @@
 """Tool registry - imports all tool implementations and provides dispatcher."""
 
 from substrate_mcp.tools.registry import list_all_tools
-from substrate_mcp.tools.dispatcher import handle_tool_call
+from substrate_mcp.tools.dispatcher import handle_tool_call, run_in_thread
 
 # Re-export individual tool implementations for direct import
 from substrate_mcp.tools.core_tools import (
@@ -38,6 +38,7 @@ from substrate_mcp.tools.swarm_tools import (
 __all__ = [
     "list_all_tools",
     "handle_tool_call",
+    "run_in_thread",
     # Core tools
     "substrate_start_session",
     "substrate_end_session",
