@@ -33,7 +33,7 @@ async def ledger_record(
     )
 
     return {
-        "id": entry.id,
+        "decision_id": entry.id,
         "tool_used": entry.tool_used,
         "alternatives": list(entry.alternatives),
         "reasoning": entry.reasoning,

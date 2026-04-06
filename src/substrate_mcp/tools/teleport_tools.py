@@ -39,14 +39,42 @@ async def teleport_create_bundle(
     }
 
 
-async def teleport_rehydrate(bundle_json: str) -> dict[str, Any]:
+async def teleport_rehydrate(bundle_json: str | dict) -> dict[str, Any]:
     """Rehydrate substrate state from a bundle."""
     ctx = SubstrateContext.get_instance()
 
     from substrate import TeleportBundle
 
+    # Handle multiple input forms:
+    # 1. Raw serialized bundle string (from TeleportBundle.serialize())
+    # 2. JSON string of the wrapper dict from teleport_create_bundle
+    # 3. Dict object from teleport_create_bundle
     if isinstance(bundle_json, dict):
-        bundle_json = json.dumps(bundle_json)
+        if "serialized" in bundle_json:
+            bundle_json = bundle_json["serialized"]
+        else:
+            bundle_json = json.dumps(bundle_json)
+    elif isinstance(bundle_json, str):
+        # Could be raw serialized bundle OR JSON-encoded wrapper dict
+        try:
+            parsed = json.loads(bundle_json)
+            if isinstance(parsed, dict) and "serialized" in parsed:
+                bundle_json = parsed["serialized"]
+            elif (
+                isinstance(parsed, dict)
+                and "bundle_id" in parsed
+                and "version" not in parsed
+            ):
+                # It's the wrapper dict parsed — extract serialized
+                bundle_json = parsed.get("serialized", bundle_json)
+            # else: it's already the raw serialized bundle, use as-is
+        except (json.JSONDecodeError, ValueError):
+            pass  # Not JSON — assume raw serialized bundle
+
+    if not isinstance(bundle_json, str):
+        raise ValueError(
+            f"Expected str or dict with 'serialized' key, got {type(bundle_json)}"
+        )
 
     try:
         bundle = TeleportBundle.deserialize(bundle_json)
