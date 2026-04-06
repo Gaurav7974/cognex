@@ -6,6 +6,38 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-04-06
+
+### Fixed
+- Timeout error: SQLite busy_timeout set to 10000ms prevents
+  indefinite hangs when database is locked
+- Timeout error: asyncio.wait_for wrapper on all tool calls
+  converts silent 30s hangs into clear error messages
+- Timeout error: SQLite write operations moved to thread pool
+  executor to prevent blocking the async event loop
+- Timeout error: retry logic with backoff for locked database
+  writes (3 attempts, 100ms/200ms/300ms delays)
+- Server startup health check added — verifies DB accessible
+  before accepting MCP connections
+- Concurrent access: multiple AI tools can now use Cognex
+  simultaneously without deadlocking
+
+## [0.1.3] - 2026-04-06
+
+### Fixed
+- ledger_outcome: renamed response field from "id" to
+  "decision_id" to match consumer expectations
+- teleport_rehydrate: 3-layer bundle deserialization handles
+  dict input, JSON string of wrapper, and raw serialized string
+
+### Performance
+- memory_get_context: 47% token savings (was 11%)
+- Grouped-by-type compression — all preferences on one line,
+  all facts on one line, etc.
+- Filler prefix stripping removes redundant words before output
+- Removed wrapper overhead fields (query, search_type) saving
+  ~15 tokens per call
+
 ## [0.1.2] - 2026-04-05
 
 ### Added
