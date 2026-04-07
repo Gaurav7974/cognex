@@ -5,6 +5,7 @@
 Give your AI coding assistant long-term memory, decision tracking, and trust management. Benchmarked to reduce context tokens by ~70% compared to manual context pasting.
 
 [![PyPI version](https://badge.fury.io/py/cognex.svg)](https://pypi.org/project/cognex/)
+[![Version](https://img.shields.io/badge/version-0.1.4-blue.svg)](https://pypi.org/project/cognex/)
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/cognex?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/cognex)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -31,6 +32,7 @@ Your AI forgets everything between sessions. **Cognex** fixes that.
 | **Decision Ledger** | Tracks choices made and their outcomes |
 | **Trust Engine** | Learns which tools you approve vs deny |
 | **Teleportation** | Export your brain, load it on another machine |
+| **Pattern Intelligence** | Discovers behavioral patterns from decision history |
 | **Swarm Mode** | Turn natural language into multi-agent plans |
 | **MCP Prompts** | 5 built-in prompts for common workflows |
 | **Auto-Installer** | One command setup for 7+ AI platforms |
@@ -376,7 +378,7 @@ All others use `"mcpServers"`.
 ## After adding config
 
 Completely close and reopen your AI tool.
-You should see 18 new cognex tools available.
+You should see 20 new cognex tools available.
 
 To verify in Claude Code:
 ```
@@ -394,11 +396,11 @@ Type /mcp in the chat
 
 ## Restart Your AI Tool
 
-After adding the config, **completely close and reopen** your AI tool. You should see 18 new tools available.
+After adding the config, **completely close and reopen** your AI tool. You should see 20 new tools available.
 
 ---
 
-## The 18 Tools
+## The 20 Tools
 
 ### Session Management
 | Tool | Description |
@@ -441,6 +443,12 @@ After adding the config, **completely close and reopen** your AI tool. You shoul
 | Tool | Description |
 |------|-------------|
 | `swarm_compile_intent` | Turn "build me an API" into a multi-agent plan |
+
+### Pattern Intelligence
+| Tool | Description |
+|------|-------------|
+| `pattern_analyze` | Discover behavioral patterns from decision history |
+| `pattern_stats` | Check if enough data exists for pattern analysis |
 
 ---
 
@@ -566,7 +574,7 @@ cognex/
 │   └── teleport_example.py
 ├── src/
 │   ├── substrate/         ← Core memory system
-│   └── substrate_mcp/     ← MCP server with 18 tools
+│   └── substrate_mcp/     ← MCP server with 20 tools
 ├── tests/
 │   ├── test_substrate.py
 │   ├── test_layers.py
