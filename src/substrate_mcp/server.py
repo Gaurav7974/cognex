@@ -203,6 +203,11 @@ async def run_server(
     try:
         count = ctx.substrate.store.count()
         logger.info(f"Database health check passed: {count} memories")
+        logger.info(
+            "Cognex ready. Add to your AI tool config to connect. "
+            "Run 'cognex --install' to auto-configure. "
+            "Docs: https://github.com/Gaurav7004/cognex"
+        )
     except Exception as e:
         logger.error(f"Database health check failed: {e}")
         raise RuntimeError(f"Cannot start server: database not accessible - {e}")
