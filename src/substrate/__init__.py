@@ -13,6 +13,7 @@ from .trust import TrustGradientEngine, TrustRecord, TrustLevel, PermissionDecis
 from .ledger import DecisionLedger, DecisionEntry
 from .teleport import TeleportProtocol, TeleportBundle
 from .swarm import IntentCompiler, SwarmPlan, SubTask, AgentRole, TaskStatus
+from .patterns import PatternAnalyzer, PatternInsight
 
 __all__ = [
     "MemoryEntry",
@@ -38,4 +39,6 @@ __all__ = [
     "SubTask",
     "AgentRole",
     "TaskStatus",
+    "PatternAnalyzer",
+    "PatternInsight",
 ]

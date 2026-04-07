@@ -45,6 +45,10 @@ from substrate_mcp.tools.teleport_tools import (
 from substrate_mcp.tools.swarm_tools import (
     swarm_compile_intent,
 )
+from substrate_mcp.tools.pattern_tools import (
+    pattern_analyze,
+    pattern_stats,
+)
 
 
 # Tool registry: name -> handler function
@@ -73,6 +77,9 @@ TOOL_HANDLERS: dict[str, Callable] = {
     "teleport_rehydrate": teleport_rehydrate,
     # Swarm tools
     "swarm_compile_intent": swarm_compile_intent,
+    # Pattern tools
+    "pattern_analyze": pattern_analyze,
+    "pattern_stats": pattern_stats,
 }
 
 

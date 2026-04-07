@@ -352,6 +352,38 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
             "required": ["intent"],
         },
     },
+    # Pattern tools (2)
+    {
+        "name": "pattern_analyze",
+        "description": "Analyze decision history and discover behavioral patterns (e.g., 'you fail more in evening', 'BashTool fails 40% for you'). Patterns are saved as memories.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "project": {
+                    "type": "string",
+                    "description": "Project name to filter analysis",
+                },
+                "save_patterns": {
+                    "type": "boolean",
+                    "description": "Whether to save discovered patterns as memories",
+                    "default": True,
+                },
+            },
+        },
+    },
+    {
+        "name": "pattern_stats",
+        "description": "Get statistics about decision history to check if pattern analysis is possible",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "project": {
+                    "type": "string",
+                    "description": "Project name to filter stats",
+                },
+            },
+        },
+    },
 ]
 
 
