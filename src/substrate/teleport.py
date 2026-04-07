@@ -11,10 +11,14 @@ from pathlib import Path
 
 @dataclass(frozen=True)
 class TeleportBundle:
-    """A portable snapshot of an agent's complete working state."""
+    """A portable snapshot of an agent's complete working state.
+
+    Version 2.0: Now includes full memory and decision content for
+    cross-machine transfer (not just IDs which only work locally).
+    """
 
     bundle_id: str = field(default_factory=lambda: uuid.uuid4().hex[:16])
-    version: str = "1.0"
+    version: str = "2.0"
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     source_host: str = ""
     target_host: str = ""
@@ -22,13 +26,21 @@ class TeleportBundle:
     # Core state
     session_id: str = ""
     project: str = ""
-    memory_ids: tuple[str, ...] = ()
     session_summary: str = ""
+
+    # Full memory content (v2.0) - replaces memory_ids
+    memories: tuple[dict, ...] = ()  # Serialized MemoryEntry objects
+
+    # Legacy field for backward compatibility
+    memory_ids: tuple[str, ...] = ()
 
     # Trust state
     trust_records: tuple[dict, ...] = ()
 
-    # Decision history
+    # Full decision content (v2.0) - replaces decision_ids
+    decisions: tuple[dict, ...] = ()  # Serialized DecisionEntry objects
+
+    # Legacy field for backward compatibility
     decision_ids: tuple[str, ...] = ()
 
     # Context
@@ -52,10 +64,14 @@ class TeleportBundle:
                 "target_host": self.target_host,
                 "session_id": self.session_id,
                 "project": self.project,
-                "memory_ids": list(self.memory_ids),
                 "session_summary": self.session_summary,
-                "trust_records": list(self.trust_records),
+                # v2.0: Full content
+                "memories": list(self.memories),
+                "decisions": list(self.decisions),
+                # Legacy fields (for backward compat)
+                "memory_ids": list(self.memory_ids),
                 "decision_ids": list(self.decision_ids),
+                "trust_records": list(self.trust_records),
                 "workspace_context": self.workspace_context,
                 "pending_tasks": list(self.pending_tasks),
                 "last_action": self.last_action,
@@ -77,10 +93,14 @@ class TeleportBundle:
             target_host=d.get("target_host", ""),
             session_id=d.get("session_id", ""),
             project=d.get("project", ""),
-            memory_ids=tuple(d.get("memory_ids", [])),
             session_summary=d.get("session_summary", ""),
-            trust_records=tuple(d.get("trust_records", [])),
+            # v2.0: Full content
+            memories=tuple(d.get("memories", [])),
+            decisions=tuple(d.get("decisions", [])),
+            # Legacy fields
+            memory_ids=tuple(d.get("memory_ids", [])),
             decision_ids=tuple(d.get("decision_ids", [])),
+            trust_records=tuple(d.get("trust_records", [])),
             workspace_context=d.get("workspace_context", ""),
             pending_tasks=tuple(d.get("pending_tasks", [])),
             last_action=d.get("last_action", ""),
@@ -93,7 +113,7 @@ class TeleportBundle:
         """Create a simple integrity signature."""
         import hashlib
 
-        payload = f"{self.bundle_id}:{self.session_id}:{self.project}:{len(self.memory_ids)}:{len(self.trust_records)}"
+        payload = f"{self.bundle_id}:{self.session_id}:{self.project}:{len(self.memories)}:{len(self.decisions)}:{len(self.trust_records)}"
         sig = hashlib.sha256(payload.encode()).hexdigest()[:16]
         return TeleportBundle(
             bundle_id=self.bundle_id,
@@ -103,9 +123,11 @@ class TeleportBundle:
             target_host=self.target_host,
             session_id=self.session_id,
             project=self.project,
-            memory_ids=self.memory_ids,
             session_summary=self.session_summary,
+            memories=self.memories,
+            memory_ids=self.memory_ids,
             trust_records=self.trust_records,
+            decisions=self.decisions,
             decision_ids=self.decision_ids,
             workspace_context=self.workspace_context,
             pending_tasks=self.pending_tasks,
@@ -127,9 +149,11 @@ class TeleportBundle:
             target_host=self.target_host,
             session_id=self.session_id,
             project=self.project,
-            memory_ids=self.memory_ids,
             session_summary=self.session_summary,
+            memories=self.memories,
+            memory_ids=self.memory_ids,
             trust_records=self.trust_records,
+            decisions=self.decisions,
             decision_ids=self.decision_ids,
             workspace_context=self.workspace_context,
             pending_tasks=self.pending_tasks,
@@ -179,6 +203,7 @@ class TeleportProtocol:
         model_name: str = "",
         tool_claims: tuple[str, ...] = (),
         trust_engine=None,  # Optional TrustGradientEngine
+        decision_ledger=None,  # Optional DecisionLedger
     ) -> TeleportBundle:
         """Create a teleport bundle from a substrate's current state.
 
@@ -191,10 +216,20 @@ class TeleportProtocol:
             model_name: Model name
             tool_claims: Tool claims
             trust_engine: Optional TrustGradientEngine for trust record export
+            decision_ledger: Optional DecisionLedger for decision export
         """
-        # Gather memory IDs
+        # v2.0: Serialize full memory content (not just IDs)
         all_memories = substrate.store.search(limit=9999)
-        memory_ids = tuple(m.id for m in all_memories)
+        memories = tuple(m.as_dict() for m in all_memories)
+        memory_ids = tuple(m.id for m in all_memories)  # Keep for backward compat
+
+        # v2.0: Serialize full decision content
+        decisions = ()
+        decision_ids = ()
+        if decision_ledger is not None:
+            all_decisions = decision_ledger.get_all(limit=9999)
+            decisions = tuple(d.as_dict() for d in all_decisions)
+            decision_ids = tuple(d.id for d in all_decisions)
 
         # Gather trust records from the provided trust engine
         trust_records = ()
@@ -211,8 +246,11 @@ class TeleportProtocol:
             target_host=target_host,
             session_id=session_id,
             project=project,
-            memory_ids=memory_ids,
             session_summary="",
+            memories=memories,
+            memory_ids=memory_ids,
+            decisions=decisions,
+            decision_ids=decision_ids,
             trust_records=trust_records,
             workspace_context="",
             pending_tasks=pending_tasks,
@@ -222,13 +260,16 @@ class TeleportProtocol:
         )
         return bundle.sign()
 
-    def rehydrate(self, bundle: TeleportBundle, substrate, trust_engine=None) -> dict:
+    def rehydrate(
+        self, bundle: TeleportBundle, substrate, trust_engine=None, decision_ledger=None
+    ) -> dict:
         """Rehydrate a substrate from a teleport bundle.
 
         Args:
             bundle: The TeleportBundle to restore from
             substrate: The CognitiveSubstrate instance
             trust_engine: Optional TrustGradientEngine instance for trust restoration
+            decision_ledger: Optional DecisionLedger for decision restoration
 
         Returns a report of what was restored.
         """
@@ -238,6 +279,7 @@ class TeleportProtocol:
         memories_restored = 0
         sessions_restored = 0
         trust_restored = False
+        decisions_restored = 0
 
         # Restore session context
         if bundle.session_id:
@@ -247,14 +289,33 @@ class TeleportProtocol:
             except Exception:
                 pass
 
-        # Restore memories from bundle - fetch actual content from source store
-        # and re-add to target substrate
-        if bundle.memory_ids and hasattr(substrate, "store"):
-            # The bundle only has IDs, but if we're rehydrating on the same machine
-            # the memories should already exist. For cross-machine transfer,
-            # the bundle would need to include serialized memory content.
-            # For now, report what we have.
-            memories_restored = len(bundle.memory_ids)
+        # v2.0: Restore full memory content (cross-machine compatible)
+        if bundle.memories and hasattr(substrate, "store"):
+            from substrate.models import MemoryEntry
+
+            restored_memories = []
+            for mem_dict in bundle.memories:
+                try:
+                    memory = MemoryEntry.from_dict(mem_dict)
+                    restored_memories.append(memory)
+                except Exception:
+                    pass
+
+            if restored_memories:
+                substrate.store.save_many(restored_memories)
+                memories_restored = len(restored_memories)
+
+        # v2.0: Restore full decision content (cross-machine compatible)
+        if bundle.decisions and decision_ledger is not None:
+            from substrate.ledger import DecisionEntry
+
+            for dec_dict in bundle.decisions:
+                try:
+                    decision = DecisionEntry.from_dict(dec_dict)
+                    decision_ledger._save(decision)
+                    decisions_restored += 1
+                except Exception:
+                    pass
 
         # Restore trust records using the provided trust engine
         if bundle.trust_records and trust_engine is not None:
@@ -277,15 +338,13 @@ class TeleportProtocol:
                     pass
             trust_restored = trust_count > 0
 
-        # Restore decision history if decision_ids are available
-        decisions_restored = len(bundle.decision_ids) if bundle.decision_ids else 0
-
         return {
             "status": "success",
+            "bundle_version": bundle.version,
             "memories_restored": memories_restored,
+            "decisions_restored": decisions_restored,
             "sessions_restored": sessions_restored,
             "trust_restored": trust_restored,
-            "decisions_restored": decisions_restored,
             "bundle_id": bundle.bundle_id,
         }
 

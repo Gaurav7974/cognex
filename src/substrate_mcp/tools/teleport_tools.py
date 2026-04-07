@@ -16,7 +16,10 @@ async def teleport_create_bundle(
     model_name: str | None = None,
     tool_claims: list[str] | None = None,
 ) -> dict[str, Any]:
-    """Create a teleport bundle for state transfer."""
+    """Create a teleport bundle for state transfer.
+
+    v2.0: Now includes full memory and decision content for cross-machine transfer.
+    """
     ctx = SubstrateContext.get_instance()
 
     bundle = ctx.teleport.create_bundle(
@@ -28,19 +31,27 @@ async def teleport_create_bundle(
         model_name=model_name or "",
         tool_claims=tuple(tool_claims or []),
         trust_engine=ctx.trust,
+        decision_ledger=ctx.ledger,
     )
 
     return {
         "bundle_id": bundle.bundle_id,
+        "version": bundle.version,
         "created_at": bundle.created_at.isoformat(),
         "source_host": bundle.source_host,
         "target_host": bundle.target_host,
+        "memories_count": len(bundle.memories),
+        "decisions_count": len(bundle.decisions),
+        "trust_records_count": len(bundle.trust_records),
         "serialized": bundle.serialize(),
     }
 
 
 async def teleport_rehydrate(bundle_json: str | dict) -> dict[str, Any]:
-    """Rehydrate substrate state from a bundle."""
+    """Rehydrate substrate state from a bundle.
+
+    v2.0: Now restores full memory and decision content for cross-machine transfer.
+    """
     ctx = SubstrateContext.get_instance()
 
     from substrate import TeleportBundle
@@ -82,12 +93,18 @@ async def teleport_rehydrate(bundle_json: str | dict) -> dict[str, Any]:
         raise ValueError(f"Invalid bundle format: {e}")
 
     report = ctx.teleport.rehydrate(
-        bundle=bundle, substrate=ctx.substrate, trust_engine=ctx.trust
+        bundle=bundle,
+        substrate=ctx.substrate,
+        trust_engine=ctx.trust,
+        decision_ledger=ctx.ledger,
     )
 
     return {
         "status": report.get("status", "rehydrated"),
+        "bundle_version": report.get("bundle_version", "1.0"),
         "memories_restored": report.get("memories_restored", 0),
+        "decisions_restored": report.get("decisions_restored", 0),
         "sessions_restored": report.get("sessions_restored", 0),
         "trust_restored": report.get("trust_restored", False),
+        "bundle_id": report.get("bundle_id", ""),
     }
