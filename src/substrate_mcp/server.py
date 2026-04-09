@@ -195,6 +195,7 @@ async def run_server(
     project: str = "default",
     server_name: str = "cognitive-substrate",
 ) -> None:
+    """Run the MCP server."""
     # Initialize context
     ctx = SubstrateContext.get_instance(db_path=db_path, project=project)
     logger.info(f"Starting Cognitive Substrate MCP Server (db: {ctx.db_path})")
@@ -226,6 +227,62 @@ async def run_server(
         )
 
         await server.run(read_stream, write_stream, init_options)
+
+
+def print_status(db_path: Optional[str] = None, project: str = "default") -> None:
+    """Print cognex status without starting the server."""
+    # Get context (don't start server)
+    ctx = SubstrateContext.get_instance(db_path=db_path, project=project)
+
+    print("=" * 50)
+    print("Cognex Status")
+    print("=" * 50)
+    print()
+
+    # DB path
+    print(f"Database: {ctx.db_path}")
+
+    # Memory count
+    try:
+        memory_count = ctx.substrate.store.count()
+        print(f"Memories: {memory_count}")
+    except Exception as e:
+        print(f"Memories: ERROR - {e}")
+
+    # Decision count
+    try:
+        from substrate.ledger import DecisionLedger
+
+        ledger = DecisionLedger(ctx.db_path)
+        decision_count = len(ledger.get_all(limit=9999))
+        print(f"Decisions: {decision_count}")
+    except Exception as e:
+        print(f"Decisions: ERROR - {e}")
+
+    # Trust records
+    try:
+        from substrate.trust import TrustGradientEngine
+
+        trust = TrustGradientEngine(ctx.db_path)
+        trust_summary = trust.get_trust_summary()
+        print(f"Trust Records: {len(trust_summary)}")
+    except Exception as e:
+        print(f"Trust Records: ERROR - {e}")
+
+    # AI tools configured
+    print()
+    print("Configured AI Tools:")
+    from substrate_mcp.installer import detect_installed_platforms
+
+    detected = detect_installed_platforms()
+    if detected:
+        for platform in detected:
+            print(f"  - {platform}")
+    else:
+        print("  (none detected)")
+
+    print()
+    print("=" * 50)
 
 
 def main() -> None:
@@ -262,6 +319,11 @@ def main() -> None:
         action="store_true",
         help="Preview install without making changes",
     )
+    parser.add_argument(
+        "--status",
+        action="store_true",
+        help="Show cognex status (memories, decisions, trust records, AI tools)",
+    )
 
     args = parser.parse_args()
 
@@ -270,6 +332,11 @@ def main() -> None:
         from substrate_mcp.installer import run_install
 
         run_install(platform=args.platform, dry_run=args.dry_run)
+        return
+
+    # Handle status command
+    if args.status:
+        print_status(db_path=args.db_path, project=args.project)
         return
 
     if args.debug:
