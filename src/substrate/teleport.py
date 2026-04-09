@@ -17,6 +17,7 @@ try:
     from cryptography.hazmat.primitives import serialization
     from cryptography.hazmat.primitives.asymmetric import ed25519
     from cryptography.hazmat.backends import default_backend
+    from cryptography.hazmat.primitives.serialization import load_ssh_public_key
 
     CRYPTO_AVAILABLE = True
 except ImportError:
@@ -82,23 +83,6 @@ def get_or_create_keys() -> tuple[bytes, bytes]:
         pass
     return private_raw, public_pem
 
-    # Generate new keypair
-    private_pem, public_pem = generate_keypair()
-    # Save as raw 32 bytes for easier loading
-    private_key = ed25519.Ed25519PrivateKey.from_private_bytes(private_pem)
-    private_raw = private_key.private_bytes(
-        encoding=serialization.Encoding.Raw,
-        format=serialization.PrivateFormat.Raw,
-        encryption_algorithm=serialization.NoEncryption(),
-    )
-    key_path.write_bytes(private_raw)
-    # Secure the key file
-    try:
-        key_path.chmod(0o600)
-    except Exception:
-        pass
-    return private_raw, public_pem
-
 
 def sign_bundle(content: str, private_key_pem: bytes) -> bytes:
     """Sign bundle content with Ed25519."""
@@ -115,7 +99,8 @@ def verify_signature(content: str, signature: bytes, public_key_pem: bytes) -> b
         return False
 
     try:
-        public_key = ed25519.Ed25519PublicKey.from_public_bytes(public_key_pem)
+        # Public key is stored/exported as OpenSSH format bytes.
+        public_key = load_ssh_public_key(public_key_pem, backend=default_backend())
         public_key.verify(signature, content.encode())
         return True
     except Exception:

@@ -1,12 +1,17 @@
 """Tool dispatcher - handles routing tool calls to appropriate handlers."""
 
 import asyncio
+import os
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from typing import Any, Callable
 
 # Shared thread pool for running synchronous DB operations off the event loop
-_db_executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="cognex-db")
+_db_workers = int(os.getenv("COGNEX_DB_WORKERS", "8"))
+_db_workers = max(4, _db_workers)
+_db_executor = ThreadPoolExecutor(
+    max_workers=_db_workers, thread_name_prefix="cognex-db"
+)
 
 
 async def run_in_thread(func: Callable, *args, **kwargs) -> Any:

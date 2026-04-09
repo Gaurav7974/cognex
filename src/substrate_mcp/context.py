@@ -67,14 +67,20 @@ class SubstrateContext:
 
         # Determine DB path
         if self._db_path:
-            db_path = Path(self._db_path)
+            configured = Path(self._db_path)
+            if configured.suffix:
+                # Caller passed a file path (e.g. /tmp/test.db)
+                db_file = configured
+                db_file.parent.mkdir(parents=True, exist_ok=True)
+            else:
+                # Caller passed a directory path
+                configured.mkdir(parents=True, exist_ok=True)
+                db_file = configured / "substrate.db"
         else:
-            # Default: .substrate/ in current working directory
-            db_path = Path.cwd() / ".substrate"
-
-        # Auto-create directory
-        db_path.mkdir(parents=True, exist_ok=True)
-        db_file = db_path / "substrate.db"
+            # Default: .substrate/substrate.db in current working directory
+            db_dir = Path.cwd() / ".substrate"
+            db_dir.mkdir(parents=True, exist_ok=True)
+            db_file = db_dir / "substrate.db"
 
         # Initialize components with shared database
         self._substrate = CognitiveSubstrate(db_path=str(db_file))
