@@ -110,9 +110,8 @@ class SubstrateContext:
         self._ensure_initialized()
         return self._teleport
 
-@property
+    @property
     def swarm(self) -> IntentCompiler:
-        """Get the IntentCompiler instance."""
         self._ensure_initialized()
         return self._swarm
 
@@ -139,7 +138,7 @@ class SubstrateContext:
         if self._ledger:
             self._ledger.close()
             self._ledger = None
-# TeleportProtocol has no close method
+        # TeleportProtocol has no close method
         self._teleport = None
         # IntentCompiler has no close method
         self._swarm = None

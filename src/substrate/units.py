@@ -1,4 +1,4 @@
-"""CognitiveUnitStore - storage layer for Cognitive Units."""
+# CognitiveUnitStore - storage layer for Cognitive Units.
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from .models import CognitiveUnit
 
 
 class ConnectionPool:
-    """Thread-local connection pool for SQLite (reused from store.py pattern)."""
+    # Thread-local connection pool for SQLite (reused from store.py pattern).
 
     def __init__(self, db_path: Path, pool_size: int = 3):
         self.db_path = db_path
@@ -72,10 +72,7 @@ class ConnectionPool:
 
 
 class CognitiveUnitStore:
-    """Storage for Cognitive Units — captures what, why, scope, and confidence.
-
-    Foundation of CHP (Cognitive Handoff Protocol) support.
-    """
+    # Storage for Cognitive Units and CHP handoff support.
 
     def __init__(self, db_path: str | Path | None = None):
         self.db_path = Path(db_path) if db_path else Path(".substrate/substrate.db")
@@ -260,7 +257,7 @@ class CognitiveUnitStore:
         return [self._row_to_unit(r) for r in rows]
 
     def mark_overridden(self, unit_id: str) -> None:
-        """Mark a unit as contradicted, decays confidence by 0.2."""
+        # Mark a unit as contradicted and decay confidence by 0.2.
         with self._connect() as conn:
             conn.execute(
                 """UPDATE cognitive_units
@@ -271,7 +268,7 @@ class CognitiveUnitStore:
             )
 
     def verify(self, unit_id: str) -> None:
-        """Confirm a unit still holds, updates last_verified to now."""
+        # Confirm a unit still holds and update last_verified.
         with self._connect() as conn:
             conn.execute(
                 "UPDATE cognitive_units SET last_verified = ? WHERE unit_id = ?",
@@ -279,7 +276,7 @@ class CognitiveUnitStore:
             )
 
     def get_bundle(self, project: str, scope: str | None = None) -> list[CognitiveUnit]:
-        """Get all active units for a project/scope, ordered by confidence DESC."""
+        # Get active units for project/scope ordered by confidence DESC.
         with self._connect() as conn:
             conditions = ["project = ?"]
             params: list = [project]

@@ -230,14 +230,11 @@ async def run_server(
 
 
 def print_status(db_path: Optional[str] = None, project: str = "default") -> None:
-    """Print cognex status without starting the server."""
+    # Print cognex status without starting the server
     # Get context (don't start server)
     ctx = SubstrateContext.get_instance(db_path=db_path, project=project)
 
-    print("=" * 50)
-    print("Cognex Status")
-    print("=" * 50)
-    print()
+    print("Cognex status")
 
     # DB path
     print(f"Database: {ctx.db_path}")
@@ -270,19 +267,15 @@ def print_status(db_path: Optional[str] = None, project: str = "default") -> Non
         print(f"Trust Records: ERROR - {e}")
 
     # AI tools configured
-    print()
-    print("Configured AI Tools:")
+    print("Configured AI tools:")
     from substrate_mcp.installer import detect_installed_platforms
 
     detected = detect_installed_platforms()
     if detected:
         for platform in detected:
-            print(f"  - {platform}")
+            print(f"- {platform}")
     else:
-        print("  (none detected)")
-
-    print()
-    print("=" * 50)
+        print("- none")
 
 
 def main() -> None:

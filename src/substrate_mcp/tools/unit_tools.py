@@ -1,4 +1,4 @@
-"""Cognitive Unit tools - commit, checkout, search, mark overridden, verify."""
+# Cognitive Unit tools - commit, checkout, search, mark overridden, verify.
 
 from datetime import datetime, timezone
 from typing import Any
@@ -25,7 +25,7 @@ async def unit_commit(
     tags: list[str] | None = None,
     project: str = "",
 ) -> dict[str, Any]:
-    """Create and save a CognitiveUnit."""
+    # Create and save a CognitiveUnit.
     # Sanitize inputs
     content = sanitize_content(content)
     rationale = sanitize_content(rationale)
@@ -77,7 +77,7 @@ async def unit_checkout(
     scope: str | None = None,
     unit_type_filter: str | None = None,
 ) -> dict[str, Any]:
-    """Get the cognitive bundle for a project/scope as structured JSON."""
+    # Get cognitive bundle for a project/scope as structured JSON.
     project = sanitize_project(project)
 
     if not project:
@@ -120,7 +120,7 @@ async def unit_search(
     unit_type_filter: str | None = None,
     limit: int = 20,
 ) -> dict[str, Any]:
-    """FTS search over cognitive units."""
+    # FTS search over cognitive units.
     from substrate_mcp.sanitizer import sanitize_query
 
     query = sanitize_query(query or "")
@@ -158,7 +158,7 @@ async def unit_search(
 
 
 async def unit_mark_overridden(unit_id: str) -> dict[str, Any]:
-    """Mark a unit as contradicted, decays confidence by 0.2."""
+    # Mark a unit as contradicted and decay confidence by 0.2.
     if not unit_id:
         raise ValueError("unit_id is required")
 
@@ -180,7 +180,7 @@ async def unit_mark_overridden(unit_id: str) -> dict[str, Any]:
 
 
 async def unit_verify(unit_id: str) -> dict[str, Any]:
-    """Confirm a unit still holds, updates last_verified to now."""
+    # Confirm a unit still holds and update last_verified.
     if not unit_id:
         raise ValueError("unit_id is required")
 
