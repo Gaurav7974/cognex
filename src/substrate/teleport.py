@@ -181,6 +181,9 @@ class TeleportBundle:
     tool_claims: tuple[str, ...] = ()  # Tools the agent expects to use
     signature: str = ""  # Simple integrity check
 
+    # Cognitive Units (v3.0) - for CHP handoff protocol
+    cognitive_units: tuple[dict, ...] = ()  # Serialized CognitiveUnit objects
+
     def serialize(self) -> str:
         """Serialize to JSON for transfer."""
         return json.dumps(
@@ -206,6 +209,8 @@ class TeleportBundle:
                 "model_name": self.model_name,
                 "tool_claims": list(self.tool_claims),
                 "signature": self.signature,
+                # v3.0: Cognitive Units
+                "cognitive_units": list(self.cognitive_units),
             },
             indent=2,
         )
@@ -235,6 +240,8 @@ class TeleportBundle:
             model_name=d.get("model_name", ""),
             tool_claims=tuple(d.get("tool_claims", [])),
             signature=d.get("signature", ""),
+            # v3.0: Cognitive Units
+            cognitive_units=tuple(d.get("cognitive_units", [])),
         )
 
     def _canonical_payload(self) -> str:
@@ -366,6 +373,7 @@ class TeleportProtocol:
         tool_claims: tuple[str, ...] = (),
         trust_engine=None,  # Optional TrustGradientEngine
         decision_ledger=None,  # Optional DecisionLedger
+        unit_store=None,  # Optional CognitiveUnitStore
     ) -> TeleportBundle:
         """Create a teleport bundle from a substrate's current state.
 
@@ -399,6 +407,13 @@ class TeleportProtocol:
             trust_summary = trust_engine.get_trust_summary()
             trust_records = tuple(r.as_dict() for r in trust_summary)
 
+        # v3.0: Gather cognitive units for CHP handoff
+        cognitive_units = ()
+        if unit_store is not None:
+            project = substrate.current_project or ""
+            units = unit_store.get_bundle(project, scope=None)
+            cognitive_units = tuple(u.as_dict() for u in units)
+
         # Gather session info
         session_id = substrate.current_session or ""
         project = substrate.current_project or ""
@@ -419,11 +434,17 @@ class TeleportProtocol:
             last_action=last_action,
             model_name=model_name,
             tool_claims=tool_claims,
+            cognitive_units=cognitive_units,
         )
         return bundle.sign()
 
     def rehydrate(
-        self, bundle: TeleportBundle, substrate, trust_engine=None, decision_ledger=None
+        self,
+        bundle: TeleportBundle,
+        substrate,
+        trust_engine=None,
+        decision_ledger=None,
+        unit_store=None,
     ) -> dict:
         """Rehydrate a substrate from a teleport bundle.
 
@@ -514,6 +535,19 @@ class TeleportProtocol:
                     f"Rejected {rejected} trust records due to suspicious counts"
                 )
 
+        # v3.0: Restore cognitive units for CHP handoff
+        cognitive_units_restored = 0
+        if bundle.cognitive_units and unit_store is not None:
+            from substrate.models import CognitiveUnit
+
+            for cu_dict in bundle.cognitive_units:
+                try:
+                    unit = CognitiveUnit.from_dict(cu_dict)
+                    unit_store.save(unit)
+                    cognitive_units_restored += 1
+                except Exception:
+                    pass
+
         return {
             "status": "success",
             "bundle_version": bundle.version,
@@ -521,6 +555,7 @@ class TeleportProtocol:
             "decisions_restored": decisions_restored,
             "sessions_restored": sessions_restored,
             "trust_restored": trust_restored,
+            "cognitive_units_restored": cognitive_units_restored,
             "bundle_id": bundle.bundle_id,
         }
 
