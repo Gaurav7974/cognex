@@ -3,10 +3,138 @@
 from __future__ import annotations
 
 import json
+import logging
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
+
+logger = logging.getLogger("teleport")
+
+# Try to import cryptography for Ed25519 signing
+try:
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric import ed25519
+    from cryptography.hazmat.backends import default_backend
+
+    CRYPTO_AVAILABLE = True
+except ImportError:
+    CRYPTO_AVAILABLE = False
+
+
+# Key file location
+def _get_key_path() -> Path:
+    """Get path to signing key."""
+    key_dir = Path(".substrate")
+    key_dir.mkdir(parents=True, exist_ok=True)
+    return key_dir / "signing_key.pem"
+
+
+def generate_keypair() -> tuple[bytes, bytes]:
+    """Generate Ed25519 keypair. Returns (private_key_raw_32bytes, public_key_ssh)."""
+    if not CRYPTO_AVAILABLE:
+        raise RuntimeError(
+            "cryptography library not installed. Run: pip install cryptography"
+        )
+
+    private_key = ed25519.Ed25519PrivateKey.generate()
+    public_key = private_key.public_key()
+
+    # Private key as raw 32 bytes
+    private_raw = private_key.private_bytes(
+        encoding=serialization.Encoding.Raw,
+        format=serialization.PrivateFormat.Raw,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+
+    # Public key as OpenSSH format for easy verification
+    public_ssh = public_key.public_bytes(
+        encoding=serialization.Encoding.OpenSSH,
+        format=serialization.PublicFormat.OpenSSH,
+    )
+
+    return private_raw, public_ssh
+
+
+def get_or_create_keys() -> tuple[bytes, bytes]:
+    """Get existing keys or generate new ones."""
+    key_path = _get_key_path()
+
+    if key_path.exists():
+        private_bytes = key_path.read_bytes()
+        # Must be raw 32 bytes
+        private_key = ed25519.Ed25519PrivateKey.from_private_bytes(private_bytes)
+        public_key = private_key.public_key()
+        public_pem = public_key.public_bytes(
+            encoding=serialization.Encoding.OpenSSH,
+            format=serialization.PublicFormat.OpenSSH,
+        )
+        return private_bytes, public_pem
+
+    # Generate new keypair
+    private_raw, public_pem = generate_keypair()
+    key_path.write_bytes(private_raw)
+    # Secure the key file
+    try:
+        key_path.chmod(0o600)
+    except Exception:
+        pass
+    return private_raw, public_pem
+
+    # Generate new keypair
+    private_pem, public_pem = generate_keypair()
+    # Save as raw 32 bytes for easier loading
+    private_key = ed25519.Ed25519PrivateKey.from_private_bytes(private_pem)
+    private_raw = private_key.private_bytes(
+        encoding=serialization.Encoding.Raw,
+        format=serialization.PrivateFormat.Raw,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+    key_path.write_bytes(private_raw)
+    # Secure the key file
+    try:
+        key_path.chmod(0o600)
+    except Exception:
+        pass
+    return private_raw, public_pem
+
+
+def sign_bundle(content: str, private_key_pem: bytes) -> bytes:
+    """Sign bundle content with Ed25519."""
+    if not CRYPTO_AVAILABLE:
+        raise RuntimeError("cryptography library not installed")
+
+    private_key = ed25519.Ed25519PrivateKey.from_private_bytes(private_key_pem)
+    return private_key.sign(content.encode())
+
+
+def verify_signature(content: str, signature: bytes, public_key_pem: bytes) -> bool:
+    """Verify Ed25519 signature."""
+    if not CRYPTO_AVAILABLE:
+        return False
+
+    try:
+        public_key = ed25519.Ed25519PublicKey.from_public_bytes(public_key_pem)
+        public_key.verify(signature, content.encode())
+        return True
+    except Exception:
+        return False
+
+
+def verify_bundle(
+    bundle: TeleportBundle, public_key_pem: Optional[bytes] = None
+) -> bool:
+    """Verify a teleport bundle's integrity.
+
+    Args:
+        bundle: The TeleportBundle to verify
+        public_key_pem: Optional public key (if None, loads from default location)
+
+    Returns:
+        True if signature is valid, False otherwise
+    """
+    return bundle.verify(public_key_pem)
 
 
 @dataclass(frozen=True)
@@ -109,12 +237,45 @@ class TeleportBundle:
             signature=d.get("signature", ""),
         )
 
-    def sign(self) -> TeleportBundle:
-        """Create a simple integrity signature."""
-        import hashlib
+    def _canonical_payload(self) -> str:
+        """Create canonical string for signing (excludes signature field)."""
+        return (
+            f"{self.bundle_id}:{self.version}:{self.created_at.isoformat()}:"
+            f"{self.source_host}:{self.target_host}:{self.session_id}:"
+            f"{self.project}:{self.session_summary}:"
+            f"{len(self.memories)}:{self.memories!r}:"
+            f"{len(self.decisions)}:{self.decisions!r}:"
+            f"{len(self.trust_records)}:{self.trust_records!r}:"
+            f"{self.workspace_context}:{self.pending_tasks!r}:"
+            f"{self.last_action}:{self.model_name}:{self.tool_claims!r}"
+        )
 
-        payload = f"{self.bundle_id}:{self.session_id}:{self.project}:{len(self.memories)}:{len(self.decisions)}:{len(self.trust_records)}"
-        sig = hashlib.sha256(payload.encode()).hexdigest()[:16]
+    def sign(self) -> TeleportBundle:
+        """Sign the bundle with Ed25519."""
+        if not CRYPTO_AVAILABLE:
+            # Fallback to hash-based (not secure, for dev only)
+            import hashlib
+
+            payload = self._canonical_payload()
+            sig = hashlib.sha256(payload.encode()).hexdigest()[:16]
+            return self._copy_with_signature(sig)
+
+        try:
+            private_pem, _ = get_or_create_keys()
+            payload = self._canonical_payload()
+            sig = sign_bundle(payload, private_pem)
+            # Ed25519 signature is 64 bytes = 128 hex chars
+            return self._copy_with_signature(sig.hex())
+        except Exception as e:
+            # Fallback on error
+            import hashlib
+
+            payload = self._canonical_payload()
+            sig = hashlib.sha256(payload.encode()).hexdigest()[:16]
+            return self._copy_with_signature(sig)
+
+    def _copy_with_signature(self, signature: str) -> TeleportBundle:
+        """Create copy with signature set."""
         return TeleportBundle(
             bundle_id=self.bundle_id,
             version=self.version,
@@ -134,34 +295,35 @@ class TeleportBundle:
             last_action=self.last_action,
             model_name=self.model_name,
             tool_claims=self.tool_claims,
-            signature=sig,
+            signature=signature,
         )
 
-    def verify(self) -> bool:
+    def verify(self, public_key_pem: Optional[bytes] = None) -> bool:
         """Verify the bundle hasn't been tampered with."""
         if not self.signature:
             return False
-        clean = TeleportBundle(
-            bundle_id=self.bundle_id,
-            version=self.version,
-            created_at=self.created_at,
-            source_host=self.source_host,
-            target_host=self.target_host,
-            session_id=self.session_id,
-            project=self.project,
-            session_summary=self.session_summary,
-            memories=self.memories,
-            memory_ids=self.memory_ids,
-            trust_records=self.trust_records,
-            decisions=self.decisions,
-            decision_ids=self.decision_ids,
-            workspace_context=self.workspace_context,
-            pending_tasks=self.pending_tasks,
-            last_action=self.last_action,
-            model_name=self.model_name,
-            tool_claims=self.tool_claims,
-        ).sign()
-        return clean.signature == self.signature
+
+        # Check if Ed25519 signature (hex-encoded, 64 bytes = 128 hex chars)
+        if len(self.signature) == 128 and CRYPTO_AVAILABLE:
+            try:
+                if public_key_pem is None:
+                    _, public_pem = get_or_create_keys()
+                    public_key_pem = public_pem
+                payload = self._canonical_payload()
+                sig_bytes = bytes.fromhex(self.signature)
+                return verify_signature(payload, sig_bytes, public_key_pem)
+            except Exception:
+                return False
+
+        # Fallback: check if old SHA256 signature matches (16 hex chars)
+        if len(self.signature) == 16:
+            import hashlib
+
+            payload = self._canonical_payload()
+            expected = hashlib.sha256(payload.encode()).hexdigest()[:16]
+            return self.signature == expected
+
+        return False
 
     def save_to_file(self, path: str | Path) -> Path:
         p = Path(path)
@@ -322,10 +484,19 @@ class TeleportProtocol:
             from substrate.trust import TrustRecord
 
             trust_count = 0
+            rejected = 0
             for tr in bundle.trust_records:
                 try:
                     # Restore the full TrustRecord from serialized dict
                     record = TrustRecord.from_dict(tr)
+
+                    # Security cap: reject malicious injection attempts
+                    approval_count = getattr(record, "approval_count", 0)
+                    violation_count = getattr(record, "violation_count", 0)
+                    if approval_count > 500 or violation_count > 100:
+                        rejected += 1
+                        continue
+
                     # Use the trust engine's internal update to restore the record
                     trust_engine._update_trust(
                         record.tool_name,
@@ -337,6 +508,11 @@ class TeleportProtocol:
                 except Exception:
                     pass
             trust_restored = trust_count > 0
+
+            if rejected > 0:
+                logger.warning(
+                    f"Rejected {rejected} trust records due to suspicious counts"
+                )
 
         return {
             "status": "success",
