@@ -49,6 +49,13 @@ from substrate_mcp.tools.pattern_tools import (
     pattern_analyze,
     pattern_stats,
 )
+from substrate_mcp.tools.unit_tools import (
+    unit_commit,
+    unit_checkout,
+    unit_search,
+    unit_mark_overridden,
+    unit_verify,
+)
 
 
 # Tool registry: name -> handler function
@@ -80,6 +87,12 @@ TOOL_HANDLERS: dict[str, Callable] = {
     # Pattern tools
     "pattern_analyze": pattern_analyze,
     "pattern_stats": pattern_stats,
+    # Unit tools
+    "unit_commit": unit_commit,
+    "unit_checkout": unit_checkout,
+    "unit_search": unit_search,
+    "unit_mark_overridden": unit_mark_overridden,
+    "unit_verify": unit_verify,
 }
 
 

@@ -384,6 +384,103 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
             },
         },
     },
+    # Unit tools (5)
+    {
+        "name": "unit_commit",
+        "description": "Create a CognitiveUnit capturing what, why, scope, and confidence",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "description": "The what - what was decided/done",
+                },
+                "rationale": {
+                    "type": "string",
+                    "description": "The why - reasoning behind",
+                },
+                "unit_type": {
+                    "type": "string",
+                    "description": "Type: decision, constraint, progress, task_state",
+                    "default": "decision",
+                },
+                "scope": {
+                    "type": "string",
+                    "description": "Project/module/subsystem scope",
+                },
+                "confidence": {
+                    "type": "number",
+                    "description": "Confidence 0.0-1.0",
+                    "default": 1.0,
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Tags",
+                },
+                "project": {"type": "string", "description": "Project name"},
+            },
+            "required": ["content"],
+        },
+    },
+    {
+        "name": "unit_checkout",
+        "description": "Get cognitive bundle for a project/scope - structured JSON for handoff",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "project": {"type": "string", "description": "Project name"},
+                "scope": {"type": "string", "description": "Scope filter (optional)"},
+                "unit_type_filter": {
+                    "type": "string",
+                    "description": "Filter by unit_type",
+                },
+            },
+            "required": ["project"],
+        },
+    },
+    {
+        "name": "unit_search",
+        "description": "FTS search over cognitive units",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Search query"},
+                "project": {"type": "string", "description": "Filter by project"},
+                "unit_type_filter": {
+                    "type": "string",
+                    "description": "Filter by unit_type",
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Max results",
+                    "default": 20,
+                },
+            },
+        },
+    },
+    {
+        "name": "unit_mark_overridden",
+        "description": "Mark a unit as contradicted - decays confidence by 0.2",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "unit_id": {"type": "string", "description": "Unit ID"},
+            },
+            "required": ["unit_id"],
+        },
+    },
+    {
+        "name": "unit_verify",
+        "description": "Confirm a unit still holds - updates last_verified",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "unit_id": {"type": "string", "description": "Unit ID"},
+            },
+            "required": ["unit_id"],
+        },
+    },
 ]
 
 
