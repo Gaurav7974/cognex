@@ -38,6 +38,33 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
            content='memories', content_rowid='rowid')""",
         ],
     ),
+    (
+        6,
+        "add cognitive_units table",
+        [
+            """CREATE TABLE IF NOT EXISTS cognitive_units (
+                unit_id TEXT PRIMARY KEY,
+                unit_type TEXT NOT NULL DEFAULT 'decision',
+                content TEXT NOT NULL,
+                rationale TEXT DEFAULT '',
+                scope TEXT DEFAULT '',
+                confidence REAL DEFAULT 1.0,
+                tags TEXT DEFAULT '[]',
+                created_at TEXT NOT NULL,
+                session_id TEXT DEFAULT '',
+                project TEXT DEFAULT '',
+                override_count INTEGER DEFAULT 0,
+                last_verified TEXT
+            )""",
+            """CREATE INDEX IF NOT EXISTS idx_cu_project ON cognitive_units(project)""",
+            """CREATE INDEX IF NOT EXISTS idx_cu_scope ON cognitive_units(scope)""",
+            """CREATE INDEX IF NOT EXISTS idx_cu_type ON cognitive_units(unit_type)""",
+            """CREATE INDEX IF NOT EXISTS idx_cu_confidence ON cognitive_units(confidence DESC)""",
+            """CREATE VIRTUAL TABLE IF NOT EXISTS cognitive_units_fts
+               USING fts5(content, rationale,
+               content='cognitive_units', content_rowid='rowid')""",
+        ],
+    ),
 ]
 
 

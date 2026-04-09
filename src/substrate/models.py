@@ -113,7 +113,7 @@ class SessionSnapshot:
             "started_at": self.started_at.isoformat(),
             "ended_at": self.ended_at.isoformat() if self.ended_at else None,
             "input_tokens": self.input_tokens, "output_tokens": self.output_tokens,
-            "memory_ids_extracted": list(self.memory_ids_extracted),
+            "memory_ids": list(self.memory_ids_extracted),
         }
 
     @classmethod
@@ -121,7 +121,7 @@ class SessionSnapshot:
         return cls(
             session_id=d["session_id"], project=d.get("project", ""),
             summary=d.get("summary", ""),
-            key_decisions=tuple(d.get("key_decisions", [])),
+            key_decisions=tuple(d.get("key_decisions", []))),
             tools_used=tuple(d.get("tools_used", [])),
             errors_encountered=tuple(d.get("errors_encountered", [])),
             started_at=datetime.fromisoformat(d["started_at"]),
@@ -129,4 +129,66 @@ class SessionSnapshot:
             input_tokens=d.get("input_tokens", 0),
             output_tokens=d.get("output_tokens", 0),
             memory_ids_extracted=tuple(d.get("memory_ids_extracted", [])),
+        )
+
+
+class CognitiveUnitType(enum.Enum):
+    """Type of cognitive unit."""
+    DECISION = "decision"
+    CONSTRAINT = "constraint"
+    PROGRESS = "progress"
+    TASK_STATE = "task_state"
+
+
+@dataclass(frozen=True)
+class CognitiveUnit:
+    """A cognitive unit — captures what, why, scope, and confidence.
+
+    This is the foundation of CHP (Cognitive Handoff Protocol) support.
+    Captures not just what was decided but why, scope, and confidence.
+    """
+    unit_id: str = field(default_factory=lambda: uuid.uuid4().hex[:16])
+    unit_type: str = "decision"  # CognitiveUnitType value
+    content: str = ""  # the what
+    rationale: str = ""  # the why — key new field
+    scope: str = ""  # which project/module/subsystem this belongs to
+    confidence: float = 1.0  # 0.0–1.0, decays when overridden
+    tags: tuple[str, ...] = ()
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    session_id: str = ""
+    project: str = ""
+    override_count: int = 0  # incremented when downstream contradicts
+    last_verified: datetime | None = None
+
+    def as_dict(self) -> dict:
+        return {
+            "unit_id": self.unit_id,
+            "unit_type": self.unit_type,
+            "content": self.content,
+            "rationale": self.rationale,
+            "scope": self.scope,
+            "confidence": self.confidence,
+            "tags": list(self.tags),
+            "created_at": self.created_at.isoformat(),
+            "session_id": self.session_id,
+            "project": self.project,
+            "override_count": self.override_count,
+            "last_verified": self.last_verified.isoformat() if self.last_verified else None,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> CognitiveUnit:
+        return cls(
+            unit_id=d["unit_id"],
+            unit_type=d.get("unit_type", "decision"),
+            content=d["content"],
+            rationale=d.get("rationale", ""),
+            scope=d.get("scope", ""),
+            confidence=d.get("confidence", 1.0),
+            tags=tuple(d.get("tags", [])),
+            created_at=datetime.fromisoformat(d["created_at"]),
+            session_id=d.get("session_id", ""),
+            project=d.get("project", ""),
+            override_count=d.get("override_count", 0),
+            last_verified=datetime.fromisoformat(d["last_verified"]) if d.get("last_verified") else None,
         )
