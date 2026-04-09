@@ -4,12 +4,88 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import threading
 import time
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Optional
 
 from .migrations import run_migrations
 from .models import MemoryEntry, MemoryScope, MemoryType, SessionSnapshot
+
+
+class ConnectionPool:
+    """Thread-local connection pool for SQLite.
+
+    Reuses connections across calls for better performance.
+    Maintains a small pool (2-3 connections) with WAL mode and busy_timeout.
+    """
+
+    def __init__(self, db_path: Path, pool_size: int = 3):
+        self.db_path = db_path
+        self.pool_size = pool_size
+        self._local = threading.local()
+        self._lock = threading.Lock()
+        self._connections: list[sqlite3.Connection] = []
+        self._init_pool()
+
+    def _init_pool(self) -> None:
+        """Initialize the connection pool."""
+        for _ in range(self.pool_size):
+            conn = self._create_connection()
+            self._connections.append(conn)
+
+    def _create_connection(self) -> sqlite3.Connection:
+        """Create a new connection with pragmas."""
+        conn = sqlite3.connect(str(self.db_path), check_same_thread=False)
+        conn.row_factory = sqlite3.Row
+        # Concurrency pragmas for multi-client access
+        conn.execute("PRAGMA busy_timeout = 10000")  # Wait up to 10s for locks
+        conn.execute("PRAGMA journal_mode = WAL")  # Write-ahead logging
+        conn.execute("PRAGMA wal_autocheckpoint = 100")  # Checkpoint every 100 pages
+        # Performance pragmas for faster queries
+        conn.execute("PRAGMA cache_size=-32000")  # 32MB cache
+        conn.execute("PRAGMA mmap_size=134217728")  # 128MB mmap
+        conn.execute("PRAGMA synchronous=NORMAL")
+        conn.execute("PRAGMA temp_store=MEMORY")
+        return conn
+
+    @contextmanager
+    def get_connection(self):
+        """Get a connection from the pool, yield it, return it to pool."""
+        conn = getattr(self._local, "conn", None)
+        if conn is None:
+            # Get connection from pool
+            with self._lock:
+                if self._connections:
+                    conn = self._connections.pop(0)
+                else:
+                    # Pool empty - create new connection
+                    conn = self._create_connection()
+
+            self._local.conn = conn
+
+        try:
+            yield conn
+        finally:
+            # Connection stays in _local for reuse
+            pass
+
+    def close_all(self) -> None:
+        """Close all connections in the pool."""
+        with self._lock:
+            for conn in self._connections:
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+            self._connections.clear()
+        if hasattr(self._local, "conn"):
+            try:
+                self._local.conn.close()
+            except Exception:
+                pass
+            self._local.conn = None
 
 
 def execute_with_retry(
@@ -61,29 +137,20 @@ class MemoryStore:
     def __init__(self, db_path: str | Path | None = None):
         self.db_path = Path(db_path) if db_path else Path(".substrate/memory.db")
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        # Use connection pool (2-3 connections)
+        self._pool = ConnectionPool(self.db_path, pool_size=3)
         self._init_db()
 
     # ── Internal ──────────────────────────────────────────────
 
-    def _connect(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(str(self.db_path))
-        conn.row_factory = sqlite3.Row
-        # Concurrency pragmas for multi-client access
-        conn.execute("PRAGMA busy_timeout = 10000")  # Wait up to 10s for locks
-        conn.execute("PRAGMA journal_mode = WAL")  # Write-ahead logging
-        conn.execute("PRAGMA wal_autocheckpoint = 100")  # Checkpoint every 100 pages
-        # Performance pragmas for faster queries
-        conn.execute("PRAGMA cache_size=-32000")  # 32MB cache
-        conn.execute("PRAGMA mmap_size=134217728")  # 128MB mmap
-        conn.execute("PRAGMA synchronous=NORMAL")
-        conn.execute("PRAGMA temp_store=MEMORY")
-        return conn
+    def _connect(self):
+        """Get a connection from the pool. Returns a context manager."""
+        return self._pool.get_connection()
 
     def close(self) -> None:
         """Close any open connections (important for cleanup on Windows)."""
-        # SQLite connections are per-call, so this is a no-op,
-        # but we keep the API for future connection pooling.
-        pass
+        # Close pool connections
+        self._pool.close_all()
 
     def _init_db(self) -> None:
         with self._connect() as conn:
