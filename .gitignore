@@ -27,6 +27,9 @@ htmlcov/
 .substrate/
 .cognex/
 
+# Test temporary files
+test_patterns_tmp/
+
 # Local MCP config (has machine-specific paths)
 mcp.json
 
