@@ -6,6 +6,21 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-04-10
+
+### Security
+- Replaced forgeable SHA-256 truncated teleport bundle signature with Ed25519 signing
+- Keys stored at .substrate/signing_key.pem, generated on first run
+- Added verify_bundle() for receivers to validate incoming bundles
+- Trust record injection attack prevention: rejects approval_count > 500 or violation_count > 100 on rehydration
+
+### Performance
+- Added connection pool to MemoryStore — eliminates per-call SQLite reconnect overhead
+- Connections reuse WAL mode and busy_timeout settings across calls
+
+### CLI
+- Added cognex --status subcommand — shows memory count, decision count, trust records, configured AI tools, and DB path without starting the server
+
 ## [0.1.4] - 2026-04-06
 
 ### Fixed

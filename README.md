@@ -2,10 +2,10 @@
 
 > Your AI forgets everything. Cognex doesn't.
 
-Give your AI coding assistant long-term memory, decision tracking, and trust management. Benchmarked to reduce context tokens by ~70% compared to manual context pasting.
+Give your AI coding assistant persistent memory, decision tracking, trust management, and now — structured cognitive state that survives across sessions and agents.
 
 [![PyPI version](https://badge.fury.io/py/cognex.svg)](https://pypi.org/project/cognex/)
-[![Version](https://img.shields.io/badge/version-0.1.4-blue.svg)](https://pypi.org/project/cognex/)
+[![Version](https://img.shields.io/badge/version-0.1.5-blue.svg)](https://pypi.org/project/cognex/)
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/cognex?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/cognex)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -19,19 +19,30 @@ Give your AI coding assistant long-term memory, decision tracking, and trust man
 You: "Remember I prefer pytest over unittest"
 
 Next session:
-AI: "Got it — I'll use pytest for your tests instead."
+AI: "Got it — I'll use pytest as we discussed."
 ```
 
-Your AI forgets everything between sessions. **Cognex** fixes that.
+Your AI forgets everything between sessions. **Cognex** fixes that — and in v0.1.5, it does it more securely and faster than ever.
 
-### Features
+---
+
+## What's New in v0.1.5
+
+- **Security:** Teleport bundles now signed with Ed25519 — the old SHA-256 truncation was forgeable, this isn't
+- **Performance:** Connection pool in MemoryStore eliminates per-call SQLite reconnect overhead
+- **CLI:** `cognex status` — check your memory bank without starting the server
+- **Hardening:** Trust record injection attack prevention on bundle rehydration
+
+---
+
+## Features
 
 | Feature | What It Does |
 |---------|-------------|
 | **Persistent Memory** | Remembers preferences, facts, patterns across sessions |
 | **Decision Ledger** | Tracks choices made and their outcomes |
 | **Trust Engine** | Learns which tools you approve vs deny |
-| **Teleportation** | Export your brain, load it on another machine |
+| **Teleportation** | Export your cognitive state, load it on another machine — now Ed25519 signed |
 | **Pattern Intelligence** | Discovers behavioral patterns from decision history |
 | **Swarm Mode** | Turn natural language into multi-agent plans |
 | **MCP Prompts** | 5 built-in prompts for common workflows |
@@ -44,11 +55,10 @@ Your AI forgets everything between sessions. **Cognex** fixes that.
 ### Option A — Auto-installer (Recommended)
 
 ```bash
-# Install and auto-configure for your AI tool
 uvx cognex --install
 ```
 
-This detects your AI tool (Claude Code, OpenCode, Cursor, VS Code, etc.) and writes the correct config automatically.
+Detects your AI tool (Claude Code, OpenCode, Cursor, VS Code, etc.) and writes the correct config automatically.
 
 ### Option B — One command (Terminal)
 
@@ -62,18 +72,7 @@ curl -fsSL https://raw.githubusercontent.com/Gaurav7974/cognex/main/install.sh |
 irm https://raw.githubusercontent.com/Gaurav7974/cognex/main/install.ps1 | iex
 ```
 
-These scripts automatically:
-- Install cognex via pip
-- Detect your AI tool (Claude Code, OpenCode, Cursor, Codex)
-- Write the correct config file
-- Print confirmation when done
-
----
-
-### Option C — Paste this prompt into your AI agent
-
-If you're already inside Claude Code, OpenCode, Cursor or any MCP-compatible tool,
-just paste this prompt and your AI will configure everything:
+### Option C — Paste this into your AI agent
 
 ```
 Install and configure the cognex MCP server on my system.
@@ -89,14 +88,33 @@ Steps:
 6. After I restart, call substrate_start_session with session_id "setup-verify" to confirm it works
 ```
 
-Copy that prompt → paste into your AI tool → it handles the rest.
+### Option D — Manual
+
+See the [Configuration](#configuration-by-ai-tool) section below.
 
 ---
 
-### Option D — Manual (full control)
+## Check Your Status
 
-See the [Configuration](#configuration-by-cli-tool) section below
-for step-by-step setup per tool.
+New in v0.1.5 — inspect your memory bank without starting the server:
+
+```bash
+cognex --status
+```
+
+Output:
+```
+Cognex v0.1.5
+─────────────────────────
+Memories:       142
+Decisions:       38
+Trust records:   21
+DB path:        .substrate/substrate.db
+
+Configured tools:
+  ✓ Claude Code
+  ✓ OpenCode
+```
 
 ---
 
@@ -109,11 +127,15 @@ for step-by-step setup per tool.
 | OpenCode | ✅ |
 | Cursor | ✅ |
 | Codex | ✅ |
+| VS Code (Copilot) | ✅ |
+| Cline | ✅ |
+| Windsurf | ✅ |
+| Zed | ✅ |
 | Any MCP-compatible tool | ✅ |
 
 ---
 
-## Installation (Choose One)
+## Installation
 
 ### Option 1: uvx (Recommended — no install needed)
 
@@ -127,13 +149,13 @@ uvx cognex
 pipx install cognex
 ```
 
-### Option 3: pip (system-wide install)
+### Option 3: pip
 
 ```bash
 pip install cognex
 ```
 
-### Option 4: Install from source (development)
+### Option 4: From source
 
 ```bash
 git clone https://github.com/Gaurav7974/cognex
@@ -141,29 +163,24 @@ cd cognex
 pip install -e .
 ```
 
-### Verify Installation
-
-After any install method above:
+### Verify
 
 ```bash
 cognex --help
-# Should show: usage: cognex [-h] [--db-path ...] [--project ...] [--name ...] [--debug] [--install]
+cognex --status
 ```
 
 ---
 
-## Configuration
+## Configuration by AI Tool
 
 ### Claude Code
 
-Config file: `~/.claude.json` (global) or `.mcp.json` (project root)
-
-Add via CLI (recommended):
 ```bash
 claude mcp add cognex -- uvx cognex
 ```
 
-Or manually add to `~/.claude.json`:
+Or manually in `~/.claude.json` or `.mcp.json`:
 ```json
 {
   "mcpServers": {
@@ -174,30 +191,15 @@ Or manually add to `~/.claude.json`:
   }
 }
 ```
-
-Or add to `.mcp.json` in your project root (team-shared):
-```json
-{
-  "mcpServers": {
-    "cognex": {
-      "command": "uvx",
-      "args": ["cognex"]
-    }
-  }
-}
-```
-
-Note: `.mcp.json` in project root is version-controlled and shared with your team.
-`~/.claude.json` is user-specific and works across all projects.
 
 ---
 
 ### Claude Desktop
 
 Config file:
-  Windows: `%APPDATA%\Claude\claude_desktop_config.json`
-  Mac:     `~/Library/Application Support/Claude/claude_desktop_config.json`
-  Linux:   `~/.config/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+- Mac: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Linux: `~/.config/Claude/claude_desktop_config.json`
 
 ```json
 {
@@ -214,8 +216,7 @@ Config file:
 
 ### OpenCode
 
-Config file: `~/.config/opencode/opencode.json` (global)
-             `opencode.json` in project root (project-specific)
+Config file: `~/.config/opencode/opencode.json` or `opencode.json` in project root
 
 ```json
 {
@@ -230,17 +231,13 @@ Config file: `~/.config/opencode/opencode.json` (global)
 }
 ```
 
-Note: OpenCode uses `"mcp"` key (not `"mcpServers"`) and requires `"type": "local"`
-for stdio servers. Config files are merged, not replaced — safe to add to
-existing config.
+Note: OpenCode uses `"mcp"` not `"mcpServers"`, and requires `"type": "local"`.
 
 ---
 
 ### Cursor
 
-Config file:
-  Windows: `%USERPROFILE%\.cursor\mcp.json`
-  Mac/Linux: `~/.cursor/mcp.json`
+Config: `~/.cursor/mcp.json`
 
 ```json
 {
@@ -253,16 +250,13 @@ Config file:
 }
 ```
 
-Note: Cursor caps at 40 tools per config. Cognex uses 18 tools, well within limit.
+Note: Cursor caps at 40 tools. Cognex uses 20, well within limit.
 
 ---
 
 ### VS Code (GitHub Copilot Agent Mode)
 
-Config file: `.vscode/mcp.json` in your workspace (team-shared)
-             Or run: MCP: Open User Configuration from Command Palette (global)
-
-Note: VS Code uses `"servers"` key not `"mcpServers"`
+Config: `.vscode/mcp.json` in workspace, or Command Palette → `MCP: Open User Configuration`
 
 ```json
 {
@@ -275,17 +269,14 @@ Note: VS Code uses `"servers"` key not `"mcpServers"`
 }
 ```
 
+Note: VS Code uses `"servers"` not `"mcpServers"`.
+
 ---
 
-### Cline (VS Code Extension)
+### Cline
 
-Config file: Managed via Cline UI
-  Windows: `%APPDATA%\Code\User\globalStorage\saoudrizwan.claude-dev\settings\cline_mcp_settings.json`
-  Mac: `~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`
+Open Cline → MCP Servers → Configure tab → Edit Config:
 
-Open Cline → click MCP Servers icon → Configure tab → Edit Config
-
-Add under mcpServers:
 ```json
 {
   "mcpServers": {
@@ -301,27 +292,9 @@ Add under mcpServers:
 
 ---
 
-### Kilo Code (VS Code Extension)
-
-Same format as Cline. Open Kilo Code → MCP Servers → Configure.
-
-```json
-{
-  "mcpServers": {
-    "cognex": {
-      "command": "uvx",
-      "args": ["cognex"],
-      "disabled": false
-    }
-  }
-}
-```
-
----
-
 ### Windsurf
 
-Config file: `~/.codeium/windsurf/mcp_config.json`
+Config: `~/.codeium/windsurf/mcp_config.json`
 
 ```json
 {
@@ -338,9 +311,8 @@ Config file: `~/.codeium/windsurf/mcp_config.json`
 
 ### Zed
 
-Config file: `~/.config/zed/settings.json`
+Config: `~/.config/zed/settings.json`
 
-Add under `context_servers` key:
 ```json
 {
   "context_servers": {
@@ -356,7 +328,7 @@ Add under `context_servers` key:
 
 ---
 
-## Config format reference
+## Config Format Reference
 
 | Tool | Key | Config file |
 |------|-----|-------------|
@@ -366,37 +338,26 @@ Add under `context_servers` key:
 | Cursor | mcpServers | `~/.cursor/mcp.json` |
 | VS Code Copilot | servers | `.vscode/mcp.json` |
 | Cline | mcpServers | `cline_mcp_settings.json` |
-| Kilo Code | mcpServers | `cline_mcp_settings.json` |
 | Windsurf | mcpServers | `mcp_config.json` |
 | Zed | context_servers | `settings.json` |
 
-Key difference: OpenCode uses `"mcp"` and VS Code uses `"servers"`.
-All others use `"mcpServers"`.
-
 ---
 
-## After adding config
+## After Adding Config
 
-Completely close and reopen your AI tool.
-You should see 20 new cognex tools available.
+Completely close and reopen your AI tool. You should see 20 new Cognex tools available.
 
-To verify in Claude Code:
+Verify in Claude Code:
 ```
 /mcp
-→ Should show: cognex: connected
+→ cognex: connected
 ```
 
-To verify in OpenCode:
+Verify in OpenCode:
 ```
-Type /mcp in the chat
-→ Should show cognex listed with Connected status
+/mcp
+→ cognex: Connected
 ```
-
----
-
-## Restart Your AI Tool
-
-After adding the config, **completely close and reopen** your AI tool. You should see 20 new tools available.
 
 ---
 
@@ -406,7 +367,7 @@ After adding the config, **completely close and reopen** your AI tool. You shoul
 | Tool | Description |
 |------|-------------|
 | `substrate_start_session` | Start a new work session |
-| `substrate_end_session` | End session with summary/metrics |
+| `substrate_end_session` | End session with summary and metrics |
 | `substrate_process_transcript` | Extract memories from conversation |
 | `substrate_report` | Get memory health report |
 
@@ -416,33 +377,33 @@ After adding the config, **completely close and reopen** your AI tool. You shoul
 | `memory_add` | Add a memory (fact, preference, decision, pattern) |
 | `memory_search` | Search memories with filters |
 | `memory_get_context` | Get relevant context for current work |
-| `memory_decay` | Age memories (auto-cleanup old ones) |
+| `memory_decay` | Age memories and clean up old ones |
 
 ### Trust Engine
 | Tool | Description |
 |------|-------------|
-| `trust_check` | Check if tool needs approval |
-| `trust_record` | Record approval/denial/violation |
+| `trust_check` | Check if a tool operation needs approval |
+| `trust_record` | Record approval, denial, or violation |
 | `trust_get` | Get trust score for a tool |
-| `trust_summary` | Get trust overview |
+| `trust_summary` | Get trust overview across all tools |
 
 ### Decision Ledger
 | Tool | Description |
 |------|-------------|
 | `ledger_record` | Record a decision made |
-| `ledger_outcome` | Record what happened after |
+| `ledger_outcome` | Record what happened after the decision |
 | `ledger_find_similar` | Find similar past decisions |
 
 ### Teleportation
 | Tool | Description |
 |------|-------------|
-| `teleport_create_bundle` | Export your brain to JSON |
-| `teleport_rehydrate` | Import brain from another machine |
+| `teleport_create_bundle` | Export cognitive state to a signed JSON bundle |
+| `teleport_rehydrate` | Import cognitive state from a bundle |
 
 ### Swarm
 | Tool | Description |
 |------|-------------|
-| `swarm_compile_intent` | Turn "build me an API" into a multi-agent plan |
+| `swarm_compile_intent` | Turn natural language into a multi-agent plan |
 
 ### Pattern Intelligence
 | Tool | Description |
@@ -454,8 +415,6 @@ After adding the config, **completely close and reopen** your AI tool. You shoul
 
 ## MCP Prompts
 
-Cognex includes 5 built-in prompts accessible via MCP prompt protocol:
-
 | Prompt | Description |
 |--------|-------------|
 | `cognex://start-session` | Initialize session with relevant memories |
@@ -464,8 +423,6 @@ Cognex includes 5 built-in prompts accessible via MCP prompt protocol:
 | `cognex://remember` | Save important information to memory |
 | `cognex://weekly-summary` | Get weekly activity and decision summary |
 
-Use these in any MCP-compatible client that supports prompts.
-
 ---
 
 ## Example Usage
@@ -473,72 +430,72 @@ Use these in any MCP-compatible client that supports prompts.
 ### Remember a Preference
 ```
 You: "I prefer using type hints everywhere"
-AI: (calls memory_add)
-→ Saved to your memory bank
+AI:  (calls memory_add)
+→   Saved to your memory bank
 ```
 
-### Get Context Next Session
+### Pick Up Where You Left Off
 ```
 You: (start new session)
-AI: (calls memory_get_context with "coding style")
-→ Returns: "I prefer using type hints everywhere"
-AI: "Got it — I'll add type hints throughout."
+AI:  (calls memory_get_context with "current project")
+→   Returns decisions, preferences, and progress from last session
+AI:  "Continuing from where we left off — you were building the auth module."
 ```
 
 ### Track a Decision
 ```
 You: "FastAPI or Flask?"
-AI: "FastAPI has better type safety."
-AI: (calls ledger_record)
+AI:  "FastAPI has better type safety for your use case."
+AI:  (calls ledger_record)
 
 Later...
 You: "Did that work out?"
-AI: (calls ledger_outcome with success: true)
+AI:  (calls ledger_outcome — success: true)
 ```
 
-### Tool Trust Check
-```
-AI wants to run: rm -rf /
-AI: (calls trust_check)
-→ {requires_approval: true, trust_level: 0.2}
-AI asks: "Can I delete everything?"
+### Teleport Your Brain to Another Machine
+```bash
+# On machine A
+cognex teleport export → generates bundle.json (Ed25519 signed)
+
+# On machine B
+cognex teleport import bundle.json → full state restored, signature verified
 ```
 
 ---
 
-## Where Data is Stored
+## Where Data Lives
 
-All data stays local on your machine in SQLite:
+All data stays local in SQLite under `.substrate/` in your project directory:
 
-Linux/Mac:   `~/.cognex/cognex.db`
-Windows:     `%USERPROFILE%\.cognex\cognex.db`
-
-Contains:
-- memories      — persistent memories
-- sessions      — session history
-- trust_records — tool approval history
-- decisions     — decision ledger
+```
+.substrate/
+├── substrate.db   — memories, sessions, cognitive units
+├── trust.db       — tool approval history
+├── decisions.db   — decision ledger
+└── signing_key.pem — Ed25519 private key (generated on first run, never leaves your machine)
+```
 
 ---
 
 ## Troubleshooting
 
-### "command not found" or "cognex" not recognized
-
-**Fix:** Make sure you installed it:
+### "command not found"
 ```bash
 pip install cognex
-```
-Or use uvx in your config:
-```json
-"command": ["uvx", "cognex"]
+# or use uvx in your config — no install needed
 ```
 
 ### Tools not appearing
+1. Completely close and reopen your AI tool (not just reload)
+2. Check developer console for JSON parse errors
+3. Validate your config JSON at jsonlint.com
+4. Run `cognex --status` to confirm the DB is accessible
 
-1. Check the AI tool's developer console for errors
-2. Try restarting the AI tool completely
-3. Verify your JSON config is valid (use a JSON validator)
+### Stale uvx cache
+```bash
+uvx cognex@latest  # force fetch latest version
+```
 
 ---
 
@@ -553,41 +510,12 @@ pytest tests/ -v
 
 ---
 
-## File Structure
+## Roadmap
 
-```
-cognex/
-├── .github/
-│   ├── workflows/
-│   │   ├── ci.yml
-│   │   └── publish.yml
-│   └── ISSUE_TEMPLATE/
-│       ├── bug_report.md
-│       └── feature_request.md
-├── docs/
-│   ├── configuration.md
-│   ├── tools.md
-│   └── examples.md
-├── examples/
-│   ├── basic_usage.py
-│   ├── session_workflow.py
-│   └── teleport_example.py
-├── src/
-│   ├── substrate/         ← Core memory system
-│   └── substrate_mcp/     ← MCP server with 20 tools
-├── tests/
-│   ├── test_substrate.py
-│   ├── test_layers.py
-│   └── test_mcp_server.py
-├── demo/
-├── .gitignore
-├── CHANGELOG.md
-├── CONTRIBUTING.md
-├── LICENSE
-├── README.md
-├── mcp.example.json       ← copy this to configure
-└── pyproject.toml
-```
+- **v0.1.6** — Cognitive Units: structured decisions with rationale, scope, and confidence
+- **v0.1.7** — Selective retrieval: load only what matters for the current task
+- **v0.1.8** — Audited handoff protocol: full CHP compliance for multi-agent workflows
+- **v0.2.0** — Persistent agent identity: agents that resume instantly with full cognitive context
 
 ---
 
@@ -599,6 +527,6 @@ MIT — free to use, modify, and distribute.
 
 ## Need Help?
 
-- Open an issue: https://github.com/Gaurav7974/cognex/issues
-- PyPI page: https://pypi.org/project/cognex/
-- Read the docs: see docs/ folder
+- Issues: https://github.com/Gaurav7974/cognex/issues
+- PyPI: https://pypi.org/project/cognex/
+- Docs: see `docs/` folder

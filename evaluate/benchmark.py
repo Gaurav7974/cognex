@@ -1,87 +1,208 @@
 """
-Measure token savings from Cognex memory retrieval.
-Compares: loading full context manually vs Cognex compressed retrieval.
+Cognex Memory Retrieval Benchmark.
+Measures token efficiency of Cognex vs manual context pasting.
 """
 
 import sys
 import asyncio
-import json
+import statistics
 
 sys.path.insert(0, "src")
 
 
 def estimate_tokens(text: str) -> int:
-    """Rough token estimate: 1 token per 4 chars."""
+    """Estimate tokens: ~4 chars per token (conservative)."""
     return len(text) // 4
 
 
 async def run_benchmark():
-    from substrate_mcp.tools import handle_tool_call
+    """Run comprehensive benchmark comparing manual vs Cognex retrieval."""
+    from substrate_mcp.tools import (
+        handle_tool_call,
+        substrate_start_session,
+        substrate_end_session,
+    )
 
-    # Add sample memories
-    test_memories = [
-        ("User prefers pytest over unittest", "preference"),
-        ("Always use type hints in Python", "preference"),
-        ("Project uses PostgreSQL 15 not MySQL", "fact"),
-        ("FastAPI chosen over Flask for async support", "decision"),
-        ("Deploy via Docker Compose", "fact"),
-        ("Use black for formatting, line length 88", "preference"),
-        ("Never use global variables", "preference"),
-        ("API responses use snake_case", "preference"),
+    # Start a session
+    await substrate_start_session(session_id="benchmark-run", project="benchmark")
+
+    # Add real production-like memories
+    production_memories = [
+        {
+            "content": "Always validate JWT expiry before processing protected request",
+            "memory_type": "preference",
+        },
+        {
+            "content": "Never commit .env files - use .env.example instead",
+            "memory_type": "preference",
+        },
+        {
+            "content": "Add tags to routers for OpenAPI grouping",
+            "memory_type": "preference",
+        },
+        {"content": "Use snake_case for all field names", "memory_type": "preference"},
+        {
+            "content": "Add response_model to every endpoint",
+            "memory_type": "preference",
+        },
+        {
+            "content": "Use async def for route handlers - never def",
+            "memory_type": "preference",
+        },
+        {
+            "content": "Router prefix should start with /api/v1",
+            "memory_type": "preference",
+        },
+        {
+            "content": "Database is PostgreSQL 15 with asyncpg driver",
+            "memory_type": "fact",
+        },
+        {"content": "Redis used for session caching only", "memory_type": "fact"},
+        {"content": "Alembic used for all database migrations", "memory_type": "fact"},
+        {
+            "content": "Rate limiting via slowapi at 100 req/min per IP",
+            "memory_type": "fact",
+        },
+        {
+            "content": "Pydantic v2 used for request/response validation",
+            "memory_type": "fact",
+        },
+        {
+            "content": "API versioning via URL prefix not headers",
+            "memory_type": "decision",
+        },
+        {
+            "content": "Dependency injection via Depends() is preferred",
+            "memory_type": "decision",
+        },
+        {
+            "content": "Repository pattern used for all database operations",
+            "memory_type": "pattern",
+        },
+        {
+            "content": "Error responses use standard HTTPException",
+            "memory_type": "pattern",
+        },
+        {
+            "content": "JWT tokens stored in httpOnly cookies not localStorage",
+            "memory_type": "pattern",
+        },
+        {
+            "content": "All passwords hashed with bcrypt cost factor 12",
+            "memory_type": "pattern",
+        },
+        {
+            "content": "Settings loaded via pydantic BaseSettings from .env",
+            "memory_type": "pattern",
+        },
+        {
+            "content": "All endpoints return schemas not ORM models directly",
+            "memory_type": "pattern",
+        },
+        {
+            "content": "422 errors mean Pydantic validation failed check schema",
+            "memory_type": "lesson",
+        },
+        {
+            "content": "SQLAlchemy sessions must be closed in finally block",
+            "memory_type": "lesson",
+        },
+        {
+            "content": "Background tasks run after response is sent not before",
+            "memory_type": "lesson",
+        },
+        {
+            "content": "CORS middleware must be added before routing middleware",
+            "memory_type": "lesson",
+        },
+        {
+            "content": "Use lifespan context manager - on_startup deprecated",
+            "memory_type": "lesson",
+        },
     ]
 
-    for content, mtype in test_memories:
+    # Add all memories
+    for mem in production_memories:
         await handle_tool_call(
             "memory_add",
-            {"content": content, "memory_type": mtype, "project": "benchmark"},
+            {
+                "content": mem["content"],
+                "memory_type": mem["memory_type"],
+                "project": "benchmark",
+            },
         )
 
-    # Method 1: Full dump (what user would paste manually)
-    manual_context = "\n".join([f"- {m[0]}" for m in test_memories])
-    manual_tokens = estimate_tokens(manual_context)
+    # Test queries - realistic use cases
+    test_queries = [
+        "preferences",
+        "database decisions",
+        "security patterns",
+        "lessons learned",
+        "API design",
+    ]
 
-    # Method 2: Cognex minimal format
-    result_minimal = await handle_tool_call(
-        "memory_get_context",
-        {
-            "query": "preferences decisions",
-            "project": "benchmark",
-            "format": "minimal",
-            "limit": 5,
-        },
+    results = []
+
+    for query in test_queries:
+        # Manual: user would paste all memories
+        manual_context = "\n".join([f"- {m['content']}" for m in production_memories])
+        manual_tokens = estimate_tokens(manual_context)
+
+        # Cognex retrieval
+        cognex_result = await handle_tool_call(
+            "memory_get_context",
+            {"query": query, "project": "benchmark", "format": "minimal", "limit": 5},
+        )
+        cognex_tokens = estimate_tokens(str(cognex_result))
+
+        saving = (
+            ((manual_tokens - cognex_tokens) / manual_tokens * 100)
+            if manual_tokens > 0
+            else 0
+        )
+
+        results.append(
+            {
+                "query": query,
+                "manual": manual_tokens,
+                "cognex": cognex_tokens,
+                "saving": saving,
+            }
+        )
+
+    # Summary stats
+    avg_saving = statistics.mean([r["saving"] for r in results])
+    avg_cognex_tokens = statistics.mean([r["cognex"] for r in results])
+    avg_manual_tokens = statistics.mean([r["manual"] for r in results])
+
+    # Print results
+    print("\n--- Cognex Benchmark Results ---\n")
+    print(f"{'Query':<25} {'Manual':>8} {'Cognex':>8} {'Saving':>8}")
+    print("-" * 50)
+    for r in results:
+        print(
+            f"{r['query']:<25} {r['manual']:>8} {r['cognex']:>8} {r['saving']:>7.0f}%"
+        )
+    print("-" * 50)
+    print(
+        f"{'AVERAGE':<25} {int(avg_manual_tokens):>8} {int(avg_cognex_tokens):>8} {avg_saving:>7.0f}%"
     )
-    cognex_tokens = estimate_tokens(json.dumps(result_minimal))
+    print(f"\nToken reduction: ~{avg_saving:.0f}% fewer tokens")
+    print(f"Per query savings: ~{int(avg_manual_tokens - avg_cognex_tokens)} tokens")
 
-    # Method 3: Cognex medium format
-    result_medium = await handle_tool_call(
-        "memory_get_context",
-        {
-            "query": "preferences decisions",
-            "project": "benchmark",
-            "format": "medium",
-            "limit": 5,
-        },
+    await substrate_end_session(
+        session_id="benchmark-run", project="benchmark", summary="Benchmark completed"
     )
-    medium_tokens = estimate_tokens(json.dumps(result_medium))
-
-    print("\n=== COGNEX BENCHMARK ===")
-    print(f"Manual context paste:     {manual_tokens} tokens")
-    print(f"Cognex minimal format:    {cognex_tokens} tokens")
-    print(f"Cognex medium format:     {medium_tokens} tokens")
-    print(f"\nSavings vs manual:")
-    if manual_tokens > 0:
-        minimal_saving = ((manual_tokens - cognex_tokens) / manual_tokens) * 100
-        medium_saving = ((manual_tokens - medium_tokens) / manual_tokens) * 100
-        print(f"  Minimal: {minimal_saving:.0f}% fewer tokens")
-        print(f"  Medium:  {medium_saving:.0f}% fewer tokens")
-    print("========================\n")
 
     return {
-        "manual_tokens": manual_tokens,
-        "cognex_minimal_tokens": cognex_tokens,
-        "cognex_medium_tokens": medium_tokens,
+        "results": results,
+        "avg_saving": avg_saving,
+        "avg_manual_tokens": int(avg_manual_tokens),
+        "avg_cognex_tokens": int(avg_cognex_tokens),
     }
 
 
 if __name__ == "__main__":
+    print("Running Cognex benchmark...")
     results = asyncio.run(run_benchmark())
+    print(f"\nBenchmark complete. Avg saving: {results['avg_saving']:.1f}%")
