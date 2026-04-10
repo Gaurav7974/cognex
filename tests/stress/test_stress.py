@@ -1,35 +1,29 @@
-"""
-Stress test for Cognex MCP server - all 5 phases.
-Runs directly against the substrate without MCP protocol overhead.
-"""
-
 import asyncio
-import json
 import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from substrate_mcp.tools import (
-    substrate_start_session,
+    ledger_find_similar,
+    ledger_outcome,
+    ledger_record,
+    memory_add,
+    memory_decay,
+    memory_get_context,
+    memory_search,
     substrate_end_session,
     substrate_process_transcript,
     substrate_report,
-    memory_add,
-    memory_search,
-    memory_get_context,
-    memory_decay,
-    trust_check,
-    trust_record,
-    trust_get,
-    trust_summary,
-    ledger_record,
-    ledger_outcome,
-    ledger_find_similar,
+    substrate_start_session,
+    swarm_compile_intent,
     teleport_create_bundle,
     teleport_rehydrate,
-    swarm_compile_intent,
+    trust_check,
+    trust_get,
+    trust_record,
+    trust_summary,
 )
 
 REPORT = []
@@ -46,7 +40,7 @@ def log(phase, tool, status, notes=""):
 
 
 async def run_phase1():
-    print("\n=== PHASE 1: Happy Path ===")
+    print("phase 1")
     try:
         r = await substrate_start_session(
             session_id="stress-test-001", project="stress-test"
@@ -189,10 +183,8 @@ async def run_phase1():
 
 
 async def run_phase2():
-    print("\n=== PHASE 2: Edge Cases ===")
+    print("phase 2")
 
-    # 1. EMPTY INPUTS
-    print("\n--- Empty Inputs ---")
     try:
         await memory_add(content="")
         log(
@@ -235,8 +227,6 @@ async def run_phase2():
     except Exception as e:
         log(2, "substrate_start_session empty id", False, f"Wrong error: {e}")
 
-    # 2. MISSING REQUIRED FIELDS
-    print("\n--- Missing Required Fields ---")
     try:
         await memory_add()
         log(2, "memory_add no args", False, "Should have raised error but didn't!")
@@ -271,8 +261,6 @@ async def run_phase2():
             f"Wrong error: {type(e).__name__}: {e}",
         )
 
-    # 3. DUPLICATE DATA
-    print("\n--- Duplicate Data ---")
     try:
         for i in range(10):
             await memory_add(content="DUPLICATE MEMORY TEST", memory_type="fact")
@@ -306,8 +294,6 @@ async def run_phase2():
     except Exception as e:
         log(2, "trust_record x5 same tool", False, str(e))
 
-    # 4. LARGE INPUTS
-    print("\n--- Large Inputs ---")
     try:
         big = "X" * 10000
         r = await memory_add(content=big, memory_type="fact")
@@ -331,8 +317,6 @@ async def run_phase2():
     except Exception as e:
         log(2, "process_transcript 20k chars", False, str(e))
 
-    # 5. SPECIAL CHARACTERS
-    print("\n--- Special Characters ---")
     try:
         r = await memory_add(
             content="Test with émojis 🧠💾🔥 and ünïcödé", memory_type="fact"
@@ -343,7 +327,7 @@ async def run_phase2():
 
     try:
         r = await memory_add(content="'; DROP TABLE memories; --", memory_type="fact")
-        log(2, "memory_add sql injection", True, f"stored safely (parametrized)")
+        log(2, "memory_add sql injection", True, "stored safely (parametrized)")
     except Exception as e:
         log(2, "memory_add sql injection", False, str(e))
 
@@ -361,8 +345,6 @@ async def run_phase2():
     except Exception as e:
         log(2, "memory_add newlines+tabs", False, str(e))
 
-    # 6. WRONG TYPES
-    print("\n--- Wrong Types ---")
     try:
         r = await memory_add(content="bad type test", memory_type="invalid_type_xyz")
         log(2, "memory_add invalid memory_type", True, f"defaulted to {r['type']}")
@@ -436,8 +418,6 @@ async def run_phase2():
             f"Wrong error type: {type(e).__name__}: {e}",
         )
 
-    # 7. CONCURRENT OPERATIONS
-    print("\n--- Concurrent Operations ---")
     try:
         tasks = [
             memory_add(content=f"Concurrent memory {i}", memory_type="fact")
@@ -459,17 +439,13 @@ async def run_phase2():
 
 
 async def run_phase3():
-    print("\n=== PHASE 3: Multi-Project Isolation ===")
+    print("phase 3")
     try:
         await memory_add(
-            content="Project A secret",
-            project="project-alpha",
-            memory_type="fact",
+            content="Project A secret", project="project-alpha", memory_type="fact"
         )
         await memory_add(
-            content="Project B secret",
-            project="project-beta",
-            memory_type="fact",
+            content="Project B secret", project="project-beta", memory_type="fact"
         )
 
         r_a = await memory_search(query="Project A secret", project="project-alpha")
@@ -513,9 +489,8 @@ async def run_phase3():
 
 
 async def run_phase4():
-    print("\n=== PHASE 4: Teleport Round-Trip ===")
+    print("phase 4")
     try:
-        # Add diverse memories
         for i in range(5):
             await memory_add(
                 content=f"Teleport memory {i}: test data",
@@ -523,47 +498,37 @@ async def run_phase4():
                 project="teleport-test",
             )
 
-        # Record ledger decisions
-        d1 = await ledger_record(
+        await ledger_record(
             tool_used="teleport-tool-1",
             reasoning="testing teleport",
             project="teleport-test",
         )
-        d2 = await ledger_record(
+        await ledger_record(
             tool_used="teleport-tool-2",
             reasoning="testing teleport again",
             project="teleport-test",
         )
-        d3 = await ledger_record(
+        await ledger_record(
             tool_used="teleport-tool-3",
             reasoning="third decision",
             project="teleport-test",
         )
 
-        # Record trust
         await trust_record(
-            action="approval",
-            tool_name="teleport-trust-1",
-            project="teleport-test",
+            action="approval", tool_name="teleport-trust-1", project="teleport-test"
         )
         await trust_record(
-            action="approval",
-            tool_name="teleport-trust-2",
-            project="teleport-test",
+            action="approval", tool_name="teleport-trust-2", project="teleport-test"
         )
         await trust_record(
-            action="denial",
-            tool_name="teleport-trust-3",
-            project="teleport-test",
+            action="denial", tool_name="teleport-trust-3", project="teleport-test"
         )
 
-        # Create bundle
         bundle = await teleport_create_bundle(
             source_host="machine-A", target_host="machine-B"
         )
         bundle_json = bundle["serialized"]
 
-        # Rehydrate
         result = await teleport_rehydrate(bundle_json=bundle_json)
         log(
             4,
@@ -587,17 +552,13 @@ async def run_phase4():
 
 
 async def run_phase5():
-    print("\n=== PHASE 5: Session Lifecycle ===")
+    print("phase 5")
     try:
-        # Start session
         await substrate_start_session(session_id="lifecycle-001")
-
-        # Add memories during session
         await memory_add(content="Lifecycle memory 1", project="lifecycle-test")
         await memory_add(content="Lifecycle memory 2", project="lifecycle-test")
         await memory_add(content="Lifecycle memory 3", project="lifecycle-test")
 
-        # Record ledger decisions
         await ledger_record(
             tool_used="lifecycle-tool",
             reasoning="testing lifecycle",
@@ -611,14 +572,12 @@ async def run_phase5():
             session_id="lifecycle-001",
         )
 
-        # Process transcript
         await substrate_process_transcript(
             transcript="User: I want to build a REST API with FastAPI.\nAI: Great choice! FastAPI has excellent async support.\nUser: Yes, and I prefer type hints everywhere.",
             session_id="lifecycle-001",
             project="lifecycle-test",
         )
 
-        # End session
         r = await substrate_end_session(
             summary="Lifecycle test session complete",
             key_decisions=["Chose FastAPI", "Used type hints"],
@@ -640,10 +599,7 @@ async def run_phase5():
         log(5, "end session 001", False, str(e))
 
     try:
-        # New session
         await substrate_start_session(session_id="lifecycle-002")
-
-        # Verify memories from session 001 are available
         r = await memory_get_context(query="lifecycle test", project="lifecycle-test")
         log(
             5,
@@ -655,7 +611,6 @@ async def run_phase5():
         log(5, "memories persist across sessions", False, str(e))
 
     try:
-        # Verify session count increased
         r = await substrate_report()
         log(
             5,
@@ -668,9 +623,7 @@ async def run_phase5():
 
 
 async def main():
-    print("=" * 60)
-    print("COGNEX MCP STRESS TEST")
-    print("=" * 60)
+    print("cognex stress test")
 
     start = time.time()
 
@@ -682,47 +635,38 @@ async def main():
 
     elapsed = time.time() - start
 
-    # Generate report
-    print("\n" + "=" * 60)
-    print("STRESS TEST REPORT - COGNEX MCP")
-    print("=" * 60)
-    print(f"Total tests: {len(REPORT)}")
-    print(f"Passed: {sum(1 for r in REPORT if r['status'])}")
-    print(f"Failed: {sum(1 for r in REPORT if not r['status'])}")
-    print(f"Time: {elapsed:.2f}s")
+    print(f"total tests: {len(REPORT)}")
+    print(f"passed: {sum(1 for r in REPORT if r['status'])}")
+    print(f"failed: {sum(1 for r in REPORT if not r['status'])}")
+    print(f"time: {elapsed:.2f}s")
 
     for phase_num in range(1, 6):
         phase_tests = [r for r in REPORT if r["phase"] == phase_num]
         if phase_tests:
             passed = sum(1 for r in phase_tests if r["status"])
             total = len(phase_tests)
-            print(f"\nPhase {phase_num}: {passed}/{total} passed")
+            print(f"phase {phase_num}: {passed}/{total} passed")
             for r in phase_tests:
                 icon = "[PASS]" if r["status"] else "[FAIL]"
                 print(f"  {icon} {r['tool']}: {r['notes'][:100]}")
 
-    # Bugs found
     failures = [r for r in REPORT if not r["status"]]
     if failures:
-        print(f"\n{'=' * 60}")
-        print("BUGS FOUND")
-        print("=" * 60)
+        print("bugs found")
         for i, f in enumerate(failures, 1):
-            print(f"\nBug #{i}:")
-            print(f"  Tool: {f['tool']}")
-            print(f"  Phase: {f['phase']}")
-            print(f"  Issue: {f['notes']}")
+            print(f"bug #{i}:")
+            print(f"tool: {f['tool']}")
+            print(f"phase: {f['phase']}")
+            print(f"issue: {f['notes']}")
     else:
-        print(f"\n{'=' * 60}")
-        print("NO BUGS FOUND - All tests passed!")
-        print("=" * 60)
+        print("no bugs found")
 
     verdict = (
         "Ready to publish"
         if len(failures) == 0
         else f"Not ready - {len(failures)} test(s) failed"
     )
-    print(f"\nOVERALL VERDICT: {verdict}")
+    print(f"overall verdict: {verdict}")
 
 
 if __name__ == "__main__":
