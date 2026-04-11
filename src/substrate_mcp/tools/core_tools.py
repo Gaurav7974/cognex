@@ -4,7 +4,6 @@ Core substrate tools - session management and reporting.
 
 from typing import Any
 
-from substrate_mcp.context import SubstrateContext
 from substrate_mcp.tools.dispatcher import run_in_thread
 
 
@@ -77,8 +76,12 @@ async def substrate_process_transcript(
     """Extract memories from a conversation transcript."""
     ctx = SubstrateContext.get_instance()
 
-    result = ctx.substrate.process_transcript(
-        transcript=transcript, session_id=session_id, project=project, context=context
+    result = await run_in_thread(
+        ctx.substrate.process_transcript,
+        transcript=transcript,
+        session_id=session_id,
+        project=project,
+        context=context,
     )
 
     return {
