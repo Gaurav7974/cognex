@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -e ".[dev]"
-          pip install pytest-asyncio>=0.23
+          pip install "pytest-asyncio>=0.23"
       - name: Run tests
         run: |
           pytest tests/ -v --ignore=tests/integration/mcp
