@@ -481,6 +481,103 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
             "required": ["unit_id"],
         },
     },
+    # CHP Tools (3)
+    {
+        "name": "chp_entangle",
+        "description": "Create quantum entanglement for Cognitive Unit transfer between agents",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "unit_id": {"type": "string", "description": "Cognitive Unit ID"},
+                "source_agent": {
+                    "type": "string",
+                    "description": "Source agent identifier",
+                },
+                "target_agent": {
+                    "type": "string",
+                    "description": "Target agent identifier",
+                },
+            },
+            "required": ["unit_id", "source_agent", "target_agent"],
+        },
+    },
+    {
+        "name": "chp_transfer",
+        "description": "Transfer Cognitive Unit data via entanglement channel",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "entanglement_key": {
+                    "type": "string",
+                    "description": "Entanglement key from chp_entangle",
+                },
+                "unit_data": {"type": "object", "description": "Serialized unit data"},
+            },
+            "required": ["entanglement_key", "unit_data"],
+        },
+    },
+    {
+        "name": "chp_project",
+        "description": "Create holographic 3D projection of Cognitive Unit for agent inspection",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "unit": {"type": "object", "description": "Cognitive Unit dict"},
+            },
+            "required": ["unit"],
+        },
+    },
+    # New Phase 2 Unit Tools (3)
+    {
+        "name": "unit_get_relevant",
+        "description": "Get relevant cognitive units with FTS search and scoring",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Search query"},
+                "project": {"type": "string", "description": "Project name"},
+                "task_context": {
+                    "type": "string",
+                    "description": "Task context for scope boosting",
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Max results",
+                    "default": 10,
+                },
+            },
+            "required": ["query", "project"],
+        },
+    },
+    {
+        "name": "unit_export_snapshot",
+        "description": "Export full cognitive snapshot for project",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "project": {"type": "string", "description": "Project name"},
+                "session_summary": {"type": "string", "description": "Session summary"},
+                "scope": {"type": "string", "description": "Scope filter"},
+            },
+            "required": ["project", "session_summary"],
+        },
+    },
+    {
+        "name": "unit_decay_stale",
+        "description": "Mark stale units as overridden and decay their confidence",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "project": {"type": "string", "description": "Project name"},
+                "threshold": {
+                    "type": "number",
+                    "description": "Staleness threshold",
+                    "default": 0.8,
+                },
+            },
+            "required": ["project"],
+        },
+    },
 ]
 
 

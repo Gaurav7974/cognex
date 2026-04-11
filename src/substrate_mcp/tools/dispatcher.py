@@ -60,6 +60,14 @@ from substrate_mcp.tools.unit_tools import (
     unit_search,
     unit_mark_overridden,
     unit_verify,
+    unit_get_relevant,
+    unit_export_snapshot,
+    unit_decay_stale,
+)
+from substrate_mcp.tools.chp_tools import (
+    chp_entangle,
+    chp_transfer,
+    chp_project,
 )
 
 
@@ -98,6 +106,13 @@ TOOL_HANDLERS: dict[str, Callable] = {
     "unit_search": unit_search,
     "unit_mark_overridden": unit_mark_overridden,
     "unit_verify": unit_verify,
+    "unit_get_relevant": unit_get_relevant,
+    "unit_export_snapshot": unit_export_snapshot,
+    "unit_decay_stale": unit_decay_stale,
+    # CHP tools
+    "chp_entangle": chp_entangle,
+    "chp_transfer": chp_transfer,
+    "chp_project": chp_project,
 }
 
 
