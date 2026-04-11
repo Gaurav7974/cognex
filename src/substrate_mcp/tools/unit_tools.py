@@ -76,8 +76,9 @@ async def unit_checkout(
     project: str,
     scope: str | None = None,
     unit_type_filter: str | None = None,
+    session_summary: str = "",
 ) -> dict[str, Any]:
-    # Get cognitive bundle for a project/scope as structured JSON.
+    # Get cognitive bundle for a project/scope as structured JSON snapshot.
     project = sanitize_project(project)
 
     if not project:
@@ -85,33 +86,24 @@ async def unit_checkout(
 
     ctx = SubstrateContext.get_instance()
 
-    # Get bundle in thread pool
-    units = await run_in_thread(ctx.unit_store.get_bundle, project, scope)
+    # Get snapshot in thread pool
+    snapshot = await run_in_thread(
+        ctx.unit_store.export_snapshot, project, session_summary, scope
+    )
 
-    # Filter by unit_type if specified
+    # Filter by unit_type if specified (legacy compatibility)
     if unit_type_filter:
-        units = [u for u in units if u.unit_type == unit_type_filter]
+        # Only keep units of the specified type across categories
+        filtered_snapshot = snapshot.copy()
+        for category in ["task_states", "decisions", "constraints", "progress"]:
+            filtered_snapshot[category] = [
+                u
+                for u in filtered_snapshot[category]
+                if u.get("unit_type") == unit_type_filter
+            ]
+        return filtered_snapshot
 
-    return {
-        "project": project,
-        "scope": scope or "all",
-        "unit_count": len(units),
-        "units": [
-            {
-                "unit_id": u.unit_id,
-                "unit_type": u.unit_type,
-                "content": u.content,
-                "rationale": u.rationale,
-                "scope": u.scope,
-                "confidence": u.confidence,
-                "override_count": u.override_count,
-                "last_verified": u.last_verified.isoformat()
-                if u.last_verified
-                else None,
-            }
-            for u in units
-        ],
-    }
+    return snapshot
 
 
 async def unit_search(
@@ -198,4 +190,102 @@ async def unit_verify(unit_id: str) -> dict[str, Any]:
         "unit_id": unit_id,
         "status": "verified",
         "last_verified": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+async def unit_get_relevant(
+    query: str,
+    project: str,
+    task_context: str = "",
+    limit: int = 10,
+) -> dict[str, Any]:
+    # Get relevant units with FTS search and scoring.
+    from substrate_mcp.sanitizer import sanitize_query
+
+    query = sanitize_query(query)
+    project = sanitize_project(project)
+
+    if not query or not project:
+        raise ValueError("query and project are required")
+
+    # Apply hard limit
+    limit = min(int(limit), 50)
+
+    ctx = SubstrateContext.get_instance()
+
+    # Get relevant units in thread pool
+    units = await run_in_thread(
+        ctx.unit_store.get_relevant_units,
+        query=query,
+        project=project,
+        task_context=task_context,
+        limit=limit,
+    )
+
+    return {
+        "count": len(units),
+        "units": [
+            {
+                "unit_id": u.unit_id,
+                "unit_type": u.unit_type,
+                "content": u.content,
+                "rationale": u.rationale,
+                "scope": u.scope,
+                "confidence": u.confidence,
+                "staleness": ctx.unit_store.check_staleness(u.unit_id),
+                "relevance_score": getattr(u, "_relevance_score", 0),
+            }
+            for u in units
+        ],
+    }
+
+
+async def unit_export_snapshot(
+    project: str,
+    session_summary: str,
+    scope: str | None = None,
+) -> dict[str, Any]:
+    # Export full cognitive snapshot.
+    project = sanitize_project(project)
+
+    if not project:
+        raise ValueError("project is required")
+
+    ctx = SubstrateContext.get_instance()
+
+    # Get snapshot in thread pool
+    snapshot = await run_in_thread(
+        ctx.unit_store.export_snapshot, project, session_summary, scope
+    )
+
+    return snapshot
+
+
+async def unit_decay_stale(
+    project: str,
+    threshold: float = 0.8,
+) -> dict[str, Any]:
+    # Decay stale units above threshold.
+    project = sanitize_project(project)
+
+    if not project:
+        raise ValueError("project is required")
+
+    threshold = max(0.0, min(1.0, float(threshold)))
+
+    ctx = SubstrateContext.get_instance()
+
+    # Get affected units first
+    all_units = await run_in_thread(ctx.unit_store.get_bundle, project, None, True)
+    affected_units = []
+    for u in all_units:
+        if ctx.unit_store.check_staleness(u.unit_id) > threshold:
+            affected_units.append(u.unit_id)
+
+    # Decay them
+    count = await run_in_thread(ctx.unit_store.decay_stale_units, project, threshold)
+
+    return {
+        "decayed_count": count,
+        "affected_unit_ids": affected_units,
     }
