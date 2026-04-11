@@ -65,6 +65,24 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
                content='cognitive_units', content_rowid='rowid')""",
         ],
     ),
+    (
+        7,
+        "add cognitive_unit_deltas table",
+        [
+            """CREATE TABLE IF NOT EXISTS cognitive_unit_deltas (
+                delta_id TEXT PRIMARY KEY,
+                unit_id TEXT NOT NULL,
+                changed_field TEXT NOT NULL,
+                old_value TEXT,
+                new_value TEXT,
+                changed_by TEXT,
+                changed_at TEXT NOT NULL,
+                reason TEXT
+            )""",
+            """CREATE INDEX IF NOT EXISTS idx_cud_unit_id ON cognitive_unit_deltas(unit_id)""",
+            """CREATE INDEX IF NOT EXISTS idx_cud_changed_at ON cognitive_unit_deltas(changed_at)""",
+        ],
+    ),
 ]
 
 
