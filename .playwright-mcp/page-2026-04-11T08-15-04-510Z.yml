@@ -1,0 +1,888 @@
+- generic [ref=e2]:
+  - region
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner [ref=e6]:
+      - heading "Navigation Menu" [level=2] [ref=e7]
+      - generic [ref=e8]:
+        - link "Homepage" [ref=e10] [cursor=pointer]:
+          - /url: /
+          - img [ref=e11]
+        - generic [ref=e13]:
+          - navigation "Global" [ref=e16]:
+            - list [ref=e17]:
+              - listitem [ref=e18]:
+                - button "Platform" [ref=e20] [cursor=pointer]:
+                  - text: Platform
+                  - img [ref=e21]
+              - listitem [ref=e23]:
+                - button "Solutions" [ref=e25] [cursor=pointer]:
+                  - text: Solutions
+                  - img [ref=e26]
+              - listitem [ref=e28]:
+                - button "Resources" [ref=e30] [cursor=pointer]:
+                  - text: Resources
+                  - img [ref=e31]
+              - listitem [ref=e33]:
+                - button "Open Source" [ref=e35] [cursor=pointer]:
+                  - text: Open Source
+                  - img [ref=e36]
+              - listitem [ref=e38]:
+                - button "Enterprise" [ref=e40] [cursor=pointer]:
+                  - text: Enterprise
+                  - img [ref=e41]
+              - listitem [ref=e43]:
+                - link "Pricing" [ref=e44] [cursor=pointer]:
+                  - /url: https://github.com/pricing
+                  - generic [ref=e45]: Pricing
+          - generic [ref=e46]:
+            - button "Search or jump to…" [ref=e49] [cursor=pointer]:
+              - img [ref=e51]
+            - link "Sign in" [ref=e54] [cursor=pointer]:
+              - /url: /login?return_to=https%3A%2F%2Fgithub.com%2FGaurav7974%2Fcognex%2Factions
+            - link "Sign up" [ref=e55] [cursor=pointer]:
+              - /url: /signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E%2Factions%2Findex&source=header-repo&source_repo=Gaurav7974%2Fcognex
+            - button "Appearance settings" [ref=e58] [cursor=pointer]:
+              - img
+  - main [ref=e62]:
+    - generic [ref=e63]:
+      - generic [ref=e64]:
+        - generic [ref=e66]:
+          - img [ref=e67]
+          - link "Gaurav7974" [ref=e70] [cursor=pointer]:
+            - /url: /Gaurav7974
+          - generic [ref=e71]: /
+          - strong [ref=e72]:
+            - link "cognex" [ref=e73] [cursor=pointer]:
+              - /url: /Gaurav7974/cognex
+          - generic [ref=e74]: Public
+        - generic [ref=e75]:
+          - list:
+            - listitem [ref=e76]:
+              - link "You must be signed in to change notification settings" [ref=e77] [cursor=pointer]:
+                - /url: /login?return_to=%2FGaurav7974%2Fcognex
+                - img [ref=e78]
+                - text: Notifications
+            - listitem [ref=e80]:
+              - link "Fork 1" [ref=e81] [cursor=pointer]:
+                - /url: /login?return_to=%2FGaurav7974%2Fcognex
+                - img [ref=e82]
+                - text: Fork
+                - generic "1" [ref=e84]
+            - listitem [ref=e85]:
+              - link "You must be signed in to star a repository" [ref=e87] [cursor=pointer]:
+                - /url: /login?return_to=%2FGaurav7974%2Fcognex
+                - img [ref=e88]
+                - text: Star
+                - generic "3 users starred this repository" [ref=e90]: "3"
+      - navigation "Repository" [ref=e91]:
+        - list [ref=e92]:
+          - listitem [ref=e93]:
+            - link "Code" [ref=e94] [cursor=pointer]:
+              - /url: /Gaurav7974/cognex
+              - img [ref=e95]
+              - generic [ref=e97]: Code
+          - listitem [ref=e98]:
+            - link "Issues" [ref=e99] [cursor=pointer]:
+              - /url: /Gaurav7974/cognex/issues
+              - img [ref=e100]
+              - generic [ref=e103]: Issues
+          - listitem [ref=e104]:
+            - link "Pull requests" [ref=e105] [cursor=pointer]:
+              - /url: /Gaurav7974/cognex/pulls
+              - img [ref=e106]
+              - generic [ref=e108]: Pull requests
+          - listitem [ref=e109]:
+            - link "Actions" [ref=e110] [cursor=pointer]:
+              - /url: /Gaurav7974/cognex/actions
+              - img [ref=e111]
+              - generic [ref=e113]: Actions
+          - listitem [ref=e114]:
+            - link "Projects" [ref=e115] [cursor=pointer]:
+              - /url: /Gaurav7974/cognex/projects
+              - img [ref=e116]
+              - generic [ref=e118]: Projects
+          - listitem [ref=e119]:
+            - link "Security and quality" [ref=e120] [cursor=pointer]:
+              - /url: /Gaurav7974/cognex/security
+              - img [ref=e121]
+              - generic [ref=e123]: Security and quality
+          - listitem [ref=e124]:
+            - link "Insights" [ref=e125] [cursor=pointer]:
+              - /url: /Gaurav7974/cognex/pulse
+              - img [ref=e126]
+              - generic [ref=e128]: Insights
+    - generic [ref=e130]:
+      - 'heading "Actions: Gaurav7974/cognex" [level=1] [ref=e131]'
+      - generic [ref=e134]:
+        - generic [ref=e135]:
+          - heading "Actions" [level=2] [ref=e137]
+          - navigation "Actions Workflows" [ref=e141]:
+            - list [ref=e143]:
+              - listitem [ref=e144]:
+                - link "All workflows" [ref=e145] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/actions
+                  - generic [ref=e146]: All workflows
+              - listitem [ref=e147]
+              - listitem [ref=e148]:
+                - list "Workflows" [ref=e152]:
+                  - listitem [ref=e153]:
+                    - link "CI" [ref=e154] [cursor=pointer]:
+                      - /url: /Gaurav7974/cognex/actions/workflows/ci.yml
+                      - generic [ref=e155]: CI
+                  - listitem [ref=e156]:
+                    - link "Publish to PyPI" [ref=e157] [cursor=pointer]:
+                      - /url: /Gaurav7974/cognex/actions/workflows/publish.yml
+                      - generic [ref=e158]: Publish to PyPI
+              - listitem [ref=e159]
+              - listitem [ref=e160]:
+                - generic [ref=e163]:
+                  - heading "Management" [level=3] [ref=e165]
+                  - list "Management" [ref=e166]:
+                    - listitem [ref=e167]:
+                      - link "Caches" [ref=e168] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/actions/caches
+                        - generic:
+                          - img
+                        - generic [ref=e169]: Caches
+        - generic [ref=e172]:
+          - generic [ref=e173]:
+            - generic [ref=e174]:
+              - heading "All workflows" [level=2] [ref=e176]:
+                - generic [ref=e178]: All workflows
+              - search [ref=e182]:
+                - combobox "Filter workflow runs" [ref=e183]
+                - img
+            - generic [ref=e184]: Showing runs from all workflows
+          - generic [ref=e185]:
+            - generic [ref=e186]:
+              - strong [ref=e189]: 39 workflow runs
+              - generic [ref=e190]:
+                - button "Workflow" [ref=e194] [cursor=pointer]:
+                  - generic [ref=e196]: Workflow
+                  - generic:
+                    - img
+                - button "Event" [ref=e200] [cursor=pointer]:
+                  - generic [ref=e202]: Event
+                  - generic:
+                    - img
+                - button "Status" [ref=e206] [cursor=pointer]:
+                  - generic [ref=e208]: Status
+                  - generic:
+                    - img
+                - button "Branch" [ref=e212] [cursor=pointer]:
+                  - generic [ref=e214]: Branch
+                  - generic:
+                    - img
+                - button "Actor" [ref=e218] [cursor=pointer]:
+                  - generic [ref=e220]: Actor
+                  - generic:
+                    - img
+            - generic [ref=e221]:
+              - generic [ref=e223]:
+                - generic [ref=e224]:
+                  - 'link "failed: Run 33 of CI. fix(deps): update pytest-asyncio to >=0.23 for pytest 9.0.2 compatibi…" [ref=e225] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24278333929
+                    - img "failed:" [ref=e227]
+                    - generic [ref=e229]: "fix(deps): update pytest-asyncio to >=0.23 for pytest 9.0.2 compatibi…"
+                  - generic [ref=e230]:
+                    - text: "CI #33:"
+                    - generic [ref=e231]:
+                      - text: Commit
+                      - link "0ea09d2" [ref=e232] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/0ea09d25097c8e2d052c2255a6dbbe3633cd07b0
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e233] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e235] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e237]:
+                  - generic [ref=e238]:
+                    - generic [ref=e239]:
+                      - img [ref=e241]
+                      - generic "Apr 11, 2026, 1:40 PM GMT+5:30" [ref=e243]: 4 minutes ago
+                    - generic [ref=e244]:
+                      - img "Run duration" [ref=e245]
+                      - text: 27s
+                  - group [ref=e248]:
+                    - generic "Show options" [ref=e249] [cursor=pointer]:
+                      - img "Show options" [ref=e250]
+              - generic [ref=e253]:
+                - generic [ref=e254]:
+                  - 'link "failed: Run 32 of CI. fix(ci): explicitly install pytest-asyncio to resolve CI test failures" [ref=e255] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24278300617
+                    - img "failed:" [ref=e257]
+                    - generic [ref=e259]: "fix(ci): explicitly install pytest-asyncio to resolve CI test failures"
+                  - generic [ref=e260]:
+                    - text: "CI #32:"
+                    - generic [ref=e261]:
+                      - text: Commit
+                      - link "0b61afc" [ref=e262] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/0b61afc9e59505cb342ab9157345ebbbb62e7b6d
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e263] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e265] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e267]:
+                  - generic [ref=e268]:
+                    - generic [ref=e269]:
+                      - img [ref=e271]
+                      - generic "Apr 11, 2026, 1:38 PM GMT+5:30" [ref=e273]: 6 minutes ago
+                    - generic [ref=e274]:
+                      - img "Run duration" [ref=e275]
+                      - text: 23s
+                  - group [ref=e278]:
+                    - generic "Show options" [ref=e279] [cursor=pointer]:
+                      - img "Show options" [ref=e280]
+              - generic [ref=e283]:
+                - generic [ref=e284]:
+                  - 'link "failed: Run 31 of CI. Fix PatternAnalyzer: wrap extractor in run_in_executor, add comprehen…" [ref=e285] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24278213990
+                    - img "failed:" [ref=e287]
+                    - generic [ref=e289]: "Fix PatternAnalyzer: wrap extractor in run_in_executor, add comprehen…"
+                  - generic [ref=e290]:
+                    - text: "CI #31:"
+                    - generic [ref=e291]:
+                      - text: Commit
+                      - link "6cf5b10" [ref=e292] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/6cf5b10d71584b1fd63ca1a336b6bb055142c1f0
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e293] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e295] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e297]:
+                  - generic [ref=e298]:
+                    - generic [ref=e299]:
+                      - img [ref=e301]
+                      - generic "Apr 11, 2026, 1:32 PM GMT+5:30" [ref=e303]: 12 minutes ago
+                    - generic [ref=e304]:
+                      - img "Run duration" [ref=e305]
+                      - text: 24s
+                  - group [ref=e308]:
+                    - generic "Show options" [ref=e309] [cursor=pointer]:
+                      - img "Show options" [ref=e310]
+              - generic [ref=e313]:
+                - generic [ref=e314]:
+                  - 'link "completed successfully: Run 6 of Publish to PyPI. release: v0.1.5 — Ed25519 signing, connection pool, cognex status" [ref=e315] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24251225273
+                    - img "completed successfully:" [ref=e317]
+                    - generic [ref=e319]: "release: v0.1.5 — Ed25519 signing, connection pool, cognex status"
+                  - generic [ref=e320]:
+                    - text: "Publish to PyPI #6:"
+                    - generic [ref=e321]:
+                      - text: Commit
+                      - link "33fa44a" [ref=e322] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/33fa44a5a1e6ed755919b946a753cc7f24c5c82b
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e323] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "v0.1.5" [ref=e325] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/tags/v0.1.5
+                - generic [ref=e327]:
+                  - generic [ref=e328]:
+                    - generic [ref=e329]:
+                      - img [ref=e331]
+                      - generic "Apr 10, 2026, 9:13 PM GMT+5:30" [ref=e333]: Apr 10, 9:13 PM GMT+5:30
+                    - generic [ref=e334]:
+                      - img "Run duration" [ref=e335]
+                      - text: 27s
+                  - group [ref=e338]:
+                    - generic "Show options" [ref=e339] [cursor=pointer]:
+                      - img "Show options" [ref=e340]
+              - generic [ref=e343]:
+                - generic [ref=e344]:
+                  - 'link "completed successfully: Run 30 of CI. release: v0.1.5 — Ed25519 signing, connection pool, cognex status" [ref=e345] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24251224031
+                    - img "completed successfully:" [ref=e347]
+                    - generic [ref=e349]: "release: v0.1.5 — Ed25519 signing, connection pool, cognex status"
+                  - generic [ref=e350]:
+                    - text: "CI #30:"
+                    - generic [ref=e351]:
+                      - text: Commit
+                      - link "33fa44a" [ref=e352] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/33fa44a5a1e6ed755919b946a753cc7f24c5c82b
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e353] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e355] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e357]:
+                  - generic [ref=e358]:
+                    - generic [ref=e359]:
+                      - img [ref=e361]
+                      - generic "Apr 10, 2026, 9:13 PM GMT+5:30" [ref=e363]: Apr 10, 9:13 PM GMT+5:30
+                    - generic [ref=e364]:
+                      - img "Run duration" [ref=e365]
+                      - text: 28s
+                  - group [ref=e368]:
+                    - generic "Show options" [ref=e369] [cursor=pointer]:
+                      - img "Show options" [ref=e370]
+              - generic [ref=e373]:
+                - generic [ref=e374]:
+                  - 'link "completed successfully: Run 29 of CI. fix: exclude integration/mcp tests from CI" [ref=e375] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24249596542
+                    - img "completed successfully:" [ref=e377]
+                    - generic [ref=e379]: "fix: exclude integration/mcp tests from CI"
+                  - generic [ref=e380]:
+                    - text: "CI #29:"
+                    - generic [ref=e381]:
+                      - text: Commit
+                      - link "71fdebd" [ref=e382] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/71fdebdcb28774c03b9f9a487b12a812784f3bc0
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e383] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e385] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e387]:
+                  - generic [ref=e388]:
+                    - generic [ref=e389]:
+                      - img [ref=e391]
+                      - generic "Apr 10, 2026, 8:35 PM GMT+5:30" [ref=e393]: Apr 10, 8:35 PM GMT+5:30
+                    - generic [ref=e394]:
+                      - img "Run duration" [ref=e395]
+                      - text: 28s
+                  - group [ref=e398]:
+                    - generic "Show options" [ref=e399] [cursor=pointer]:
+                      - img "Show options" [ref=e400]
+              - generic [ref=e403]:
+                - generic [ref=e404]:
+                  - 'link "failed: Run 28 of CI. chore: add test_patterns_tmp to gitignore" [ref=e405] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24249469089
+                    - img "failed:" [ref=e407]
+                    - generic [ref=e409]: "chore: add test_patterns_tmp to gitignore"
+                  - generic [ref=e410]:
+                    - text: "CI #28:"
+                    - generic [ref=e411]:
+                      - text: Commit
+                      - link "bb8adf1" [ref=e412] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/bb8adf118f49ea145df726668e40b04e45330c67
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e413] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e415] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e417]:
+                  - generic [ref=e418]:
+                    - generic [ref=e419]:
+                      - img [ref=e421]
+                      - generic "Apr 10, 2026, 8:32 PM GMT+5:30" [ref=e423]: Apr 10, 8:32 PM GMT+5:30
+                    - generic [ref=e424]:
+                      - img "Run duration" [ref=e425]
+                      - text: 28s
+                  - group [ref=e428]:
+                    - generic "Show options" [ref=e429] [cursor=pointer]:
+                      - img "Show options" [ref=e430]
+              - generic [ref=e433]:
+                - generic [ref=e434]:
+                  - 'link "failed: Run 27 of CI. refactor: restructure tests into production hierarchy" [ref=e435] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24249401406
+                    - img "failed:" [ref=e437]
+                    - generic [ref=e439]: "refactor: restructure tests into production hierarchy"
+                  - generic [ref=e440]:
+                    - text: "CI #27:"
+                    - generic [ref=e441]:
+                      - text: Commit
+                      - link "f459e90" [ref=e442] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/f459e90c1447eacf73d6f84696405cd4daa2a6f0
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e443] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e445] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e447]:
+                  - generic [ref=e448]:
+                    - generic [ref=e449]:
+                      - img [ref=e451]
+                      - generic "Apr 10, 2026, 8:31 PM GMT+5:30" [ref=e453]: Apr 10, 8:31 PM GMT+5:30
+                    - generic [ref=e454]:
+                      - img "Run duration" [ref=e455]
+                      - text: 24s
+                  - group [ref=e458]:
+                    - generic "Show options" [ref=e459] [cursor=pointer]:
+                      - img "Show options" [ref=e460]
+              - generic [ref=e463]:
+                - generic [ref=e464]:
+                  - 'link "completed successfully: Run 26 of CI. fix teleport verify and context db path" [ref=e465] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24196267959
+                    - img "completed successfully:" [ref=e467]
+                    - generic [ref=e469]: fix teleport verify and context db path
+                  - generic [ref=e470]:
+                    - text: "CI #26:"
+                    - generic [ref=e471]:
+                      - text: Commit
+                      - link "ae78f62" [ref=e472] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/ae78f6282ff22dceacf3703439ebf56c11980af7
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e473] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e475] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e477]:
+                  - generic [ref=e478]:
+                    - generic [ref=e479]:
+                      - img [ref=e481]
+                      - generic "Apr 9, 2026, 8:10 PM GMT+5:30" [ref=e483]: Apr 9, 8:10 PM GMT+5:30
+                    - generic [ref=e484]:
+                      - img "Run duration" [ref=e485]
+                      - text: 26s
+                  - group [ref=e488]:
+                    - generic "Show options" [ref=e489] [cursor=pointer]:
+                      - img "Show options" [ref=e490]
+              - generic [ref=e493]:
+                - generic [ref=e494]:
+                  - 'link "failed: Run 25 of CI. fix ci syntax and style issues" [ref=e495] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24195577233
+                    - img "failed:" [ref=e497]
+                    - generic [ref=e499]: fix ci syntax and style issues
+                  - generic [ref=e500]:
+                    - text: "CI #25:"
+                    - generic [ref=e501]:
+                      - text: Commit
+                      - link "e0a824a" [ref=e502] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/e0a824ae7842892c4f1b6f0b725fbc593288d098
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e503] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e505] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e507]:
+                  - generic [ref=e508]:
+                    - generic [ref=e509]:
+                      - img [ref=e511]
+                      - generic "Apr 9, 2026, 7:56 PM GMT+5:30" [ref=e513]: Apr 9, 7:56 PM GMT+5:30
+                    - generic [ref=e514]:
+                      - img "Run duration" [ref=e515]
+                      - text: 34s
+                  - group [ref=e518]:
+                    - generic "Show options" [ref=e519] [cursor=pointer]:
+                      - img "Show options" [ref=e520]
+              - generic [ref=e523]:
+                - generic [ref=e524]:
+                  - 'link "failed: Run 24 of CI. feat(teleport): extend TeleportBundle for cognitive units (CHP)" [ref=e525] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24194534363
+                    - img "failed:" [ref=e527]
+                    - generic [ref=e529]: "feat(teleport): extend TeleportBundle for cognitive units (CHP)"
+                  - generic [ref=e530]:
+                    - text: "CI #24:"
+                    - generic [ref=e531]:
+                      - text: Commit
+                      - link "3d8d81a" [ref=e532] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/3d8d81a7c8e50073a548d8ae7602d45b91aacc30
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e533] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e535] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e537]:
+                  - generic [ref=e538]:
+                    - generic [ref=e539]:
+                      - img [ref=e541]
+                      - generic "Apr 9, 2026, 7:34 PM GMT+5:30" [ref=e543]: Apr 9, 7:34 PM GMT+5:30
+                    - generic [ref=e544]:
+                      - img "Run duration" [ref=e545]
+                      - text: 29s
+                  - group [ref=e548]:
+                    - generic "Show options" [ref=e549] [cursor=pointer]:
+                      - img "Show options" [ref=e550]
+              - generic [ref=e553]:
+                - generic [ref=e554]:
+                  - 'link "completed successfully: Run 23 of CI. docs: update version to 0.1.4, add pattern tools" [ref=e555] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24090616480
+                    - img "completed successfully:" [ref=e557]
+                    - generic [ref=e559]: "docs: update version to 0.1.4, add pattern tools"
+                  - generic [ref=e560]:
+                    - text: "CI #23:"
+                    - generic [ref=e561]:
+                      - text: Commit
+                      - link "77234be" [ref=e562] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/77234be2f86f875a703c126da26b81f41f545356
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e563] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e565] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e567]:
+                  - generic [ref=e568]:
+                    - generic [ref=e569]:
+                      - img [ref=e571]
+                      - generic "Apr 7, 2026, 9:17 PM GMT+5:30" [ref=e573]: Apr 7, 9:17 PM GMT+5:30
+                    - generic [ref=e574]:
+                      - img "Run duration" [ref=e575]
+                      - text: 30s
+                  - group [ref=e578]:
+                    - generic "Show options" [ref=e579] [cursor=pointer]:
+                      - img "Show options" [ref=e580]
+              - generic [ref=e583]:
+                - generic [ref=e584]:
+                  - 'link "completed successfully: Run 22 of CI. feat(patterns): add pattern intelligence engine" [ref=e585] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24089979706
+                    - img "completed successfully:" [ref=e587]
+                    - generic [ref=e589]: "feat(patterns): add pattern intelligence engine"
+                  - generic [ref=e590]:
+                    - text: "CI #22:"
+                    - generic [ref=e591]:
+                      - text: Commit
+                      - link "d10a5cc" [ref=e592] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/d10a5cc6f62bef4a789df01f973200538825c3ee
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e593] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e595] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e597]:
+                  - generic [ref=e598]:
+                    - generic [ref=e599]:
+                      - img [ref=e601]
+                      - generic "Apr 7, 2026, 9:03 PM GMT+5:30" [ref=e603]: Apr 7, 9:03 PM GMT+5:30
+                    - generic [ref=e604]:
+                      - img "Run duration" [ref=e605]
+                      - text: 27s
+                  - group [ref=e608]:
+                    - generic "Show options" [ref=e609] [cursor=pointer]:
+                      - img "Show options" [ref=e610]
+              - generic [ref=e613]:
+                - generic [ref=e614]:
+                  - 'link "completed successfully: Run 21 of CI. fix(teleport): enable cross-machine transfer by including full content" [ref=e615] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24088729421
+                    - img "completed successfully:" [ref=e617]
+                    - generic [ref=e619]: "fix(teleport): enable cross-machine transfer by including full content"
+                  - generic [ref=e620]:
+                    - text: "CI #21:"
+                    - generic [ref=e621]:
+                      - text: Commit
+                      - link "8100b89" [ref=e622] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/8100b8909d125df8b255fe5a4af56ed37e1a8042
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e623] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e625] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e627]:
+                  - generic [ref=e628]:
+                    - generic [ref=e629]:
+                      - img [ref=e631]
+                      - generic "Apr 7, 2026, 8:37 PM GMT+5:30" [ref=e633]: Apr 7, 8:37 PM GMT+5:30
+                    - generic [ref=e634]:
+                      - img "Run duration" [ref=e635]
+                      - text: 23s
+                  - group [ref=e638]:
+                    - generic "Show options" [ref=e639] [cursor=pointer]:
+                      - img "Show options" [ref=e640]
+              - generic [ref=e643]:
+                - generic [ref=e644]:
+                  - 'link "completed successfully: Run 20 of CI. feat: add helpful startup message for new users" [ref=e645] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24088305352
+                    - img "completed successfully:" [ref=e647]
+                    - generic [ref=e649]: "feat: add helpful startup message for new users"
+                  - generic [ref=e650]:
+                    - text: "CI #20:"
+                    - generic [ref=e651]:
+                      - text: Commit
+                      - link "60d65bc" [ref=e652] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/60d65bcb9015394a78f69604f0a2e1931c11a6f0
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e653] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e655] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e657]:
+                  - generic [ref=e658]:
+                    - generic [ref=e659]:
+                      - img [ref=e661]
+                      - generic "Apr 7, 2026, 8:29 PM GMT+5:30" [ref=e663]: Apr 7, 8:29 PM GMT+5:30
+                    - generic [ref=e664]:
+                      - img "Run duration" [ref=e665]
+                      - text: 25s
+                  - group [ref=e668]:
+                    - generic "Show options" [ref=e669] [cursor=pointer]:
+                      - img "Show options" [ref=e670]
+              - generic [ref=e673]:
+                - generic [ref=e674]:
+                  - 'link "completed successfully: Run 19 of CI. docs: make guides copy-pasteable with bash code blocks" [ref=e675] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24030632167
+                    - img "completed successfully:" [ref=e677]
+                    - generic [ref=e679]: "docs: make guides copy-pasteable with bash code blocks"
+                  - generic [ref=e680]:
+                    - text: "CI #19:"
+                    - generic [ref=e681]:
+                      - text: Commit
+                      - link "7703100" [ref=e682] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/77031004ea2868eb87d6146a54056fb1fc8dcba7
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e683] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e685] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e687]:
+                  - generic [ref=e688]:
+                    - generic [ref=e689]:
+                      - img [ref=e691]
+                      - generic "Apr 6, 2026, 5:18 PM GMT+5:30" [ref=e693]: Apr 6, 5:18 PM GMT+5:30
+                    - generic [ref=e694]:
+                      - img "Run duration" [ref=e695]
+                      - text: 25s
+                  - group [ref=e698]:
+                    - generic "Show options" [ref=e699] [cursor=pointer]:
+                      - img "Show options" [ref=e700]
+              - generic [ref=e703]:
+                - generic [ref=e704]:
+                  - 'link "failed: Run 5 of Publish to PyPI." [ref=e705] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24030449122
+                    - img "failed:" [ref=e707]
+                    - generic [ref=e709]: Publish to PyPI
+                  - generic [ref=e710]:
+                    - text: "Publish to PyPI #5:"
+                    - generic [ref=e711]:
+                      - text: by
+                      - link "Gaurav7974" [ref=e712] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "v0.1.4" [ref=e714] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/tags/v0.1.4
+                - generic [ref=e716]:
+                  - generic [ref=e717]:
+                    - generic [ref=e718]:
+                      - img [ref=e720]
+                      - generic "Apr 6, 2026, 5:11 PM GMT+5:30" [ref=e722]: Apr 6, 5:11 PM GMT+5:30
+                    - generic [ref=e723]:
+                      - img "Run duration" [ref=e724]
+                      - text: 27s
+                  - group [ref=e727]:
+                    - generic "Show options" [ref=e728] [cursor=pointer]:
+                      - img "Show options" [ref=e729]
+              - generic [ref=e732]:
+                - generic [ref=e733]:
+                  - 'link "completed successfully: Run 18 of CI. chore: add project_context.md to gitignore" [ref=e734] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24030432295
+                    - img "completed successfully:" [ref=e736]
+                    - generic [ref=e738]: "chore: add project_context.md to gitignore"
+                  - generic [ref=e739]:
+                    - text: "CI #18:"
+                    - generic [ref=e740]:
+                      - text: Commit
+                      - link "011f64e" [ref=e741] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/011f64eec1de79c232f703bb2a211c5948944b4e
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e742] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e744] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e746]:
+                  - generic [ref=e747]:
+                    - generic [ref=e748]:
+                      - img [ref=e750]
+                      - generic "Apr 6, 2026, 5:11 PM GMT+5:30" [ref=e752]: Apr 6, 5:11 PM GMT+5:30
+                    - generic [ref=e753]:
+                      - img "Run duration" [ref=e754]
+                      - text: 30s
+                  - group [ref=e757]:
+                    - generic "Show options" [ref=e758] [cursor=pointer]:
+                      - img "Show options" [ref=e759]
+              - generic [ref=e762]:
+                - generic [ref=e763]:
+                  - 'link "completed successfully: Run 17 of CI. docs: add PyPI downloads badge" [ref=e764] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24029899567
+                    - img "completed successfully:" [ref=e766]
+                    - generic [ref=e768]: "docs: add PyPI downloads badge"
+                  - generic [ref=e769]:
+                    - text: "CI #17:"
+                    - generic [ref=e770]:
+                      - text: Commit
+                      - link "1c8e483" [ref=e771] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/1c8e4839ae32b5ea6b8ce98f4d4e5978c71ed4e1
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e772] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e774] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e776]:
+                  - generic [ref=e777]:
+                    - generic [ref=e778]:
+                      - img [ref=e780]
+                      - generic "Apr 6, 2026, 4:51 PM GMT+5:30" [ref=e782]: Apr 6, 4:51 PM GMT+5:30
+                    - generic [ref=e783]:
+                      - img "Run duration" [ref=e784]
+                      - text: 25s
+                  - group [ref=e787]:
+                    - generic "Show options" [ref=e788] [cursor=pointer]:
+                      - img "Show options" [ref=e789]
+              - generic [ref=e792]:
+                - generic [ref=e793]:
+                  - 'link "completed successfully: Run 16 of CI. Merge remote changes, keep blockquote tagline style" [ref=e794] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24029755182
+                    - img "completed successfully:" [ref=e796]
+                    - generic [ref=e798]: Merge remote changes, keep blockquote tagline style
+                  - generic [ref=e799]:
+                    - text: "CI #16:"
+                    - generic [ref=e800]:
+                      - text: Commit
+                      - link "aaa49dc" [ref=e801] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/aaa49dc3b76727083f7c937fc7e85e0f6584fd67
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e802] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e804] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e806]:
+                  - generic [ref=e807]:
+                    - generic [ref=e808]:
+                      - img [ref=e810]
+                      - generic "Apr 6, 2026, 4:46 PM GMT+5:30" [ref=e812]: Apr 6, 4:46 PM GMT+5:30
+                    - generic [ref=e813]:
+                      - img "Run duration" [ref=e814]
+                      - text: 25s
+                  - group [ref=e817]:
+                    - generic "Show options" [ref=e818] [cursor=pointer]:
+                      - img "Show options" [ref=e819]
+              - generic [ref=e822]:
+                - generic [ref=e823]:
+                  - 'link "completed successfully: Run 15 of CI. Update README to clarify Cognex''s memory capabilities" [ref=e824] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24029425394
+                    - img "completed successfully:" [ref=e826]
+                    - generic [ref=e828]: Update README to clarify Cognex's memory capabilities
+                  - generic [ref=e829]:
+                    - text: "CI #15:"
+                    - generic [ref=e830]:
+                      - text: Commit
+                      - link "f944496" [ref=e831] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/f944496678a39c8fcd5c4a294791dd49c3ccc393
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e832] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e834] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e836]:
+                  - generic [ref=e837]:
+                    - generic [ref=e838]:
+                      - img [ref=e840]
+                      - generic "Apr 6, 2026, 4:34 PM GMT+5:30" [ref=e842]: Apr 6, 4:34 PM GMT+5:30
+                    - generic [ref=e843]:
+                      - img "Run duration" [ref=e844]
+                      - text: 24s
+                  - group [ref=e847]:
+                    - generic "Show options" [ref=e848] [cursor=pointer]:
+                      - img "Show options" [ref=e849]
+              - generic [ref=e852]:
+                - generic [ref=e853]:
+                  - 'link "completed successfully: Run 4 of Publish to PyPI. fix: SQLite busy_timeout, asyncio wait_for, thread pool for concurren…" [ref=e854] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24029342204
+                    - img "completed successfully:" [ref=e856]
+                    - generic [ref=e858]: "fix: SQLite busy_timeout, asyncio wait_for, thread pool for concurren…"
+                  - generic [ref=e859]:
+                    - text: "Publish to PyPI #4:"
+                    - generic [ref=e860]:
+                      - text: Commit
+                      - link "65135ff" [ref=e861] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/65135ffb89169597c4e5079df55b6f53e2b1951e
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e862] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "v0.1.4" [ref=e864] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/tags/v0.1.4
+                - generic [ref=e866]:
+                  - generic [ref=e867]:
+                    - generic [ref=e868]:
+                      - img [ref=e870]
+                      - generic "Apr 6, 2026, 4:32 PM GMT+5:30" [ref=e872]: Apr 6, 4:32 PM GMT+5:30
+                    - generic [ref=e873]:
+                      - img "Run duration" [ref=e874]
+                      - text: 30s
+                  - group [ref=e877]:
+                    - generic "Show options" [ref=e878] [cursor=pointer]:
+                      - img "Show options" [ref=e879]
+              - generic [ref=e882]:
+                - generic [ref=e883]:
+                  - 'link "completed successfully: Run 14 of CI. fix: SQLite busy_timeout, asyncio wait_for, thread pool for concurren…" [ref=e884] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24029342109
+                    - img "completed successfully:" [ref=e886]
+                    - generic [ref=e888]: "fix: SQLite busy_timeout, asyncio wait_for, thread pool for concurren…"
+                  - generic [ref=e889]:
+                    - text: "CI #14:"
+                    - generic [ref=e890]:
+                      - text: Commit
+                      - link "65135ff" [ref=e891] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/65135ffb89169597c4e5079df55b6f53e2b1951e
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e892] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e894] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e896]:
+                  - generic [ref=e897]:
+                    - generic [ref=e898]:
+                      - img [ref=e900]
+                      - generic "Apr 6, 2026, 4:32 PM GMT+5:30" [ref=e902]: Apr 6, 4:32 PM GMT+5:30
+                    - generic [ref=e903]:
+                      - img "Run duration" [ref=e904]
+                      - text: 24s
+                  - group [ref=e907]:
+                    - generic "Show options" [ref=e908] [cursor=pointer]:
+                      - img "Show options" [ref=e909]
+              - generic [ref=e912]:
+                - generic [ref=e913]:
+                  - 'link "completed successfully: Run 13 of CI. docs: update changelog for v0.1.3 and v0.1.4" [ref=e914] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24029101433
+                    - img "completed successfully:" [ref=e916]
+                    - generic [ref=e918]: "docs: update changelog for v0.1.3 and v0.1.4"
+                  - generic [ref=e919]:
+                    - text: "CI #13:"
+                    - generic [ref=e920]:
+                      - text: Commit
+                      - link "1775c49" [ref=e921] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/1775c4936674356433db6ee1c182806f206631ff
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e922] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e924] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e926]:
+                  - generic [ref=e927]:
+                    - generic [ref=e928]:
+                      - img [ref=e930]
+                      - generic "Apr 6, 2026, 4:23 PM GMT+5:30" [ref=e932]: Apr 6, 4:23 PM GMT+5:30
+                    - generic [ref=e933]:
+                      - img "Run duration" [ref=e934]
+                      - text: 25s
+                  - group [ref=e937]:
+                    - generic "Show options" [ref=e938] [cursor=pointer]:
+                      - img "Show options" [ref=e939]
+              - generic [ref=e942]:
+                - generic [ref=e943]:
+                  - 'link "completed successfully: Run 12 of CI. perf(memory): compress context output to reduce token usage" [ref=e944] [cursor=pointer]':
+                    - /url: /Gaurav7974/cognex/actions/runs/24028570510
+                    - img "completed successfully:" [ref=e946]
+                    - generic [ref=e948]: "perf(memory): compress context output to reduce token usage"
+                  - generic [ref=e949]:
+                    - text: "CI #12:"
+                    - generic [ref=e950]:
+                      - text: Commit
+                      - link "bcfbd99" [ref=e951] [cursor=pointer]:
+                        - /url: /Gaurav7974/cognex/commit/bcfbd99b7ffe96b79a92e3e9a3a66dedc913eda3
+                      - text: pushed by
+                      - link "Gaurav7974" [ref=e952] [cursor=pointer]:
+                        - /url: /Gaurav7974
+                - link "main" [ref=e954] [cursor=pointer]:
+                  - /url: /Gaurav7974/cognex/tree/refs/heads/main
+                - generic [ref=e956]:
+                  - generic [ref=e957]:
+                    - generic [ref=e958]:
+                      - img [ref=e960]
+                      - generic "Apr 6, 2026, 4:04 PM GMT+5:30" [ref=e962]: Apr 6, 4:04 PM GMT+5:30
+                    - generic [ref=e963]:
+                      - img "Run duration" [ref=e964]
+                      - text: 26s
+                  - group [ref=e967]:
+                    - generic "Show options" [ref=e968] [cursor=pointer]:
+                      - img "Show options" [ref=e969]
+          - navigation "Pagination" [ref=e973]:
+            - generic "Previous page" [ref=e974]: Previous
+            - emphasis [ref=e975] [cursor=pointer]: "1"
+            - link "Page 2" [ref=e976] [cursor=pointer]:
+              - /url: /Gaurav7974/cognex/actions?page=2
+              - text: "2"
+            - link "Next page" [ref=e977] [cursor=pointer]:
+              - /url: /Gaurav7974/cognex/actions?page=2
+              - text: Next

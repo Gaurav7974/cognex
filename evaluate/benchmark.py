@@ -1,8 +1,3 @@
-"""
-Cognex Memory Retrieval Benchmark.
-Measures token efficiency of Cognex vs manual context pasting.
-"""
-
 import sys
 import asyncio
 import statistics
@@ -11,22 +6,18 @@ sys.path.insert(0, "src")
 
 
 def estimate_tokens(text: str) -> int:
-    """Estimate tokens: ~4 chars per token (conservative)."""
     return len(text) // 4
 
 
 async def run_benchmark():
-    """Run comprehensive benchmark comparing manual vs Cognex retrieval."""
     from substrate_mcp.tools import (
         handle_tool_call,
         substrate_start_session,
         substrate_end_session,
     )
 
-    # Start a session
     await substrate_start_session(session_id="benchmark-run", project="benchmark")
 
-    # Add real production-like memories
     production_memories = [
         {
             "content": "Always validate JWT expiry before processing protected request",
@@ -121,7 +112,6 @@ async def run_benchmark():
         },
     ]
 
-    # Add all memories
     for mem in production_memories:
         await handle_tool_call(
             "memory_add",
@@ -132,7 +122,6 @@ async def run_benchmark():
             },
         )
 
-    # Test queries - realistic use cases
     test_queries = [
         "preferences",
         "database decisions",
@@ -142,13 +131,10 @@ async def run_benchmark():
     ]
 
     results = []
-
     for query in test_queries:
-        # Manual: user would paste all memories
         manual_context = "\n".join([f"- {m['content']}" for m in production_memories])
         manual_tokens = estimate_tokens(manual_context)
 
-        # Cognex retrieval
         cognex_result = await handle_tool_call(
             "memory_get_context",
             {"query": query, "project": "benchmark", "format": "minimal", "limit": 5},
@@ -160,7 +146,6 @@ async def run_benchmark():
             if manual_tokens > 0
             else 0
         )
-
         results.append(
             {
                 "query": query,
@@ -170,24 +155,21 @@ async def run_benchmark():
             }
         )
 
-    # Summary stats
     avg_saving = statistics.mean([r["saving"] for r in results])
     avg_cognex_tokens = statistics.mean([r["cognex"] for r in results])
     avg_manual_tokens = statistics.mean([r["manual"] for r in results])
 
-    # Print results
-    print("\n--- Cognex Benchmark Results ---\n")
-    print(f"{'Query':<25} {'Manual':>8} {'Cognex':>8} {'Saving':>8}")
+    print("Query                     Manual   Cognex   Saving")
     print("-" * 50)
     for r in results:
         print(
-            f"{r['query']:<25} {r['manual']:>8} {r['cognex']:>8} {r['saving']:>7.0f}%"
+            f"{r['query']:<25} {r['manual']:>7} {r['cognex']:>7} {r['saving']:>6.0f}%"
         )
     print("-" * 50)
     print(
-        f"{'AVERAGE':<25} {int(avg_manual_tokens):>8} {int(avg_cognex_tokens):>8} {avg_saving:>7.0f}%"
+        f"Average                   {int(avg_manual_tokens):>7} {int(avg_cognex_tokens):>7} {avg_saving:>6.0f}%"
     )
-    print(f"\nToken reduction: ~{avg_saving:.0f}% fewer tokens")
+    print(f"Token reduction: {avg_saving:.0f}%")
     print(f"Per query savings: ~{int(avg_manual_tokens - avg_cognex_tokens)} tokens")
 
     await substrate_end_session(
@@ -195,7 +177,6 @@ async def run_benchmark():
     )
 
     return {
-        "results": results,
         "avg_saving": avg_saving,
         "avg_manual_tokens": int(avg_manual_tokens),
         "avg_cognex_tokens": int(avg_cognex_tokens),
@@ -203,6 +184,5 @@ async def run_benchmark():
 
 
 if __name__ == "__main__":
-    print("Running Cognex benchmark...")
     results = asyncio.run(run_benchmark())
-    print(f"\nBenchmark complete. Avg saving: {results['avg_saving']:.1f}%")
+    print(f"Done. Avg saving: {results['avg_saving']:.1f}%")

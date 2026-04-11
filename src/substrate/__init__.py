@@ -14,6 +14,7 @@ from .ledger import DecisionLedger, DecisionEntry
 from .teleport import TeleportProtocol, TeleportBundle
 from .swarm import IntentCompiler, SwarmPlan, SubTask, AgentRole, TaskStatus
 from .patterns import PatternAnalyzer, PatternInsight
+from .chp import CHPProtocol
 
 __all__ = [
     "MemoryEntry",
@@ -41,4 +42,5 @@ __all__ = [
     "TaskStatus",
     "PatternAnalyzer",
     "PatternInsight",
+    "CHPProtocol",
 ]

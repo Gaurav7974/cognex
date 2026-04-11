@@ -23,6 +23,8 @@ try:
 except ImportError:
     CRYPTO_AVAILABLE = False
 
+from .chp import CHPProtocol
+
 
 # Key file location
 def _get_key_path() -> Path:
@@ -168,6 +170,7 @@ class TeleportBundle:
 
     # Cognitive Units (v3.0) - for CHP handoff protocol
     cognitive_units: tuple[dict, ...] = ()  # Serialized CognitiveUnit objects
+    chp_projections: tuple[dict, ...] = ()  # CHP holographic projections
 
     def serialize(self) -> str:
         """Serialize to JSON for transfer."""
@@ -394,10 +397,15 @@ class TeleportProtocol:
 
         # v3.0: Gather cognitive units for CHP handoff
         cognitive_units = ()
+        chp_projections = ()
         if unit_store is not None:
             project = substrate.current_project or ""
             units = unit_store.get_bundle(project, scope=None)
             cognitive_units = tuple(u.as_dict() for u in units)
+
+            # CHP Enhancement: Create holographic projections for advanced handoff
+            chp = CHPProtocol()
+            chp_projections = tuple(chp.holographic_project(u) for u in units)
 
         # Gather session info
         session_id = substrate.current_session or ""
@@ -420,6 +428,7 @@ class TeleportProtocol:
             model_name=model_name,
             tool_claims=tool_claims,
             cognitive_units=cognitive_units,
+            chp_projections=chp_projections,
         )
         return bundle.sign()
 
@@ -533,6 +542,15 @@ class TeleportProtocol:
                 except Exception:
                     pass
 
+        # CHP Enhancement: Process holographic projections for advanced handoff validation
+        chp_validated = 0
+        if bundle.chp_projections:
+            chp = CHPProtocol()
+            for projection in bundle.chp_projections:
+                # Validate projection integrity (simplified for demo)
+                if "unit_id" in projection:
+                    chp_validated += 1
+
         return {
             "status": "success",
             "bundle_version": bundle.version,
@@ -541,6 +559,7 @@ class TeleportProtocol:
             "sessions_restored": sessions_restored,
             "trust_restored": trust_restored,
             "cognitive_units_restored": cognitive_units_restored,
+            "chp_projections_validated": chp_validated,
             "bundle_id": bundle.bundle_id,
         }
 
