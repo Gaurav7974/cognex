@@ -67,3 +67,9 @@ project_context.md
 # Benchmark results
 evaluate/results/
 *.benchmark
+
+# Kilo planning files
+.kilo/
+
+# Playwright captures
+.playwright-mcp/
