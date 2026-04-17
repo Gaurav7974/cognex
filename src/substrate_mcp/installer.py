@@ -1,5 +1,6 @@
 """Auto-installer for Cognex MCP across all AI coding tools."""
 
+import datetime
 import json
 import os
 import shutil
@@ -120,6 +121,15 @@ def write_config(platform: str, dry_run: bool = False) -> bool:
                 except Exception:
                     existing = {}
 
+                # Create .bak copy before modifying
+                if not dry_run:
+                    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                    bak_path = Path(str(path) + f".bak.{timestamp}")
+                    try:
+                        shutil.copy2(path, bak_path)
+                    except Exception:
+                        pass  # Backup creation is non-critical
+
             # Merge cognex in
             fmt = config["format"]
             if fmt == "mcp_servers":
@@ -139,7 +149,26 @@ def write_config(platform: str, dry_run: bool = False) -> bool:
 
             if dry_run:
                 print(f"  [dry-run] Would write to {path}")
-                print(f"  {json.dumps({'cognex': cognex_entry}, indent=2)}")
+                # Show JSON diff of the change
+                if fmt == "mcp_servers" or fmt == "claude_json":
+                    diff_obj = {"mcpServers": {"cognex": cognex_entry}}
+                elif fmt == "opencode":
+                    diff_obj = {
+                        "mcp": {
+                            "cognex": {
+                                "type": "local",
+                                "command": ["uvx", "cognex"]
+                                if cmd == "uvx"
+                                else ["cognex"],
+                                "enabled": True,
+                            }
+                        }
+                    }
+                elif fmt == "vscode_servers":
+                    diff_obj = {"servers": {"cognex": cognex_entry}}
+                else:
+                    diff_obj = existing
+                print(f"  {json.dumps(diff_obj, indent=2)}")
                 return True
 
             path.write_text(json.dumps(existing, indent=2), encoding="utf-8")

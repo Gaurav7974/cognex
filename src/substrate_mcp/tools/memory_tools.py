@@ -61,13 +61,19 @@ async def memory_add(
         context=context,
     )
 
-    return {
+    result = {
         "id": entry.id,
         "content": entry.content,
         "type": entry.type.value,
         "scope": entry.scope.value,
         "created_at": entry.created_at.isoformat(),
     }
+
+    # Warn if no active session
+    if not ctx.substrate.current_session:
+        result["warning"] = "no active session — call substrate_start_session first"
+
+    return result
 
 
 async def memory_search(
@@ -161,6 +167,9 @@ async def memory_get_context(
         ctx.substrate.get_context, query=query, project=project, limit=limit
     )
 
+    # Detect which search type was actually used
+    search_type = await run_in_thread(ctx.substrate.store.get_search_type, query=query)
+
     # Strip common filler prefixes to compress content
     FILLER_PREFIXES = [
         "User always ",
@@ -202,7 +211,11 @@ async def memory_get_context(
         lines: list[str] = []
         for ts, phrases in groups.items():
             lines.append(f"[{ts}] {'; '.join(phrases)}")
-        return {"context": "\n".join(lines), "count": len(memories)}
+        return {
+            "context": "\n".join(lines),
+            "count": len(memories),
+            "search_type": search_type,
+        }
 
     elif format == "medium":
         # Group by type, return compact dict — no score, no id, no timestamps
@@ -212,7 +225,11 @@ async def memory_get_context(
             content = strip_filler(m.content)
             groups.setdefault(ts, []).append(content)
 
-        return {"memories": groups, "count": len(memories)}
+        return {
+            "memories": groups,
+            "count": len(memories),
+            "search_type": search_type,
+        }
 
     else:  # full
         return {
@@ -227,6 +244,7 @@ async def memory_get_context(
                 for m in memories
             ],
             "count": len(memories),
+            "search_type": search_type,
         }
 
 

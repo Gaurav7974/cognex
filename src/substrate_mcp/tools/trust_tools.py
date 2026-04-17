@@ -77,7 +77,7 @@ async def trust_record(
             reason=reason or "",
         )
 
-    return {
+    result = {
         "id": decision.id,
         "action": action,
         "tool_name": tool_name,
@@ -85,6 +85,12 @@ async def trust_record(
         "trust_level_at_time": decision.trust_level_at_time.value,
         "timestamp": decision.timestamp.isoformat(),
     }
+
+    # Warn if no active session
+    if not ctx.substrate.current_session:
+        result["warning"] = "no active session — call substrate_start_session first"
+
+    return result
 
 
 async def trust_get(

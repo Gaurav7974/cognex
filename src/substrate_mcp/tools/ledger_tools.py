@@ -5,6 +5,7 @@ Ledger tools - decision recording and outcome tracking.
 from typing import Any
 
 from substrate_mcp.context import SubstrateContext
+from substrate_mcp.sanitizer import sanitize_query
 
 
 async def ledger_record(
@@ -32,13 +33,19 @@ async def ledger_record(
         tags=tuple(tags or []),
     )
 
-    return {
+    result = {
         "decision_id": entry.id,
         "tool_used": entry.tool_used,
         "alternatives": list(entry.alternatives),
         "reasoning": entry.reasoning,
         "timestamp": entry.timestamp.isoformat(),
     }
+
+    # Warn if no active session
+    if not ctx.substrate.current_session:
+        result["warning"] = "no active session — call substrate_start_session first"
+
+    return result
 
 
 async def ledger_outcome(
@@ -71,7 +78,16 @@ async def ledger_find_similar(
     project: str | None = None,
     limit: int = 5,
 ) -> dict[str, Any]:
-    """Find similar past decisions."""
+    """Find similar past decisions.
+
+    Sanitizes the query to prevent LIKE injection and wildcard abuse
+    (e.g., "100%" matching every record).
+    """
+    # Sanitize query to prevent injection
+    query = sanitize_query(query)
+    if not query:
+        raise ValueError("query is required and cannot be empty")
+
     ctx = SubstrateContext.get_instance()
 
     decisions = ctx.ledger.find_similar(

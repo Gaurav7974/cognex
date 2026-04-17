@@ -4,6 +4,7 @@ Core substrate tools - session management and reporting.
 
 from typing import Any
 
+from substrate_mcp.context import SubstrateContext
 from substrate_mcp.tools.dispatcher import run_in_thread
 
 

@@ -2,7 +2,10 @@
 Substrate Context - Manages singleton instances of all substrate components.
 """
 
+import logging
 import os
+import sqlite3
+import sys
 import threading
 from pathlib import Path
 from typing import Optional
@@ -15,6 +18,25 @@ from substrate import (
     IntentCompiler,
 )
 from substrate.units import CognitiveUnitStore
+
+logger = logging.getLogger("substrate-context")
+
+
+def check_fts5_available() -> bool:
+    # Check if FTS5 is compiled into SQLite
+    conn = sqlite3.connect(":memory:")
+    try:
+        conn.execute(
+            "SELECT * FROM pragma_compile_options WHERE compile_options LIKE 'ENABLE_FTS5'"
+        ).fetchone()
+        result = conn.execute(
+            "SELECT * FROM pragma_compile_options WHERE compile_options LIKE 'ENABLE_FTS5'"
+        ).fetchone()
+        return result is not None
+    except Exception:
+        return False
+    finally:
+        conn.close()
 
 
 class SubstrateContext:
@@ -31,9 +53,15 @@ class SubstrateContext:
     _instance: Optional["SubstrateContext"] = None
     _lock = threading.Lock()
 
-    def __init__(self, db_path: Optional[str] = None, project: str = "default"):
+    def __init__(
+        self,
+        db_path: Optional[str] = None,
+        project: str = "default",
+        pool_size: int | None = None,
+    ):
         self._db_path = db_path
         self._project = project
+        self._pool_size = pool_size
         self._substrate: Optional[CognitiveSubstrate] = None
         self._trust: Optional[TrustGradientEngine] = None
         self._ledger: Optional[DecisionLedger] = None
@@ -44,12 +72,17 @@ class SubstrateContext:
 
     @classmethod
     def get_instance(
-        cls, db_path: Optional[str] = None, project: str = "default"
+        cls,
+        db_path: Optional[str] = None,
+        project: str = "default",
+        pool_size: int | None = None,
     ) -> "SubstrateContext":
         """Get or create the singleton SubstrateContext instance."""
         with cls._lock:
             if cls._instance is None:
-                cls._instance = cls(db_path=db_path, project=project)
+                cls._instance = cls(
+                    db_path=db_path, project=project, pool_size=pool_size
+                )
             return cls._instance
 
     @classmethod
@@ -64,6 +97,13 @@ class SubstrateContext:
         """Lazy initialization of all substrate components."""
         if self._initialized:
             return
+
+        # Check FTS5 availability at startup
+        if not check_fts5_available():
+            logger.warning(
+                "FTS5 not available in SQLite: memory search will use slower LIKE queries. "
+                "Rebuild SQLite with --enable-fts5 for better performance."
+            )
 
         # Determine DB path
         if self._db_path:
@@ -83,7 +123,9 @@ class SubstrateContext:
             db_file = db_dir / "substrate.db"
 
         # Initialize components with shared database
-        self._substrate = CognitiveSubstrate(db_path=str(db_file))
+        self._substrate = CognitiveSubstrate(
+            db_path=str(db_file), pool_size=self._pool_size
+        )
         self._trust = TrustGradientEngine(db_path=str(db_file))
         self._ledger = DecisionLedger(db_path=str(db_file))
         self._teleport = TeleportProtocol()  # No db_path param
