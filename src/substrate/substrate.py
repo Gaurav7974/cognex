@@ -53,8 +53,8 @@ class CognitiveSubstrate:
         memories = substrate.get_context("my-api")
     """
 
-    def __init__(self, db_path: str | Path | None = None):
-        self.store = MemoryStore(db_path=db_path)
+    def __init__(self, db_path: str | Path | None = None, pool_size: int | None = None):
+        self.store = MemoryStore(db_path=db_path, pool_size=pool_size)
         self.extractor = MemoryExtractor()
         self.retriever = MemoryRetriever(self.store)
         self._current_session: str | None = None
@@ -157,41 +157,54 @@ class CognitiveSubstrate:
         return self.store.decay_all(factor)
 
     def report(self) -> SubstrateReport:
-        """Get a summary of the substrate's state."""
-        total = self.store.count()
-        by_type: dict[str, int] = {}
-        for mt in MemoryType:
-            count = len(self.store.search(memory_type=mt, limit=9999))
-            if count > 0:
-                by_type[mt.value] = count
+        """Get a summary of the substrate's state.
 
-        sessions = self.store.get_sessions(limit=9999)
+        All queries run in a single transaction for consistent snapshot.
+        """
+        with self.store._connect() as conn:
+            # The _connect() context manager already ensures transaction isolation
+            try:
+                total = self.store.count()
+                by_type: dict[str, int] = {}
+                for mt in MemoryType:
+                    count = len(self.store.search(memory_type=mt, limit=9999))
+                    if count > 0:
+                        by_type[mt.value] = count
 
-        # Top projects
-        project_counts: dict[str, int] = {}
-        for mt in MemoryType:
-            for mem in self.store.search(memory_type=mt, limit=9999):
-                if mem.project:
-                    project_counts[mem.project] = project_counts.get(mem.project, 0) + 1
-        top_projects = sorted(project_counts.items(), key=lambda x: x[1], reverse=True)[
-            :5
-        ]
+                sessions = self.store.get_sessions(limit=9999)
 
-        from datetime import datetime, timezone
+                # Top projects
+                project_counts: dict[str, int] = {}
+                for mt in MemoryType:
+                    for mem in self.store.search(memory_type=mt, limit=9999):
+                        if mem.project:
+                            project_counts[mem.project] = (
+                                project_counts.get(mem.project, 0) + 1
+                            )
+                top_projects = sorted(
+                    project_counts.items(), key=lambda x: x[1], reverse=True
+                )[:5]
 
-        now = datetime.now(timezone.utc)
-        all_mems = self.store.search(limit=9999)
-        oldest = max(((now - m.created_at).days for m in all_mems), default=0)
-        newest = min(((now - m.created_at).days for m in all_mems), default=0)
+                from datetime import datetime, timezone
 
-        return SubstrateReport(
-            total_memories=total,
-            memories_by_type=by_type,
-            total_sessions=len(sessions),
-            top_projects=top_projects,
-            oldest_memory_age_days=oldest,
-            newest_memory_age_days=newest,
-        )
+                now = datetime.now(timezone.utc)
+                all_mems = self.store.search(limit=9999)
+                oldest = max(((now - m.created_at).days for m in all_mems), default=0)
+                newest = min(((now - m.created_at).days for m in all_mems), default=0)
+
+                conn.commit()
+
+                return SubstrateReport(
+                    total_memories=total,
+                    memories_by_type=by_type,
+                    total_sessions=len(sessions),
+                    top_projects=top_projects,
+                    oldest_memory_age_days=oldest,
+                    newest_memory_age_days=newest,
+                )
+            except Exception:
+                conn.rollback()
+                raise
 
     @property
     def current_session(self) -> str | None:

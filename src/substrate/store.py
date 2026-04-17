@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 import sqlite3
 import threading
 import time
@@ -134,11 +136,16 @@ class MemoryStore:
     Uses SQLite — zero dependencies, single file, works everywhere.
     """
 
-    def __init__(self, db_path: str | Path | None = None):
+    def __init__(self, db_path: str | Path | None = None, pool_size: int | None = None):
         self.db_path = Path(db_path) if db_path else Path(".substrate/memory.db")
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        # Use connection pool (2-3 connections)
-        self._pool = ConnectionPool(self.db_path, pool_size=3)
+
+        # Get pool size from env var or use provided value or default
+        if pool_size is None:
+            pool_size = int(os.getenv("SUBSTRATE_POOL_SIZE", "3"))
+
+        # Use connection pool with configurable size
+        self._pool = ConnectionPool(self.db_path, pool_size=pool_size)
         self._init_db()
 
     # ── Internal ──────────────────────────────────────────────
@@ -254,18 +261,56 @@ class MemoryStore:
     # ── Memory CRUD ───────────────────────────────────────────
 
     def save(self, memory: MemoryEntry) -> MemoryEntry:
-        """Save or update a memory entry."""
+        """Save or update a memory entry.
+
+        Uses INSERT OR IGNORE + explicit UPDATE to avoid FTS5 double-write.
+        Computes content_hash for deduplication across sessions.
+        """
+        # Compute content hash for dedup (first 16 chars of sha256)
+        content_hash = hashlib.sha256(memory.content.encode()).hexdigest()[:16]
+
         with self._connect() as conn:
+            params = (
+                memory.id,
+                memory.type.value,
+                memory.scope.value,
+                memory.content,
+                memory.context,
+                memory.relevance_score,
+                memory.created_at.isoformat(),
+                memory.last_accessed.isoformat() if memory.last_accessed else None,
+                memory.access_count,
+                memory.project,
+                json.dumps(memory.tags),
+                content_hash,
+            )
+
+            # Try INSERT first (for new records)
             execute_with_retry(
                 conn,
                 """
-                INSERT OR REPLACE INTO memories
+                INSERT OR IGNORE INTO memories
                 (id, type, scope, content, context, relevance_score,
-                 created_at, last_accessed, access_count, project, tags)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 created_at, last_accessed, access_count, project, tags, content_hash)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+                params,
+            )
+
+            # If record already exists, UPDATE it (explicit path avoids FTS5 double-write)
+            cur = execute_with_retry(
+                conn,
+                """
+                UPDATE memories
+                SET type=?, scope=?, content=?, context=?, relevance_score=?,
+                    created_at=?, last_accessed=?, access_count=?, project=?, tags=?, content_hash=?
+                WHERE id=? AND (
+                    type != ? OR scope != ? OR content != ? OR context != ? OR 
+                    relevance_score != ? OR last_accessed != ? OR access_count != ? OR 
+                    project != ? OR tags != ?
+                )
             """,
                 (
-                    memory.id,
                     memory.type.value,
                     memory.scope.value,
                     memory.content,
@@ -276,19 +321,34 @@ class MemoryStore:
                     memory.access_count,
                     memory.project,
                     json.dumps(memory.tags),
+                    content_hash,
+                    memory.id,
+                    memory.type.value,
+                    memory.scope.value,
+                    memory.content,
+                    memory.context,
+                    memory.relevance_score,
+                    memory.last_accessed.isoformat() if memory.last_accessed else None,
+                    memory.access_count,
+                    memory.project,
+                    json.dumps(memory.tags),
                 ),
             )
         return memory
 
     def save_many(self, memories: list[MemoryEntry]) -> int:
-        """Bulk save. Returns count saved."""
+        """Bulk save. Returns count saved.
+
+        Uses INSERT OR IGNORE to avoid FTS5 double-write overhead.
+        Includes content_hash for dedup tracking.
+        """
         with self._connect() as conn:
             conn.executemany(
                 """
-                INSERT OR REPLACE INTO memories
+                INSERT OR IGNORE INTO memories
                 (id, type, scope, content, context, relevance_score,
-                 created_at, last_accessed, access_count, project, tags)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 created_at, last_accessed, access_count, project, tags, content_hash)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
                 [
                     (
@@ -303,6 +363,7 @@ class MemoryStore:
                         m.access_count,
                         m.project,
                         json.dumps(m.tags),
+                        hashlib.sha256(m.content.encode()).hexdigest()[:16],
                     )
                     for m in memories
                 ],
@@ -370,6 +431,20 @@ class MemoryStore:
             return self._search_like(
                 conn, query, memory_type, project, scope, tags, limit, min_relevance
             )
+
+    def get_search_type(self, query: str = "") -> str:
+        """Detect which search method will be used for a given query.
+
+        Returns 'fts5_bm25' if FTS5 is available and query is non-empty,
+        otherwise 'like_fallback'.
+        """
+        if not query:
+            return "like_fallback"
+
+        with self._connect() as conn:
+            if self._fts5_available(conn):
+                return "fts5_bm25"
+            return "like_fallback"
 
     def _search_fts5(
         self,

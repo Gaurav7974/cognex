@@ -83,6 +83,16 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
             """CREATE INDEX IF NOT EXISTS idx_cud_changed_at ON cognitive_unit_deltas(changed_at)""",
         ],
     ),
+    (
+        8,
+        "add content_hash for deduplication",
+        [
+            # Add content_hash column to memories table
+            "ALTER TABLE memories ADD COLUMN content_hash TEXT DEFAULT ''",
+            # Index on content_hash for fast dedup checks
+            "CREATE INDEX IF NOT EXISTS idx_mem_content_hash ON memories(content_hash)",
+        ],
+    ),
 ]
 
 

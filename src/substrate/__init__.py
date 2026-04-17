@@ -4,6 +4,13 @@ Cognitive Substrate — Persistent Memory for AI Agents
 An AI that remembers you. The foundation everything else sits on.
 """
 
+try:
+    from importlib.metadata import version
+
+    __version__ = version("cognex")
+except Exception:
+    __version__ = "0.0.0+unknown"
+
 from .models import MemoryEntry, MemoryType, MemoryScope, SessionSnapshot
 from .store import MemoryStore
 from .extractor import MemoryExtractor, ExtractionResult
@@ -17,6 +24,7 @@ from .patterns import PatternAnalyzer, PatternInsight
 from .chp import CHPProtocol
 
 __all__ = [
+    "__version__",
     "MemoryEntry",
     "MemoryType",
     "MemoryScope",

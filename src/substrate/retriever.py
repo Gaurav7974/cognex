@@ -26,20 +26,22 @@ class MemoryRetriever:
         limit: int = 10,
         memory_types: tuple[MemoryType, ...] | None = None,
     ) -> list[MemoryEntry]:
-        """Find memories relevant to the current query/context."""
-        # Phase 1: Broad search
+        # Phase 1: Broad search with reduced candidate multiplier
+        # Moved scoring to SQL layer via FTS5 bm25() to reduce Python work
         candidates = self.store.search(
             query=query,
             project=project,
-            limit=limit * 3,  # Get extras for ranking
+            limit=int(limit * 1.5),  # Reduced from limit*3 to limit*1.5
             min_relevance=0.1,
         )
 
-        # Phase 2: Score and rank
+        # Phase 2: Filter by type (Python-side type filtering only)
         scored = []
         for mem in candidates:
             if memory_types and mem.type not in memory_types:
                 continue
+            # Minimal Python scoring for project/recency bonuses
+            # FTS5 BM25 score already in mem.relevance_score from SQL
             score = self._score(mem, query, project)
             scored.append((score, mem))
 
@@ -156,6 +158,7 @@ class MemoryRetriever:
 
         # Recency bonus (memories from last 7 days get a boost)
         from datetime import datetime, timezone, timedelta
+
         age = datetime.now(timezone.utc) - mem.created_at
         if age < timedelta(days=7):
             score *= 1.3

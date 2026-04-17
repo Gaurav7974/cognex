@@ -21,13 +21,19 @@ class ExtractionResult:
 
 # Patterns that signal important memory-worthy content
 _PREFERENCE_PATTERNS = [
-    (r"(?:prefer|like to use|always use|don't use|avoid|never use)\s+(?:the\s+)?(\w+)", "preference"),
+    (
+        r"(?:prefer|like to use|always use|don't use|avoid|never use)\s+(?:the\s+)?(\w+)",
+        "preference",
+    ),
     (r"(?:I\s+)?(?:use|run|write)\s+(?:with|in|using)\s+(\w+)", "preference"),
     (r"(?:better\s+with|works\s+better\s+with|faster\s+with)\s+(\w+)", "preference"),
 ]
 
 _DECISION_PATTERNS = [
-    (r"(?:chose|choosing|decided|deciding|went\s+with|picked)\s+(?:the\s+)?(\w+)", "decision"),
+    (
+        r"(?:chose|choosing|decided|deciding|went\s+with|picked)\s+(?:the\s+)?(\w+)",
+        "decision",
+    ),
     (r"(?:instead\s+of|rather\s+than|over)\s+(\w+)", "decision"),
     (r"(?:because|since|due\s+to)\s+(.+?)(?:\.|$)", "reasoning"),
 ]
@@ -59,7 +65,15 @@ class MemoryExtractor:
         project: str = "",
         context: str = "",
     ) -> ExtractionResult:
-        """Extract all memories from a conversation transcript."""
+        """Extract all memories from a conversation transcript.
+
+        Hard limit: transcripts over 50,000 characters are truncated.
+        """
+        # Hard character limit to prevent DoS via massive transcripts
+        MAX_TRANSCRIPT_CHARS = 50_000
+        if len(transcript) > MAX_TRANSCRIPT_CHARS:
+            transcript = transcript[:MAX_TRANSCRIPT_CHARS]
+
         memories = []
 
         for memory_type, extractor in [
@@ -79,7 +93,11 @@ class MemoryExtractor:
         )
 
     def _extract_preferences(
-        self, text: str, session_id: str, project: str, context: str,
+        self,
+        text: str,
+        session_id: str,
+        project: str,
+        context: str,
     ) -> list[MemoryEntry]:
         memories = []
         for pattern, label in _PREFERENCE_PATTERNS:
@@ -87,18 +105,24 @@ class MemoryExtractor:
                 content = match.group(0).strip()
                 # Deduplicate
                 if not any(m.content == content for m in memories):
-                    memories.append(MemoryEntry(
-                        type=MemoryType.PREFERENCE,
-                        scope=MemoryScope.PRIVATE,
-                        content=content,
-                        context=context or f"Learned from session {session_id}",
-                        project=project,
-                        tags=(label, "preference"),
-                    ))
+                    memories.append(
+                        MemoryEntry(
+                            type=MemoryType.PREFERENCE,
+                            scope=MemoryScope.PRIVATE,
+                            content=content,
+                            context=context or f"Learned from session {session_id}",
+                            project=project,
+                            tags=(label, "preference"),
+                        )
+                    )
         return memories
 
     def _extract_decisions(
-        self, text: str, session_id: str, project: str, context: str,
+        self,
+        text: str,
+        session_id: str,
+        project: str,
+        context: str,
     ) -> list[MemoryEntry]:
         memories = []
         for pattern, label in _DECISION_PATTERNS:
@@ -107,54 +131,72 @@ class MemoryExtractor:
                 if len(content) < 10:  # Too short to be meaningful
                     continue
                 if not any(m.content == content for m in memories):
-                    memories.append(MemoryEntry(
-                        type=MemoryType.DECISION,
-                        scope=MemoryScope.PRIVATE,
-                        content=content,
-                        context=context or f"Learned from session {session_id}",
-                        project=project,
-                        tags=(label, "decision"),
-                    ))
+                    memories.append(
+                        MemoryEntry(
+                            type=MemoryType.DECISION,
+                            scope=MemoryScope.PRIVATE,
+                            content=content,
+                            context=context or f"Learned from session {session_id}",
+                            project=project,
+                            tags=(label, "decision"),
+                        )
+                    )
         return memories
 
     def _extract_lessons(
-        self, text: str, session_id: str, project: str, context: str,
+        self,
+        text: str,
+        session_id: str,
+        project: str,
+        context: str,
     ) -> list[MemoryEntry]:
         memories = []
         for pattern, label in _LESSON_PATTERNS:
             for match in re.finditer(pattern, text, re.IGNORECASE):
                 content = match.group(0).strip()
                 if not any(m.content == content for m in memories):
-                    memories.append(MemoryEntry(
-                        type=MemoryType.LESSON,
-                        scope=MemoryScope.PRIVATE,
-                        content=content,
-                        context=context or f"Learned from session {session_id}",
-                        project=project,
-                        tags=(label, "lesson"),
-                    ))
+                    memories.append(
+                        MemoryEntry(
+                            type=MemoryType.LESSON,
+                            scope=MemoryScope.PRIVATE,
+                            content=content,
+                            context=context or f"Learned from session {session_id}",
+                            project=project,
+                            tags=(label, "lesson"),
+                        )
+                    )
         return memories
 
     def _extract_patterns(
-        self, text: str, session_id: str, project: str, context: str,
+        self,
+        text: str,
+        session_id: str,
+        project: str,
+        context: str,
     ) -> list[MemoryEntry]:
         memories = []
         for pattern, label in _PATTERN_PATTERNS:
             for match in re.finditer(pattern, text, re.IGNORECASE):
                 content = match.group(0).strip()
                 if not any(m.content == content for m in memories):
-                    memories.append(MemoryEntry(
-                        type=MemoryType.PATTERN,
-                        scope=MemoryScope.PRIVATE,
-                        content=content,
-                        context=context or f"Learned from session {session_id}",
-                        project=project,
-                        tags=(label, "pattern"),
-                    ))
+                    memories.append(
+                        MemoryEntry(
+                            type=MemoryType.PATTERN,
+                            scope=MemoryScope.PRIVATE,
+                            content=content,
+                            context=context or f"Learned from session {session_id}",
+                            project=project,
+                            tags=(label, "pattern"),
+                        )
+                    )
         return memories
 
     def _extract_facts(
-        self, text: str, session_id: str, project: str, context: str,
+        self,
+        text: str,
+        session_id: str,
+        project: str,
+        context: str,
     ) -> list[MemoryEntry]:
         """Extract explicit factual statements — things like 'X uses Y', 'X is configured with Y'."""
         memories = []
@@ -169,14 +211,16 @@ class MemoryExtractor:
                 if len(content) < 15:
                     continue
                 if not any(m.content == content for m in memories):
-                    memories.append(MemoryEntry(
-                        type=MemoryType.FACT,
-                        scope=MemoryScope.PROJECT,
-                        content=content,
-                        context=context or f"Learned from session {session_id}",
-                        project=project,
-                        tags=("fact",),
-                    ))
+                    memories.append(
+                        MemoryEntry(
+                            type=MemoryType.FACT,
+                            scope=MemoryScope.PROJECT,
+                            content=content,
+                            context=context or f"Learned from session {session_id}",
+                            project=project,
+                            tags=("fact",),
+                        )
+                    )
         return memories
 
     def extract_manual(
