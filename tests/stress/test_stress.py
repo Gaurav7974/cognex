@@ -1,10 +1,12 @@
 import asyncio
+import logging
 import sys
 import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
+from substrate_mcp.logger import TEST_LOGGER
 from substrate_mcp.tools import (
     ledger_find_similar,
     ledger_outcome,
@@ -32,15 +34,18 @@ BUNDLE_JSON = None
 
 
 def log(phase, tool, status, notes=""):
+    """Log test result to report and output."""
     REPORT.append(
         {"phase": phase, "tool": tool, "status": status, "notes": str(notes)[:200]}
     )
-    icon = "[PASS]" if status else "[FAIL]"
-    print(f"  {icon} {tool}: {notes[:100]}")
+    level = logging.INFO if status else logging.ERROR
+    # Use ASCII-safe symbols instead of Unicode to avoid encoding issues on Windows
+    status_label = "[PASS]" if status else "[FAIL]"
+    TEST_LOGGER.log(level, f"{status_label} {tool}: {notes[:100]}")
 
 
 async def run_phase1():
-    print("phase 1")
+    TEST_LOGGER.info("Running Phase 1: Basic Operations")
     try:
         r = await substrate_start_session(
             session_id="stress-test-001", project="stress-test"
@@ -183,7 +188,7 @@ async def run_phase1():
 
 
 async def run_phase2():
-    print("phase 2")
+    TEST_LOGGER.info("Running Phase 2: Error Handling & Edge Cases")
 
     try:
         await memory_add(content="")
@@ -439,7 +444,7 @@ async def run_phase2():
 
 
 async def run_phase3():
-    print("phase 3")
+    TEST_LOGGER.info("Running Phase 3: Integration & Data Flow")
     try:
         await memory_add(
             content="Project A secret", project="project-alpha", memory_type="fact"
@@ -489,7 +494,7 @@ async def run_phase3():
 
 
 async def run_phase4():
-    print("phase 4")
+    TEST_LOGGER.info("Running Phase 4: Advanced Features")
     try:
         for i in range(5):
             await memory_add(
@@ -552,7 +557,7 @@ async def run_phase4():
 
 
 async def run_phase5():
-    print("phase 5")
+    TEST_LOGGER.info("Running Phase 5: Lifecycle & Persistence")
     try:
         await substrate_start_session(session_id="lifecycle-001")
         await memory_add(content="Lifecycle memory 1", project="lifecycle-test")
@@ -623,7 +628,9 @@ async def run_phase5():
 
 
 async def main():
-    print("cognex stress test")
+    TEST_LOGGER.info("=" * 60)
+    TEST_LOGGER.info("Cognex Stress Test Suite")
+    TEST_LOGGER.info("=" * 60)
 
     start = time.time()
 
@@ -635,38 +642,44 @@ async def main():
 
     elapsed = time.time() - start
 
-    print(f"total tests: {len(REPORT)}")
-    print(f"passed: {sum(1 for r in REPORT if r['status'])}")
-    print(f"failed: {sum(1 for r in REPORT if not r['status'])}")
-    print(f"time: {elapsed:.2f}s")
+    # Summary statistics
+    passed_count = sum(1 for r in REPORT if r["status"])
+    failed_count = sum(1 for r in REPORT if not r["status"])
 
+    TEST_LOGGER.info("")
+    TEST_LOGGER.info("=" * 60)
+    TEST_LOGGER.info(
+        f"Test Results: {len(REPORT)} total | {passed_count} passed | {failed_count} failed"
+    )
+    TEST_LOGGER.info(f"Execution Time: {elapsed:.2f}s")
+    TEST_LOGGER.info("=" * 60)
+
+    # Phase breakdown
     for phase_num in range(1, 6):
         phase_tests = [r for r in REPORT if r["phase"] == phase_num]
         if phase_tests:
             passed = sum(1 for r in phase_tests if r["status"])
             total = len(phase_tests)
-            print(f"phase {phase_num}: {passed}/{total} passed")
-            for r in phase_tests:
-                icon = "[PASS]" if r["status"] else "[FAIL]"
-                print(f"  {icon} {r['tool']}: {r['notes'][:100]}")
+            TEST_LOGGER.info(f"Phase {phase_num}: {passed}/{total} passed")
 
+    # Failures summary
     failures = [r for r in REPORT if not r["status"]]
     if failures:
-        print("bugs found")
+        TEST_LOGGER.error(f"[BUGS] Bugs Found: {len(failures)} test(s) failed")
         for i, f in enumerate(failures, 1):
-            print(f"bug #{i}:")
-            print(f"tool: {f['tool']}")
-            print(f"phase: {f['phase']}")
-            print(f"issue: {f['notes']}")
+            TEST_LOGGER.error(
+                f"  Bug #{i}: {f['tool']} (Phase {f['phase']}) - {f['notes'][:80]}"
+            )
     else:
-        print("no bugs found")
+        TEST_LOGGER.info("[OK] No Bugs Found")
 
     verdict = (
-        "Ready to publish"
+        "[PASS] Ready to publish"
         if len(failures) == 0
-        else f"Not ready - {len(failures)} test(s) failed"
+        else f"[FAIL] Not ready - {len(failures)} test(s) failed"
     )
-    print(f"overall verdict: {verdict}")
+    TEST_LOGGER.info(f"Overall Verdict: {verdict}")
+    TEST_LOGGER.info("=" * 60)
 
 
 if __name__ == "__main__":
