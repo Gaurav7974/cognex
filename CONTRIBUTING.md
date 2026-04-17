@@ -90,6 +90,36 @@ ruff format src/
 
 ---
 
+## Test Logging
+
+All test files use Python's standard `logging` module for output, not `print()` statements. This ensures consistent formatting, proper log levels, and cross-platform compatibility (especially on Windows with different encodings).
+
+### Using Logging in Tests
+
+Import the logger from the logger utility module:
+
+```python
+from substrate_mcp.logger import TEST_LOGGER
+
+# Log a test result with a status
+TEST_LOGGER.info("Test passed successfully")
+TEST_LOGGER.error("Test failed with error: {error_message}")
+
+# Log with ASCII-safe symbols (no Unicode to avoid encoding issues)
+TEST_LOGGER.info("[PASS] substrate_start_session: session=123abc")
+TEST_LOGGER.error("[FAIL] trust_record: database is locked")
+```
+
+### Logger Configuration
+
+- **Format**: `"  %(levelname)-4s | %(message)s"` for clean, readable output
+- **Log Levels**: Use `INFO` for passing tests, `ERROR` for failures
+- **Symbols**: Use ASCII brackets `[PASS]`/`[FAIL]` instead of Unicode checkmarks/crosses to support Windows cp1252 encoding
+
+See `src/substrate_mcp/logger.py` for implementation details.
+
+---
+
 ## Submitting a Pull Request
 
 1. [Fork](https://github.com/Gaurav7974/cognex/fork) and clone the repository
