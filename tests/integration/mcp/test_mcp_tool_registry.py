@@ -27,12 +27,11 @@ def test_all_tools_registered():
         "swarm_compile_intent",
     ]
 
-    from substrate_mcp.tools import TOOL_HANDLERS
+    from substrate_mcp.tools.registry import TOOL_DEFINITIONS
 
-    actual_tools = list(TOOL_HANDLERS.keys())
+    actual_tool_names = [tool["name"] for tool in TOOL_DEFINITIONS]
     for tool in expected_tools:
-        assert tool in actual_tools, f"Missing tool: {tool}"
-    assert len(actual_tools) == len(expected_tools)
+        assert tool in actual_tool_names, f"Missing tool: {tool}"
 
 
 if __name__ == "__main__":

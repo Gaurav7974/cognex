@@ -31,30 +31,24 @@ async def test_ledger_tools():
     SubstrateContext.get_instance(db_path=db_path)
 
     result = await ledger_tools.ledger_record(
-        {
-            "tool_used": "EditTool",
-            "alternatives": ["ReadTool", "BashTool"],
-            "reasoning": "Best for this task",
-            "project": "test-project",
-        }
+        tool_used="EditTool",
+        alternatives=["ReadTool", "BashTool"],
+        reasoning="Best for this task",
+        project="test-project",
     )
-    assert "id" in result
-    decision_id = result["id"]
+    assert "decision_id" in result
+    decision_id = result["decision_id"]
 
     await ledger_tools.ledger_outcome(
-        {
-            "decision_id": decision_id,
-            "outcome": "Successfully edited file",
-            "success": True,
-        }
+        decision_id=decision_id,
+        outcome="Successfully edited file",
+        success=True,
     )
 
     await ledger_tools.ledger_find_similar(
-        {
-            "query": "edit file",
-            "project": "test-project",
-            "limit": 5,
-        }
+        query="edit file",
+        project="test-project",
+        limit=5,
     )
 
     SubstrateContext.reset_instance()

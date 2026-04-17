@@ -31,14 +31,12 @@ async def test_core_tools():
     SubstrateContext.get_instance(db_path=db_path)
 
     result = await core_tools.substrate_start_session(
-        {
-            "session_id": "test-session-123",
-            "project": "test-project",
-        }
+        session_id="test-session-123",
+        project="test-project",
     )
     assert result["session_id"] == "test-session-123"
 
-    result = await core_tools.substrate_report({})
+    result = await core_tools.substrate_report()
     assert "total_memories" in result
 
     SubstrateContext.reset_instance()

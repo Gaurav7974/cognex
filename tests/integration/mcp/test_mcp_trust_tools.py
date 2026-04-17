@@ -31,32 +31,26 @@ async def test_trust_tools():
     SubstrateContext.get_instance(db_path=db_path)
 
     result = await trust_tools.trust_check(
-        {
-            "tool_name": "BashTool",
-            "project": "test-project",
-        }
+        tool_name="BashTool",
+        project="test-project",
     )
     assert "requires_approval" in result
 
     result = await trust_tools.trust_record(
-        {
-            "action": "approval",
-            "tool_name": "BashTool",
-            "project": "test-project",
-            "reason": "Test approval",
-        }
+        action="approval",
+        tool_name="BashTool",
+        project="test-project",
+        reason="Test approval",
     )
     assert "id" in result
 
     result = await trust_tools.trust_get(
-        {
-            "tool_name": "BashTool",
-            "project": "test-project",
-        }
+        tool_name="BashTool",
+        project="test-project",
     )
     assert result["approval_count"] == 1
 
-    await trust_tools.trust_summary({"project": "test-project"})
+    await trust_tools.trust_summary(project="test-project")
 
     SubstrateContext.reset_instance()
     cleanup_test_dir()
