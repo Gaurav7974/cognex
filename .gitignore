@@ -73,3 +73,6 @@ evaluate/results/
 
 # Playwright captures
 .playwright-mcp/
+
+# MCP optimization notes (for AI agents)
+fix.md
