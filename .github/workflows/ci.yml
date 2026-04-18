@@ -29,8 +29,8 @@ jobs:
         run: |
           python -m pytest -v --tb=short -k "not mcp_server"
 
-      - name: Verify import
+      - name: Verify imports
         run: |
           python -c "from substrate import CognitiveSubstrate"
           python -c "from substrate.units import CognitiveUnitStore"
-          python -c "from substrate_mcp.server import main"
+          python -c "from substrate_mcp.tools import list_all_tools"
