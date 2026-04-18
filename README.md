@@ -5,7 +5,7 @@
 Give your AI coding assistant persistent memory, decision tracking, trust management, and now — structured cognitive state that survives across sessions and agents.
 
 [![PyPI version](https://badge.fury.io/py/cognex.svg)](https://pypi.org/project/cognex/)
-[![Version](https://img.shields.io/badge/version-0.1.5-blue.svg)](https://pypi.org/project/cognex/)
+[![Version](https://img.shields.io/badge/version-0.1.6-blue.svg)](https://pypi.org/project/cognex/)
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/cognex?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/cognex)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -22,16 +22,20 @@ Next session:
 AI: "Got it — I'll use pytest as we discussed."
 ```
 
-Your AI forgets everything between sessions. **Cognex** fixes that — and in v0.1.5, it does it more securely and faster than ever.
+Your AI forgets everything between sessions. **Cognex** fixes that — and in v0.1.6, it does it with full structured cognitive state tracking.
 
 ---
 
-## What's New in v0.1.5
+## What's New in v0.1.6
 
-- **Security:** Teleport bundles now signed with Ed25519 — the old SHA-256 truncation was forgeable, this isn't
-- **Performance:** Connection pool in MemoryStore eliminates per-call SQLite reconnect overhead
-- **CLI:** `cognex status` — check your memory bank without starting the server
-- **Hardening:** Trust record injection attack prevention on bundle rehydration
+- **Cognitive Units:** First-class structured state with content, rationale, scope, and confidence
+- **Delta Tracking:** Append-only change log per unit — full audit trail of how cognition evolved
+- **Staleness Scoring:** Computed on read from override count, last verified age, and confidence
+- **Selective Retrieval:** get_relevant_units() scores by BM25 + confidence + recency + scope match
+- **Cognitive Snapshot:** export_snapshot() returns full structured CHP handoff bundle with delta trail
+- **8 New MCP Tools:** unit_commit, unit_checkout, unit_search, unit_mark_overridden, unit_verify, unit_get_relevant, unit_export_snapshot, unit_decay_stale
+- **TeleportBundle Enhancement:** Now carries cognitive_units for full cross-machine cognitive state transfer
+- **CLI Fix:** cognex --status now working (was reported done in 0.1.5 but not implemented until now)
 
 ---
 

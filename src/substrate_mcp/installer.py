@@ -180,7 +180,7 @@ def write_config(platform: str, dry_run: bool = False) -> bool:
 
 def inject_agents_md(dry_run: bool = False) -> None:
     """Inject Cognex instructions into AGENTS.md or CLAUDE.md if present."""
-    instruction = """<!-- cognex-agents v0.1.5 -->
+    instruction = """<!-- cognex-agents v0.1.6 -->
 ## Cognex Memory (Auto-injected)
 Cognex MCP is connected. Use it automatically:
 - Session start: call substrate_start_session with project name

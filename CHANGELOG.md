@@ -6,6 +6,25 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-04-18
+
+### Added
+- Cognitive Units: first-class structured state with content, rationale, scope, and confidence
+- CognitiveUnitDelta: append-only change log per unit — full audit trail of how cognition evolved
+- Delta tracking: mark_overridden() writes a delta record before decaying confidence
+- Staleness scoring: computed on read from override_count, last_verified age, and confidence
+- Selective retrieval: get_relevant_units() scores by BM25 + confidence + recency + scope match
+- Cognitive snapshot: export_snapshot() returns full structured CHP handoff bundle with delta trail
+- 8 new MCP tools: unit_commit, unit_checkout, unit_search, unit_mark_overridden, unit_verify, unit_get_relevant, unit_export_snapshot, unit_decay_stale
+- TeleportBundle now carries cognitive_units for full cross-machine cognitive state transfer
+- PatternAnalyzer tests added — now runs in CI
+- process_transcript extractor wrapped in run_in_executor (no longer blocks event loop)
+- cognex --status CLI subcommand (fix: was reported done in 0.1.5 but not working until now)
+
+### Database
+- Migration 6: cognitive_units table + cognitive_units_fts FTS5 virtual table
+- Migration 7: cognitive_unit_deltas table + index
+
 ## [0.1.5] - 2026-04-10
 
 ### Security
