@@ -527,10 +527,10 @@ class MemoryStore:
         if min_relevance > 0:
             conditions.append("relevance_score >= ?")
             params.append(min_relevance)
-            if tags:
-                for tag in tags:
-                    conditions.append("INSTR(tags, ?) > 0")
-                    params.append(tag)
+        if tags:
+            for tag in tags:
+                conditions.append("INSTR(tags, ?) > 0")
+                params.append(tag)
         if query:
             # Split query into words — match if ANY word is found
             words = query.split()
