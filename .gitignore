@@ -76,3 +76,14 @@ evaluate/results/
 
 # MCP optimization notes (for AI agents)
 fix.md
+
+# Secrets and credentials (extra safety for public repo)
+*.pem
+*.key
+*.crt
+*.cert
+secrets/
+credentials/
+.env.local
+.env.*.local
+*.gpg
