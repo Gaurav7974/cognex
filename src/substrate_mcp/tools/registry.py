@@ -31,11 +31,31 @@ except ImportError:
 
 # Data structure: list of tool definitions
 # Each dict has: name, description, inputSchema
+
+# TOOL CATEGORIES:
+# - Session Management (4): substrate_start_session, substrate_end_session, substrate_process_transcript, substrate_report
+# - Memory (4): memory_add, memory_search, memory_get_context, memory_decay
+# - Trust (4): trust_check, trust_record, trust_get, trust_summary
+# - Decision Ledger (3): ledger_record, ledger_outcome, ledger_find_similar
+# - Teleport (2): teleport_create_bundle, teleport_rehydrate
+# - Swarm Planning (1): swarm_compile_intent
+# - Pattern Intelligence (2): pattern_analyze, pattern_stats
+# - Cognitive Units (8): unit_commit, unit_checkout, unit_search, unit_mark_overridden, unit_verify, unit_get_relevant, unit_export_snapshot, unit_decay_stale
+# - Cross-Agent Protocol (3): chp_entangle, chp_transfer, chp_project
+# Total: 18 tools
+
+# QUICK START:
+# 1. Always start with substrate_start_session to initialize memory context
+# 2. Use memory_add to save things the user wants remembered
+# 3. Use memory_get_context to retrieve relevant context before decisions
+# 4. Use ledger_record before making important choices
+# 5. Use unit_commit to capture structured cognitive state
+# 6. Use teleport_create_bundle to transfer state between machines
 TOOL_DEFINITIONS: list[dict[str, Any]] = [
     # Core substrate tools (4)
     {
         "name": "substrate_start_session",
-        "description": "Start a new session in the cognitive substrate and return relevant memories",
+        "description": "Start a new session in the cognitive substrate and return relevant memories. Use when: beginning a new work session, task, or conversation. This initializes session tracking and retrieves context from past sessions.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -54,7 +74,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "name": "substrate_end_session",
-        "description": "End the current session with summary and metrics",
+        "description": "End the current session with summary and metrics. Use when: finishing a work session, task, or conversation. This saves session insights, records key decisions, and tracks performance metrics.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -89,7 +109,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "name": "substrate_process_transcript",
-        "description": "Extract memories from a conversation transcript",
+        "description": "Extract memories from a conversation transcript. Use when: reviewing past conversations to capture important insights, decisions, or preferences mentioned by the user that should be remembered for future sessions.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -106,13 +126,13 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "name": "substrate_report",
-        "description": "Get substrate health and statistics report",
+        "description": "Get substrate health and statistics report. Use when: checking memory bank status, monitoring database health, or verifying how many memories and decisions have been stored.",
         "inputSchema": {"type": "object", "properties": {}},
     },
     # Memory tools (4)
     {
         "name": "memory_add",
-        "description": "Add a memory to the cognitive substrate",
+        "description": "Add a memory to the cognitive substrate. Use when: user says 'remember', wants to save a preference, preference, decision, insight, pattern, or any knowledge they want preserved across sessions. Memories are searchable and persistent.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -120,11 +140,13 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
                 "memory_type": {
                     "type": "string",
                     "description": "Type: fact, preference, decision, pattern, context, lesson",
+                    "enum": ["fact", "preference", "decision", "pattern", "context", "lesson"],
                     "default": "fact",
                 },
                 "scope": {
                     "type": "string",
                     "description": "Scope: private, project, shared",
+                    "enum": ["private", "project", "shared"],
                     "default": "private",
                 },
                 "project": {"type": "string", "description": "Project name"},
@@ -140,14 +162,22 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "name": "memory_search",
-        "description": "Search memories with filters",
+        "description": "Search memories with filters. Use when: looking for specific information, preferences, or decisions from past sessions. Can filter by type (fact/preference/decision/pattern/context/lesson), project, scope, or tags.",
         "inputSchema": {
             "type": "object",
             "properties": {
                 "query": {"type": "string", "description": "Search query"},
-                "memory_type": {"type": "string", "description": "Filter by type"},
+                "memory_type": {
+                    "type": "string",
+                    "description": "Filter by type",
+                    "enum": ["fact", "preference", "decision", "pattern", "context", "lesson"],
+                },
                 "project": {"type": "string", "description": "Filter by project"},
-                "scope": {"type": "string", "description": "Filter by scope"},
+                "scope": {
+                    "type": "string",
+                    "description": "Filter by scope",
+                    "enum": ["private", "project", "shared"],
+                },
                 "tags": {
                     "type": "array",
                     "items": {"type": "string"},
@@ -163,18 +193,29 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "name": "memory_get_context",
-        "description": "Get relevant context memories for a query",
+        "description": "Get relevant context memories for a query. Use when: starting work on a task, needing background context, or retrieving information relevant to the current goal. Returns scored, prioritized memories with minimal/medium/full detail levels.",
         "inputSchema": {
             "type": "object",
             "properties": {
                 "query": {"type": "string", "description": "Query"},
                 "project": {"type": "string", "description": "Project name"},
+                "limit": {
+                    "type": "integer",
+                    "description": "Max memories to return",
+                    "default": 5,
+                },
+                "format": {
+                    "type": "string",
+                    "description": "Output format: minimal, medium, or full",
+                    "enum": ["minimal", "medium", "full"],
+                    "default": "medium",
+                },
             },
         },
     },
     {
         "name": "memory_decay",
-        "description": "Apply aging/decay to all memories",
+        "description": "Apply aging/decay to all memories. Use when: cleaning up old memories, maintaining database health, or ensuring older information decays in relevance while newer information remains prominent.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -189,7 +230,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     # Trust tools (4)
     {
         "name": "trust_check",
-        "description": "Check if an operation requires approval",
+        "description": "Check if an operation requires approval. Use when: planning to execute a potentially sensitive tool (delete, update, deploy), checking if the operation has already been approved based on trust history.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -202,13 +243,14 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "name": "trust_record",
-        "description": "Record an approval, denial, or violation",
+        "description": "Record an approval, denial, or violation. Use when: user approves/denies a tool operation (approval/denial), or to flag security violations. Builds trust history to inform future approvals.",
         "inputSchema": {
             "type": "object",
             "properties": {
                 "action": {
                     "type": "string",
                     "description": "Action: approval, denial, violation",
+                    "enum": ["approval", "denial", "violation"],
                 },
                 "tool_name": {"type": "string", "description": "Tool name"},
                 "operation": {"type": "string", "description": "Operation"},
@@ -221,7 +263,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "name": "trust_get",
-        "description": "Get trust record for a tool",
+        "description": "Get trust record for a tool. Use when: reviewing approval history for a specific tool, checking which operations have been approved/denied for a given tool.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -234,7 +276,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "name": "trust_summary",
-        "description": "Get trust summary for all tools or a project",
+        "description": "Get trust summary for all tools or a project. Use when: reviewing overall trust posture, checking approval counts across all tools, or generating trust reports for a specific project.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -245,7 +287,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     # Ledger tools (3)
     {
         "name": "ledger_record",
-        "description": "Record a decision in the ledger",
+        "description": "Record a decision in the ledger. Use when: making a significant technical decision (e.g., 'FastAPI vs Flask', 'SQL vs NoSQL'). Tracks the decision, alternatives considered, reasoning, and outcome for future reference.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -270,7 +312,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "name": "ledger_outcome",
-        "description": "Record outcome for a decision",
+        "description": "Record outcome for a decision. Use when: a decision you previously logged has been executed and you want to capture results. Connects decision to outcome for pattern learning and retrospectives.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -283,7 +325,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "name": "ledger_find_similar",
-        "description": "Find similar past decisions",
+        "description": "Find similar past decisions. Use when: facing a new decision and wanting to learn from similar past decisions, reviewing what worked before in analogous situations.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -301,7 +343,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     # Teleport tools (2)
     {
         "name": "teleport_create_bundle",
-        "description": "Create a teleport bundle for state transfer",
+        "description": "Create teleport bundle for state transfer between sessions. Use when: transferring full agent state to another machine or session. Captures pending tasks, tool claims, and context.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -324,7 +366,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "name": "teleport_rehydrate",
-        "description": "Rehydrate substrate state from a bundle",
+        "description": "Rehydrate substrate state from a teleport bundle. Use when: restoring agent state from a bundle created on another machine. Reverses teleport_create_bundle to resume work.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -339,7 +381,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     # Swarm tools (1)
     {
         "name": "swarm_compile_intent",
-        "description": "Compile natural language intent into a swarm plan",
+        "description": "Compile natural language intent into a swarm plan. Use when: translating a high-level goal into a structured execution plan for agent swarms. Returns actionable task breakdown.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -355,7 +397,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     # Pattern tools (2)
     {
         "name": "pattern_analyze",
-        "description": "Analyze decision history and discover behavioral patterns (e.g., 'you fail more in evening', 'BashTool fails 40% for you'). Patterns are saved as memories.",
+        "description": "Analyze decision history and discover behavioral patterns. Use when: looking for trends in past decisions (e.g., 'when do I fail', 'which tools succeed most'). Saves patterns as memories.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -373,7 +415,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "name": "pattern_stats",
-        "description": "Get statistics about decision history to check if pattern analysis is possible",
+        "description": "Get statistics about decision history. Use when: checking if enough data exists for pattern analysis, or reviewing decision counts by tool/outcome.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -387,7 +429,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     # Unit tools (5)
     {
         "name": "unit_commit",
-        "description": "Create a CognitiveUnit capturing what, why, scope, and confidence",
+        "description": "Create a Cognitive Unit capturing decision/constraint/progress state. Use when: documenting a structured decision, constraint, or progress checkpoint. Stores what was decided, why, scope, and confidence level.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -402,6 +444,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
                 "unit_type": {
                     "type": "string",
                     "description": "Type: decision, constraint, progress, task_state",
+                    "enum": ["decision", "constraint", "progress", "task_state"],
                     "default": "decision",
                 },
                 "scope": {
@@ -425,7 +468,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "name": "unit_checkout",
-        "description": "Get cognitive bundle for a project/scope - structured JSON for handoff",
+        "description": "Get cognitive bundle (decisions, constraints, progress) for a project. Use when: preparing to work on a task or retrieving full state snapshot for a scope. Returns structured JSON for handoff.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -434,6 +477,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
                 "unit_type_filter": {
                     "type": "string",
                     "description": "Filter by unit_type",
+                    "enum": ["decision", "constraint", "progress", "task_state"],
                 },
             },
             "required": ["project"],
@@ -441,7 +485,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "name": "unit_search",
-        "description": "FTS search over cognitive units",
+        "description": "Search Cognitive Units by query and type filter. Use when: finding past decisions, constraints, or progress entries matching a topic. Returns scored results ranked by relevance.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -450,6 +494,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
                 "unit_type_filter": {
                     "type": "string",
                     "description": "Filter by unit_type",
+                    "enum": ["decision", "constraint", "progress", "task_state"],
                 },
                 "limit": {
                     "type": "integer",
@@ -484,7 +529,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     # CHP Tools (3)
     {
         "name": "chp_entangle",
-        "description": "Create quantum entanglement for Cognitive Unit transfer between agents",
+        "description": "Create quantum entanglement for Cognitive Unit transfer between agents. Use when: transferring state between different agents or machines. Establishes secure channel for cross-agent communication.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -503,7 +548,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "name": "chp_transfer",
-        "description": "Transfer Cognitive Unit data via entanglement channel",
+        "description": "Transfer Cognitive Unit data via entanglement channel. Use when: sending unit data to another agent after establishing entanglement. Completes the cross-agent state transfer.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -511,18 +556,44 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
                     "type": "string",
                     "description": "Entanglement key from chp_entangle",
                 },
-                "unit_data": {"type": "object", "description": "Serialized unit data"},
+                "unit_data": {
+                    "type": "object",
+                    "description": "Serialized unit data with content, rationale, unit_type, scope, confidence",
+                    "properties": {
+                        "content": {"type": "string", "description": "Unit content"},
+                        "rationale": {"type": "string", "description": "Reasoning"},
+                        "unit_type": {
+                            "type": "string",
+                            "enum": ["decision", "constraint", "progress", "task_state"],
+                        },
+                        "scope": {"type": "string", "description": "Scope"},
+                        "confidence": {"type": "number", "description": "0.0-1.0"},
+                    },
+                },
             },
             "required": ["entanglement_key", "unit_data"],
         },
     },
     {
         "name": "chp_project",
-        "description": "Create holographic 3D projection of Cognitive Unit for agent inspection",
+        "description": "Create holographic 3D projection of Cognitive Unit for inspection. Use when: visualizing or sharing a Cognitive Unit across agents. Makes unit state transparent and portable.",
         "inputSchema": {
             "type": "object",
             "properties": {
-                "unit": {"type": "object", "description": "Cognitive Unit dict"},
+                "unit": {
+                    "type": "object",
+                    "description": "Cognitive Unit dict with content, rationale, unit_type, scope, confidence",
+                    "properties": {
+                        "content": {"type": "string", "description": "Unit content"},
+                        "rationale": {"type": "string", "description": "Reasoning"},
+                        "unit_type": {
+                            "type": "string",
+                            "enum": ["decision", "constraint", "progress", "task_state"],
+                        },
+                        "scope": {"type": "string", "description": "Scope"},
+                        "confidence": {"type": "number", "description": "0.0-1.0"},
+                    },
+                },
             },
             "required": ["unit"],
         },
