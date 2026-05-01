@@ -543,7 +543,7 @@ class MemoryStore:
             conditions.append("(" + " OR ".join(word_conditions) + ")")
 
         where = " AND ".join(conditions) if conditions else "1=1"
-        sql = f"SELECT * FROM memories WHERE {where} ORDER BY relevance_score DESC, created_at DESC LIMIT ?"
+        sql = f"SELECT * FROM memories WHERE {where} ORDER BY relevance_score DESC, created_at DESC, id ASC LIMIT ?"
         params.append(limit)
 
         rows = conn.execute(sql, params).fetchall()
