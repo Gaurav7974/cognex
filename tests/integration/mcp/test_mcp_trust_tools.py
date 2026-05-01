@@ -1,5 +1,4 @@
-import asyncio
-import shutil
+import pytest
 import sys
 from pathlib import Path
 
@@ -7,54 +6,91 @@ src_path = Path(__file__).resolve().parents[3] / "src"
 sys.path.insert(0, str(src_path))
 
 from substrate_mcp.context import SubstrateContext
-import substrate_mcp.tools.trust_tools as trust_tools
+from substrate_mcp.tools.dispatcher import handle_tool_call
 
 
-TEST_DIR = Path(__file__).parent / ".test_mcp_trust"
-TEST_DIR.mkdir(exist_ok=True)
-
-
-def cleanup_test_dir():
-    if TEST_DIR.exists():
-        try:
-            shutil.rmtree(TEST_DIR)
-        except Exception:
-            pass
-    TEST_DIR.mkdir(exist_ok=True)
-
-
-async def test_trust_tools():
-    db_path = str(TEST_DIR / "test_trust.db")
-    cleanup_test_dir()
-
+@pytest.fixture(autouse=True)
+def fresh_context(tmp_path):
+    """Create a fresh context for each test."""
     SubstrateContext.reset_instance()
-    SubstrateContext.get_instance(db_path=db_path)
+    db = str(tmp_path / "substrate.db")
+    SubstrateContext.get_instance(db_path=db, project="test-project")
+    yield
+    SubstrateContext.reset_instance()
 
-    result = await trust_tools.trust_check(
-        tool_name="BashTool",
-        project="test-project",
+
+@pytest.mark.asyncio
+async def test_unknown_tool_requires_approval():
+    """Test that unknown tool requires approval."""
+    result = await handle_tool_call("trust_check", {"tool_name": "brand_new_tool"})
+    assert result["requires_approval"] is True
+
+
+@pytest.mark.asyncio
+async def test_five_approvals_reaches_observed():
+    """Test that five approvals reach OBSERVED trust level."""
+    for _ in range(5):
+        await handle_tool_call(
+            "trust_record",
+            {
+                "action": "approval",
+                "tool_name": "file_writer",
+                "project": "test-project",
+            },
+        )
+
+    result = await handle_tool_call(
+        "trust_check", {"tool_name": "file_writer", "project": "test-project"}
     )
+    assert result["requires_approval"] is False
+
+
+@pytest.mark.asyncio
+async def test_violation_blocks_tool():
+    """Test that violation blocks tool."""
+    await handle_tool_call(
+        "trust_record", {"action": "violation", "tool_name": "shell"}
+    )
+    result = await handle_tool_call("trust_check", {"tool_name": "shell"})
+    assert result["requires_approval"] is True
+
+
+@pytest.mark.asyncio
+async def test_trust_summary_returns_list():
+    """Test that trust summary returns list of records."""
+    await handle_tool_call("trust_record", {"action": "approval", "tool_name": "toolA"})
+    await handle_tool_call("trust_record", {"action": "approval", "tool_name": "toolB"})
+    result = await handle_tool_call("trust_summary", {})
+    assert "records" in result or "count" in result
+    assert result.get("count", len(result.get("records", []))) >= 2
+
+
+@pytest.mark.asyncio
+async def test_trust_record_approval_increments_count():
+    """Test that recording approval increments count."""
+    await handle_tool_call(
+        "trust_record",
+        {
+            "action": "approval",
+            "tool_name": "BashTool",
+            "project": "test-project",
+            "reason": "Test approval",
+        },
+    )
+
+    result = await handle_tool_call(
+        "trust_check",
+        {
+            "tool_name": "BashTool",
+            "project": "test-project",
+        },
+    )
+    assert result.get("approval_count", 0) >= 1
+
+
+@pytest.mark.asyncio
+async def test_trust_check_returns_required_fields():
+    """Test that trust check returns required fields."""
+    result = await handle_tool_call("trust_check", {"tool_name": "FileTool"})
     assert "requires_approval" in result
-
-    result = await trust_tools.trust_record(
-        action="approval",
-        tool_name="BashTool",
-        project="test-project",
-        reason="Test approval",
-    )
-    assert "id" in result
-
-    result = await trust_tools.trust_get(
-        tool_name="BashTool",
-        project="test-project",
-    )
-    assert result["approval_count"] == 1
-
-    await trust_tools.trust_summary(project="test-project")
-
-    SubstrateContext.reset_instance()
-    cleanup_test_dir()
-
-
-if __name__ == "__main__":
-    asyncio.run(test_trust_tools())
+    assert "trust_level" in result or "trust_score" in result

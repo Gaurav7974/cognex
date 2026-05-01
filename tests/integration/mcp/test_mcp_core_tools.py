@@ -1,5 +1,4 @@
-import asyncio
-import shutil
+import pytest
 import sys
 from pathlib import Path
 
@@ -7,41 +6,65 @@ src_path = Path(__file__).resolve().parents[3] / "src"
 sys.path.insert(0, str(src_path))
 
 from substrate_mcp.context import SubstrateContext
-import substrate_mcp.tools.core_tools as core_tools
+from substrate_mcp.tools.dispatcher import handle_tool_call
 
 
-TEST_DIR = Path(__file__).parent / ".test_mcp_core"
-TEST_DIR.mkdir(exist_ok=True)
-
-
-def cleanup_test_dir():
-    if TEST_DIR.exists():
-        try:
-            shutil.rmtree(TEST_DIR)
-        except Exception:
-            pass
-    TEST_DIR.mkdir(exist_ok=True)
-
-
-async def test_core_tools():
-    db_path = str(TEST_DIR / "test_core.db")
-    cleanup_test_dir()
-
+@pytest.fixture(autouse=True)
+def fresh_context(tmp_path):
+    """Create a fresh context for each test."""
     SubstrateContext.reset_instance()
-    SubstrateContext.get_instance(db_path=db_path)
+    db = str(tmp_path / "substrate.db")
+    SubstrateContext.get_instance(db_path=db, project="test-project")
+    yield
+    SubstrateContext.reset_instance()
 
-    result = await core_tools.substrate_start_session(
-        session_id="test-session-123",
-        project="test-project",
+
+@pytest.mark.asyncio
+async def test_start_session_returns_session_id():
+    """Test that start_session returns the correct session_id."""
+    result = await handle_tool_call(
+        "substrate_start_session", {"session_id": "sess-001", "project": "test-project"}
     )
-    assert result["session_id"] == "test-session-123"
+    assert result["session_id"] == "sess-001"
 
-    result = await core_tools.substrate_report()
+
+@pytest.mark.asyncio
+async def test_end_session_graceful_without_start():
+    """Test that end_session handles missing session gracefully."""
+    result = await handle_tool_call("substrate_end_session", {})
+    assert "session_id" in result or "message" in result
+
+
+@pytest.mark.asyncio
+async def test_report_returns_expected_keys():
+    """Test that report returns expected keys."""
+    result = await handle_tool_call("substrate_report", {})
     assert "total_memories" in result
+    assert "total_sessions" in result
+    assert result["total_memories"] >= 0
 
-    SubstrateContext.reset_instance()
-    cleanup_test_dir()
+
+@pytest.mark.asyncio
+async def test_report_counts_increase_after_add():
+    """Test that memory count increases after adding memory."""
+    before = await handle_tool_call("substrate_report", {})
+    baseline = before["total_memories"]
+
+    for i in range(3):
+        await handle_tool_call(
+            "memory_add", {"content": f"memory {i}", "project": "test-project"}
+        )
+
+    after = await handle_tool_call("substrate_report", {})
+    assert after["total_memories"] == baseline + 3
 
 
-if __name__ == "__main__":
-    asyncio.run(test_core_tools())
+@pytest.mark.asyncio
+async def test_start_session_with_no_prior_memories():
+    """Test starting a new session with fresh context."""
+    result = await handle_tool_call(
+        "substrate_start_session",
+        {"session_id": "fresh-001", "project": "test-project"},
+    )
+    assert result["session_id"] == "fresh-001"
+    assert "context_memories" in result or "memories" in result or "message" in result
