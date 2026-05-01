@@ -285,55 +285,18 @@ class MemoryStore:
                 content_hash,
             )
 
-            # Try INSERT first (for new records)
+            # Try INSERT OR REPLACE (handles new and existing records)
             execute_with_retry(
                 conn,
                 """
-                INSERT OR IGNORE INTO memories
+                INSERT OR REPLACE INTO memories
                 (id, type, scope, content, context, relevance_score,
                  created_at, last_accessed, access_count, project, tags, content_hash)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
                 params,
             )
-
-            # If record already exists, UPDATE it (explicit path avoids FTS5 double-write)
-            cur = execute_with_retry(
-                conn,
-                """
-                UPDATE memories
-                SET type=?, scope=?, content=?, context=?, relevance_score=?,
-                    created_at=?, last_accessed=?, access_count=?, project=?, tags=?, content_hash=?
-                WHERE id=? AND (
-                    type != ? OR scope != ? OR content != ? OR context != ? OR 
-                    relevance_score != ? OR last_accessed != ? OR access_count != ? OR 
-                    project != ? OR tags != ?
-                )
-            """,
-                (
-                    memory.type.value,
-                    memory.scope.value,
-                    memory.content,
-                    memory.context,
-                    memory.relevance_score,
-                    memory.created_at.isoformat(),
-                    memory.last_accessed.isoformat() if memory.last_accessed else None,
-                    memory.access_count,
-                    memory.project,
-                    json.dumps(memory.tags),
-                    content_hash,
-                    memory.id,
-                    memory.type.value,
-                    memory.scope.value,
-                    memory.content,
-                    memory.context,
-                    memory.relevance_score,
-                    memory.last_accessed.isoformat() if memory.last_accessed else None,
-                    memory.access_count,
-                    memory.project,
-                    json.dumps(memory.tags),
-                ),
-            )
+            conn.commit()
         return memory
 
     def save_many(self, memories: list[MemoryEntry]) -> int:
@@ -368,6 +331,7 @@ class MemoryStore:
                     for m in memories
                 ],
             )
+            conn.commit()
         return len(memories)
 
     def get(self, memory_id: str) -> MemoryEntry | None:
@@ -477,7 +441,7 @@ class MemoryStore:
                 params.append(min_relevance)
             if tags:
                 for tag in tags:
-                    conditions.append("m.tags LIKE ?")
+                    conditions.append("m.tags LIKE ? COLLATE NOCASE")
                     params.append(f"%{tag}%")
 
             where_clause = " AND ".join(conditions) if conditions else "1=1"
@@ -534,7 +498,7 @@ class MemoryStore:
             return '""'  # Empty query
 
         # Use prefix matching for each word
-        return " OR ".join(f'"{word}"*' for word in words if word)
+        return " OR ".join(f"{word}*" for word in words if word)
 
     def _search_like(
         self,
@@ -563,17 +527,19 @@ class MemoryStore:
         if min_relevance > 0:
             conditions.append("relevance_score >= ?")
             params.append(min_relevance)
-        if tags:
-            for tag in tags:
-                conditions.append("tags LIKE ?")
-                params.append(f"%{tag}%")
+            if tags:
+                for tag in tags:
+                    conditions.append("INSTR(tags, ?) > 0")
+                    params.append(tag)
         if query:
             # Split query into words — match if ANY word is found
             words = query.split()
             word_conditions = []
             for word in words:
-                word_conditions.append("(content LIKE ? OR context LIKE ?)")
-                params.extend([f"%{word}%", f"%{word}%"])
+                word_conditions.append(
+                    "(INSTR(content, ?) > 0 OR INSTR(context, ?) > 0)"
+                )
+                params.extend([word, word])
             conditions.append("(" + " OR ".join(word_conditions) + ")")
 
         where = " AND ".join(conditions) if conditions else "1=1"
