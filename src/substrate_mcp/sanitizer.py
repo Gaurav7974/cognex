@@ -16,7 +16,7 @@ def sanitize_content(content: str) -> str:
     # Strip control characters except newline and tab
     content = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", content)
     # Cap length
-    return content[:MAX_CONTENT_LENGTH].strip()
+    return content.lower()[:MAX_CONTENT_LENGTH].strip()
 
 
 def sanitize_project(project: str) -> str:
@@ -42,9 +42,8 @@ def sanitize_tags(tags: list) -> list[str]:
 
 
 def sanitize_query(query: str) -> str:
-    """Sanitize search query - prevent FTS5 injection."""
     if not query:
         return ""
     # Remove FTS5 special operators that could cause issues
     query = re.sub(r'["\*\^\(\)\{\}\[\]\\]', "", query)
-    return query[:MAX_QUERY_LENGTH].strip()
+    return query.lower()[:MAX_QUERY_LENGTH].strip()
