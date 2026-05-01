@@ -27,7 +27,7 @@ jobs:
 
       - name: Run tests
         run: |
-          python -m pytest -v --tb=short -k "not mcp_server"
+          python -m pytest -v --tb=short -k "not mcp_server" tests/unit/ tests/integration/mcp/test_mcp_tool_registry.py tests/integration/mcp/test_mcp_core_tools.py tests/integration/mcp/test_mcp_memory_tools.py tests/integration/mcp/test_mcp_trust_tools.py tests/integration/mcp/test_mcp_ledger_tools.py
 
       - name: Verify imports
         run: |
