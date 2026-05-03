@@ -6,6 +6,29 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-05-03
+
+### Added
+- Concurrent sessions: multiple active sessions per SubstrateContext with thread-safe `_sessions` dict + `threading.Lock()`
+- Audit logging: structured append-only event log with SHA256 checksums for immutability
+- AuditLog class: append-only event store with `append(event_type, session_id, project, agent_id, payload)` and `get_recent(project, limit=50)` methods
+- Audit verification: `verify_integrity(log_id)` method to recompute and verify entry checksums
+- MCP audit tools: `audit_get_recent()` and `audit_verify()` for retrieving and verifying audit events
+- Audit wiring: all 6 core MCP tools now log events (session_start, session_end, unit_commit, unit_overridden, bundle_created, bundle_rehydrated)
+- Graceful audit error handling: database lock errors don't crash tool execution; logs return empty string on DB contention
+
+### Database
+- Migration 9: audit_log table with log_id, event_type, session_id, project, agent_id, payload, created_at, checksum columns
+- Indices: idx_audit_log_project, idx_audit_log_created_at for efficient querying
+
+### Changed
+- DB path moved from `.substrate/substrate.db` (project cwd) to `~/.cognex/substrate.db` (user home directory)
+- All components (substrate, trust, ledger, unit_store, audit) now share centralized `~/.cognex/` directory
+
+### Fixed
+- Session tracking now thread-safe: concurrent sessions no longer overwrite each other
+- Database lock contention: graceful error handling in audit.append() prevents tool execution failures
+
 ## [0.1.6] - 2026-04-18
 
 ### Added
