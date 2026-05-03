@@ -17,6 +17,7 @@ from substrate import (
     TeleportProtocol,
     IntentCompiler,
 )
+from substrate.audit import AuditLog
 from substrate.units import CognitiveUnitStore
 
 logger = logging.getLogger("substrate-context")
@@ -68,6 +69,7 @@ class SubstrateContext:
         self._teleport: Optional[TeleportProtocol] = None
         self._swarm: Optional[IntentCompiler] = None
         self._unit_store: Optional[CognitiveUnitStore] = None
+        self._audit: Optional[AuditLog] = None
         self._initialized = False
 
     @classmethod
@@ -117,8 +119,8 @@ class SubstrateContext:
                 configured.mkdir(parents=True, exist_ok=True)
                 db_file = configured / "substrate.db"
         else:
-            # Default: .substrate/substrate.db in current working directory
-            db_dir = Path.cwd() / ".substrate"
+            # Default: ~/.cognex/substrate.db in user home directory
+            db_dir = Path.home() / ".cognex"
             db_dir.mkdir(parents=True, exist_ok=True)
             db_file = db_dir / "substrate.db"
 
@@ -131,6 +133,7 @@ class SubstrateContext:
         self._teleport = TeleportProtocol()  # No db_path param
         self._swarm = IntentCompiler()
         self._unit_store = CognitiveUnitStore(db_path=str(db_file))
+        self._audit = AuditLog(db_path=str(db_file))
 
         self._initialized = True
 
@@ -170,9 +173,15 @@ class SubstrateContext:
         return self._unit_store
 
     @property
+    def audit(self) -> AuditLog:
+        """Get the AuditLog instance."""
+        self._ensure_initialized()
+        return self._audit
+
+    @property
     def db_path(self) -> str:
         """Get the database path."""
-        return self._db_path or str(Path.cwd() / ".substrate")
+        return self._db_path or str(Path.home() / ".cognex" / "substrate.db")
 
     def close(self) -> None:
         """Close all component resources."""
@@ -193,5 +202,8 @@ class SubstrateContext:
         if self._unit_store:
             self._unit_store.close()
             self._unit_store = None
+        if self._audit:
+            self._audit.close()
+            self._audit = None
 
         self._initialized = False

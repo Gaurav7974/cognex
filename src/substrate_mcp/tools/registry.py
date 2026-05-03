@@ -649,6 +649,34 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
             "required": ["project"],
         },
     },
+    # Audit Log Tools (2) - NEW in Phase 3a
+    {
+        "name": "audit_get_recent",
+        "description": "Get recent audit log entries for a project. Returns list of audit events with timestamps.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "project": {"type": "string", "description": "Project name to filter by"},
+                "limit": {
+                    "type": "integer",
+                    "description": "Max number of entries to return",
+                    "default": 50,
+                },
+            },
+            "required": ["project"],
+        },
+    },
+    {
+        "name": "audit_verify",
+        "description": "Verify integrity of an audit log entry by recomputing its checksum.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "log_id": {"type": "string", "description": "Audit log entry ID to verify"},
+            },
+            "required": ["log_id"],
+        },
+    },
 ]
 
 

@@ -16,6 +16,7 @@ from .store import MemoryStore
 from .extractor import MemoryExtractor, ExtractionResult
 from .retriever import MemoryRetriever
 from .substrate import CognitiveSubstrate, SubstrateReport
+from .audit import AuditLog
 from .trust import TrustGradientEngine, TrustRecord, TrustLevel, PermissionDecision
 from .ledger import DecisionLedger, DecisionEntry
 from .teleport import TeleportProtocol, TeleportBundle
@@ -35,6 +36,7 @@ __all__ = [
     "MemoryRetriever",
     "CognitiveSubstrate",
     "SubstrateReport",
+    "AuditLog",
     "TrustGradientEngine",
     "TrustRecord",
     "TrustLevel",

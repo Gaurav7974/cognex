@@ -61,6 +61,15 @@ async def unit_commit(
     # Save in thread pool
     await run_in_thread(ctx.unit_store.save, unit)
 
+    # Audit log (direct call - AuditLog is thread-safe)
+    ctx.audit.append(
+        event_type="unit_commit",
+        session_id=session_id or None,
+        project=project,
+        agent_id=None,
+        payload={"unit_id": unit.unit_id, "unit_type": unit_type, "project": project},
+    )
+
     return {
         "unit_id": unit.unit_id,
         "unit_type": unit.unit_type,
@@ -163,6 +172,15 @@ async def unit_mark_overridden(unit_id: str) -> dict[str, Any]:
 
     # Mark overridden in thread pool
     await run_in_thread(ctx.unit_store.mark_overridden, unit_id)
+
+    # Audit log (direct call - AuditLog is thread-safe)
+    ctx.audit.append(
+        event_type="unit_overridden",
+        session_id=ctx.substrate.current_session,
+        project=unit.project,
+        agent_id=None,
+        payload={"unit_id": unit_id, "reason": "contradicted"},
+    )
 
     return {
         "unit_id": unit_id,

@@ -21,6 +21,15 @@ async def substrate_start_session(
         ctx.substrate.start_session, session_id=session_id, project=project
     )
 
+    # Audit log (direct call - AuditLog is thread-safe)
+    ctx.audit.append(
+        event_type="session_start",
+        session_id=session_id,
+        project=project,
+        agent_id=None,
+        payload={"project": project, "session_id": session_id},
+    )
+
     return {
         "session_id": session_id,
         "project": project,
@@ -54,6 +63,15 @@ async def substrate_end_session(
         errors=tuple(errors or []),
         input_tokens=input_tokens,
         output_tokens=output_tokens,
+    )
+
+    # Audit log (direct call - AuditLog is thread-safe)
+    ctx.audit.append(
+        event_type="session_end",
+        session_id=snapshot.session_id,
+        project=snapshot.project,
+        agent_id=None,
+        payload={"session_id": snapshot.session_id, "summary": summary},
     )
 
     return {

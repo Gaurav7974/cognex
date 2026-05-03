@@ -93,6 +93,24 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
             "CREATE INDEX IF NOT EXISTS idx_mem_content_hash ON memories(content_hash)",
         ],
     ),
+    (
+        9,
+        "add audit_log table",
+        [
+            """CREATE TABLE IF NOT EXISTS audit_log (
+                log_id TEXT PRIMARY KEY,
+                event_type TEXT NOT NULL,
+                session_id TEXT,
+                project TEXT,
+                agent_id TEXT,
+                payload TEXT,
+                created_at TEXT NOT NULL,
+                checksum TEXT NOT NULL
+            )""",
+            """CREATE INDEX IF NOT EXISTS idx_audit_log_project ON audit_log(project)""",
+            """CREATE INDEX IF NOT EXISTS idx_audit_log_created_at ON audit_log(created_at)""",
+        ],
+    ),
 ]
 
 

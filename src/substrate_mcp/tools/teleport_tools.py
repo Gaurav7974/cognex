@@ -6,6 +6,7 @@ import json
 from typing import Any
 
 from substrate_mcp.context import SubstrateContext
+from substrate_mcp.tools.dispatcher import run_in_thread
 
 
 async def teleport_create_bundle(
@@ -32,6 +33,15 @@ async def teleport_create_bundle(
         tool_claims=tuple(tool_claims or []),
         trust_engine=ctx.trust,
         decision_ledger=ctx.ledger,
+    )
+
+    # Audit log (direct call - AuditLog is thread-safe)
+    ctx.audit.append(
+        event_type="bundle_created",
+        session_id=ctx.substrate.get_current_session(),
+        project=None,
+        agent_id=None,
+        payload={"bundle_id": bundle.bundle_id, "source_host": source_host or "", "target_host": target_host or ""},
     )
 
     return {
@@ -97,6 +107,15 @@ async def teleport_rehydrate(bundle_json: str | dict) -> dict[str, Any]:
         substrate=ctx.substrate,
         trust_engine=ctx.trust,
         decision_ledger=ctx.ledger,
+    )
+
+    # Audit log (direct call - AuditLog is thread-safe)
+    ctx.audit.append(
+        event_type="bundle_rehydrated",
+        session_id=ctx.substrate.get_current_session(),
+        project=None,
+        agent_id=None,
+        payload={"bundle_id": report.get("bundle_id", ""), "memories_restored": report.get("memories_restored", 0)},
     )
 
     return {

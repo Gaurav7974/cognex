@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import threading
 from pathlib import Path
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 
 from .models import MemoryEntry, MemoryScope, MemoryType, SessionSnapshot
 from .store import MemoryStore
@@ -57,14 +59,36 @@ class CognitiveSubstrate:
         self.store = MemoryStore(db_path=db_path, pool_size=pool_size)
         self.extractor = MemoryExtractor()
         self.retriever = MemoryRetriever(self.store)
-        self._current_session: str | None = None
+        self._sessions: dict[str, dict] = {}
+        self._sessions_lock: threading.Lock = threading.Lock()
         self._current_project: str = ""
+
+    def get_current_session(self) -> str | None:
+        """Get the session_id of the most recently started active session.
+        
+        Returns None if no active sessions.
+        Thread-safe via _sessions_lock.
+        """
+        with self._sessions_lock:
+            if not self._sessions:
+                return None
+            # Return the most recently started active session
+            for session_id in reversed(list(self._sessions.keys())):
+                if self._sessions[session_id].get("active", False):
+                    return session_id
+            return None
 
     # ── Session Lifecycle ─────────────────────────────────────
 
     def start_session(self, session_id: str, project: str = "") -> list[MemoryEntry]:
         """Start a new session. Returns relevant memories to inject."""
-        self._current_session = session_id
+        with self._sessions_lock:
+            self._sessions[session_id] = {
+                "session_id": session_id,
+                "project": project,
+                "started_at": datetime.now(timezone.utc).isoformat(),
+                "active": True
+            }
         self._current_project = project
         return self.retriever.get_session_context(project=project)
 
@@ -78,8 +102,9 @@ class CognitiveSubstrate:
         output_tokens: int = 0,
     ) -> SessionSnapshot:
         """End the current session. Saves snapshot and extracts memories."""
+        current_session_id = self.get_current_session()
         session = SessionSnapshot(
-            session_id=self._current_session or "unknown",
+            session_id=current_session_id or "unknown",
             project=self._current_project,
             summary=summary,
             key_decisions=key_decisions,
@@ -89,7 +114,11 @@ class CognitiveSubstrate:
             output_tokens=output_tokens,
         )
         self.store.save_session(session)
-        self._current_session = None
+        # Mark session as inactive
+        if current_session_id:
+            with self._sessions_lock:
+                if current_session_id in self._sessions:
+                    self._sessions[current_session_id]["active"] = False
         return session
 
     # ── Memory Operations ─────────────────────────────────────
@@ -102,7 +131,7 @@ class CognitiveSubstrate:
         context: str = "",
     ) -> ExtractionResult:
         """Process a conversation transcript and extract memories."""
-        sid = session_id or self._current_session or ""
+        sid = session_id or self.get_current_session() or ""
         proj = project or self._current_project or ""
         result = self.extractor.extract(
             transcript=transcript,
@@ -208,7 +237,7 @@ class CognitiveSubstrate:
 
     @property
     def current_session(self) -> str | None:
-        return self._current_session
+        return self.get_current_session()
 
     @property
     def current_project(self) -> str:

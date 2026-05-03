@@ -69,6 +69,10 @@ from substrate_mcp.tools.chp_tools import (
     chp_transfer,
     chp_project,
 )
+from substrate_mcp.tools.audit_tools import (
+    audit_get_recent,
+    audit_verify,
+)
 
 
 # Tool registry: name -> handler function
@@ -113,6 +117,9 @@ TOOL_HANDLERS: dict[str, Callable] = {
     "chp_entangle": chp_entangle,
     "chp_transfer": chp_transfer,
     "chp_project": chp_project,
+    # Audit log tools
+    "audit_get_recent": audit_get_recent,
+    "audit_verify": audit_verify,
 }
 
 
