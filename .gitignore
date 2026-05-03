@@ -74,6 +74,11 @@ evaluate/results/
 # Playwright captures
 .playwright-mcp/
 
+# AI agent workspace configs (machine-specific)
+AGENTS.md
+CLUADE.MD
+CLAUDE.MD
+
 # MCP optimization notes (for AI agents)
 fix.md
 
