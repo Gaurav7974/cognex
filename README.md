@@ -5,7 +5,7 @@
 Give your AI coding assistant persistent memory, decision tracking, trust management, and now — structured cognitive state that survives across sessions and agents.
 
 [![PyPI version](https://badge.fury.io/py/cognex.svg)](https://pypi.org/project/cognex/)
-[![Version](https://img.shields.io/badge/version-0.1.6-blue.svg)](https://pypi.org/project/cognex/)
+[![Version](https://img.shields.io/badge/version-0.1.7-blue.svg)](https://pypi.org/project/cognex/)
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/cognex?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/cognex)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -22,11 +22,22 @@ Next session:
 AI: "Got it — I'll use pytest as we discussed."
 ```
 
-Your AI forgets everything between sessions. **Cognex** fixes that — and in v0.1.6, it does it with full structured cognitive state tracking.
+Your AI forgets everything between sessions. **Cognex** fixes that — and in v0.1.7, it does it with full structured cognitive state tracking, concurrent session support, and audit logging.
 
 ---
 
-## What's New in v0.1.6
+## What's New in v0.1.7
+
+- **Concurrent Sessions:** Support multiple active sessions per context with thread-safe `_sessions` dict
+- **Audit Logging:** Structured append-only event log with checksums (created audit_log table in v9 migration)
+- **Audit Tools:** New MCP tools `audit_get_recent()` and `audit_verify()` for retrieving and verifying audit events
+- **Wired Audit Calls:** All 6 core MCP tools now log events: session_start, session_end, unit_commit, unit_overridden, bundle_created, bundle_rehydrated
+- **DB Path Centralization:** Changed default DB path from `.substrate/` to `~/.cognex/` in user home directory
+- **Graceful Error Handling:** Non-blocking audit logging with graceful database lock handling
+
+---
+
+## What Was New in v0.1.6
 
 - **Cognitive Units:** First-class structured state with content, rationale, scope, and confidence
 - **Delta Tracking:** Append-only change log per unit — full audit trail of how cognition evolved
