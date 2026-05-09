@@ -263,13 +263,33 @@ class MemoryStore:
     def save(self, memory: MemoryEntry) -> MemoryEntry:
         """Save or update a memory entry.
 
-        Uses INSERT OR IGNORE + explicit UPDATE to avoid FTS5 double-write.
+        Deduplicates by content_hash — if the same content already exists,
+        returns the existing memory without creating a duplicate.
         Computes content_hash for deduplication across sessions.
         """
         # Compute content hash for dedup (first 16 chars of sha256)
         content_hash = hashlib.sha256(memory.content.encode()).hexdigest()[:16]
 
         with self._connect() as conn:
+            # Check if memory with same content_hash already exists
+            existing = execute_with_retry(
+                conn,
+                """
+                SELECT id FROM memories 
+                WHERE content_hash = ? AND project = ?
+                LIMIT 1
+            """,
+                (content_hash, memory.project),
+            ).fetchone()
+
+            if existing:
+                # Dedup: fetch and return existing memory (without recursive save)
+                row = conn.execute(
+                    "SELECT * FROM memories WHERE id = ?", (existing[0],)
+                ).fetchone()
+                return self._row_to_memory(row)
+
+            # New memory: insert it
             params = (
                 memory.id,
                 memory.type.value,
@@ -285,11 +305,10 @@ class MemoryStore:
                 content_hash,
             )
 
-            # Try INSERT OR REPLACE (handles new and existing records)
             execute_with_retry(
                 conn,
                 """
-                INSERT OR REPLACE INTO memories
+                INSERT INTO memories
                 (id, type, scope, content, context, relevance_score,
                  created_at, last_accessed, access_count, project, tags, content_hash)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -300,39 +319,67 @@ class MemoryStore:
         return memory
 
     def save_many(self, memories: list[MemoryEntry]) -> int:
-        """Bulk save. Returns count saved.
+        """Bulk save. Returns count of unique memories saved.
 
-        Uses INSERT OR IGNORE to avoid FTS5 double-write overhead.
-        Includes content_hash for dedup tracking.
+        Deduplicates by content_hash — skips any memory whose content
+        already exists in the same project.
         """
+        if not memories:
+            return 0
+
         with self._connect() as conn:
-            conn.executemany(
-                """
-                INSERT OR IGNORE INTO memories
-                (id, type, scope, content, context, relevance_score,
-                 created_at, last_accessed, access_count, project, tags, content_hash)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-                [
-                    (
-                        m.id,
-                        m.type.value,
-                        m.scope.value,
-                        m.content,
-                        m.context,
-                        m.relevance_score,
-                        m.created_at.isoformat(),
-                        m.last_accessed.isoformat() if m.last_accessed else None,
-                        m.access_count,
-                        m.project,
-                        json.dumps(m.tags),
-                        hashlib.sha256(m.content.encode()).hexdigest()[:16],
+            # Get all existing content_hashes for these projects
+            projects = set(m.project for m in memories)
+            placeholders = ",".join("?" * len(projects))
+            existing_hashes = set()
+            if projects:
+                rows = conn.execute(
+                    f"""
+                    SELECT content_hash FROM memories 
+                    WHERE project IN ({placeholders})
+                """,
+                    list(projects),
+                ).fetchall()
+                existing_hashes = {row[0] for row in rows}
+
+            # Filter out duplicates
+            to_insert = []
+            count = 0
+            for m in memories:
+                content_hash = hashlib.sha256(m.content.encode()).hexdigest()[:16]
+                if content_hash not in existing_hashes:
+                    to_insert.append(
+                        (
+                            m.id,
+                            m.type.value,
+                            m.scope.value,
+                            m.content,
+                            m.context,
+                            m.relevance_score,
+                            m.created_at.isoformat(),
+                            m.last_accessed.isoformat() if m.last_accessed else None,
+                            m.access_count,
+                            m.project,
+                            json.dumps(m.tags),
+                            content_hash,
+                        )
                     )
-                    for m in memories
-                ],
-            )
-            conn.commit()
-        return len(memories)
+                    existing_hashes.add(content_hash)
+                    count += 1
+
+            if to_insert:
+                conn.executemany(
+                    """
+                    INSERT INTO memories
+                    (id, type, scope, content, context, relevance_score,
+                     created_at, last_accessed, access_count, project, tags, content_hash)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                    to_insert,
+                )
+                conn.commit()
+
+            return count
 
     def get(self, memory_id: str) -> MemoryEntry | None:
         """Get a single memory by ID."""

@@ -78,3 +78,32 @@ def test_core_substrate_tools_present():
     ]
     for name in required_substrate:
         assert name in names, f"Core substrate tool missing from registry: {name}"
+
+
+def test_audit_tools_present():
+    """Verify Phase 3a audit tools are registered."""
+    names = [t["name"] for t in TOOL_DEFINITIONS]
+    required_audit = ["audit_get_recent", "audit_verify"]
+    for name in required_audit:
+        assert name in names, f"Audit tool missing from registry: {name}"
+
+
+def test_unit_and_teleport_tools_present():
+    """Verify cognitive unit and teleport tools are registered."""
+    names = [t["name"] for t in TOOL_DEFINITIONS]
+    required = [
+        "unit_commit",
+        "unit_mark_overridden",
+        "teleport_create_bundle",
+        "teleport_rehydrate",
+    ]
+    for name in required:
+        assert name in names, f"Tool missing from registry: {name}"
+
+
+def test_tool_count_is_32():
+    """Verify total tool count is exactly 32 after Phase 3a."""
+    assert len(TOOL_DEFINITIONS) == 32, (
+        f"Expected 32 tools, got {len(TOOL_DEFINITIONS)}. "
+        f"Tools: {sorted([t['name'] for t in TOOL_DEFINITIONS])}"
+    )

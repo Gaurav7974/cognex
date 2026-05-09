@@ -177,3 +177,25 @@ class TestMemoryStore:
         assert found.key_decisions == ("chose FastAPI", "chose PostgreSQL")
         assert found.tools_used == ("FileReadTool", "BashTool")
         assert found.memory_ids_extracted == ("m1", "m2")
+
+    def test_deduplication_by_content_hash(self, store):
+        """Test that saving identical content twice only stores one entry (deduplication)."""
+        # Save same content twice with different IDs
+        content = "I prefer using FastAPI for REST APIs"
+        m1 = MemoryEntry(content=content, type=MemoryType.PREFERENCE)
+        m2 = MemoryEntry(content=content, type=MemoryType.PREFERENCE)
+        
+        assert m1.id != m2.id, "Different MemoryEntry instances should have different IDs"
+        
+        # Save both
+        store.save(m1)
+        store.save(m2)
+        
+        # Search should return only 1 entry (deduplication worked)
+        results = store.search(query=content)
+        # Filter to only exact matches
+        exact_matches = [r for r in results if r.content == content]
+        assert len(exact_matches) == 1, f"Expected 1 deduplicated entry, got {len(exact_matches)}"
+        
+        # Total count should still be 1
+        assert store.count() == 1, f"Expected store count to be 1, got {store.count()}"
