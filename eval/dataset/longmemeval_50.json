@@ -1,0 +1,772 @@
+[
+  {
+    "id": "lme_001",
+    "category": "single_session_user",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "I prefer FastAPI over Flask for building APIs because of the async support."},
+      {"role": "assistant", "content": "Noted, I'll remember your framework preference."}
+    ],
+    "memory_to_store": "User prefers FastAPI over Flask for building APIs due to async support.",
+    "question": "What web framework does the user prefer for building APIs?",
+    "answer_keywords": ["fastapi"],
+    "distractor_memories": ["User prefers Django for full-stack web development"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_002",
+    "category": "single_session_user",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "PostgreSQL is my default choice for relational data storage."},
+      {"role": "assistant", "content": "Got it, PostgreSQL is your default relational database."}
+    ],
+    "memory_to_store": "User selects PostgreSQL as the default database for relational data storage.",
+    "question": "Which database does the user default to for relational data?",
+    "answer_keywords": ["postgresql"],
+    "distractor_memories": ["User defaults to MySQL for relational data storage"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_003",
+    "category": "single_session_user",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "I stick to PyTorch for all my deep learning experiments."},
+      {"role": "assistant", "content": "Understood, PyTorch is your framework of choice."}
+    ],
+    "memory_to_store": "User relies exclusively on PyTorch for conducting all deep learning experiments.",
+    "question": "What deep learning framework does the user rely on?",
+    "answer_keywords": ["pytorch"],
+    "distractor_memories": ["User relies on TensorFlow for deep learning experiments"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_004",
+    "category": "single_session_user",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "Vue.js is my go-to framework for dashboard interfaces."},
+      {"role": "assistant", "content": "I'll note that you use Vue.js for dashboards."}
+    ],
+    "memory_to_store": "User chooses Vue.js as the primary framework for dashboard interfaces.",
+    "question": "Which framework does the user choose for dashboards?",
+    "answer_keywords": ["vue.js"],
+    "distractor_memories": ["User chooses React for dashboard interfaces"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_005",
+    "category": "single_session_user",
+    "difficulty": "medium",
+    "setup_turns": [
+      {"role": "user", "content": "I deploy everything using Docker containers on AWS."},
+      {"role": "assistant", "content": "Noted, your deployment stack uses Docker and AWS."}
+    ],
+    "memory_to_store": "User deploys applications using Docker containers hosted on AWS infrastructure.",
+    "question": "What containerization technology does the user utilize for deployments?",
+    "answer_keywords": ["docker"],
+    "distractor_memories": ["User deploys applications using Kubernetes pods on GCP"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_006",
+    "category": "single_session_user",
+    "difficulty": "medium",
+    "setup_turns": [
+      {"role": "user", "content": "I run black on every commit to keep formatting consistent."},
+      {"role": "assistant", "content": "I'll remember you enforce black for formatting."}
+    ],
+    "memory_to_store": "User executes black automatically on commits to maintain consistent code formatting.",
+    "question": "Which tool does the user run to enforce formatting consistency?",
+    "answer_keywords": ["black"],
+    "distractor_memories": ["User runs flake8 on every commit for formatting"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_007",
+    "category": "single_session_user",
+    "difficulty": "medium",
+    "setup_turns": [
+      {"role": "user", "content": "Linear is where I track all my engineering tasks."},
+      {"role": "assistant", "content": "Got it, Linear is your task tracker."}
+    ],
+    "memory_to_store": "User tracks engineering tasks exclusively within the Linear project management tool.",
+    "question": "Where does the user keep track of engineering tasks?",
+    "answer_keywords": ["linear"],
+    "distractor_memories": ["User tracks engineering tasks exclusively within Jira"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_008",
+    "category": "single_session_user",
+    "difficulty": "medium",
+    "setup_turns": [
+      {"role": "user", "content": "I develop exclusively on Ubuntu Linux machines."},
+      {"role": "assistant", "content": "Noted, your development OS is Ubuntu."}
+    ],
+    "memory_to_store": "User conducts all software development work on Ubuntu Linux operating systems.",
+    "question": "Which operating system does the user develop on?",
+    "answer_keywords": ["ubuntu"],
+    "distractor_memories": ["User conducts development work on macOS machines"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_009",
+    "category": "single_session_user",
+    "difficulty": "hard",
+    "setup_turns": [
+      {"role": "user", "content": "I pair SQLAlchemy with FastAPI for type-safe database queries."},
+      {"role": "assistant", "content": "That's a solid stack for type safety."}
+    ],
+    "memory_to_store": "User combines SQLAlchemy with FastAPI to execute type-safe database queries.",
+    "question": "What ORM does the user integrate with their preferred web framework for type safety?",
+    "answer_keywords": ["sqlalchemy"],
+    "distractor_memories": ["User combines Prisma with FastAPI for type-safe queries"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_010",
+    "category": "single_session_user",
+    "difficulty": "hard",
+    "setup_turns": [
+      {"role": "user", "content": "I containerize my LangChain agents using Docker for reproducible deployments."},
+      {"role": "assistant", "content": "Containerization will definitely help with reproducibility."}
+    ],
+    "memory_to_store": "User packages LangChain agents inside Docker containers to ensure deployment reproducibility.",
+    "question": "How does the user ensure their AI agent deployments remain reproducible across environments?",
+    "answer_keywords": ["docker"],
+    "distractor_memories": ["User packages LangChain agents using virtualenv for reproducibility"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_011",
+    "category": "single_session_assistant",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "What should I use for caching high-read endpoints?"},
+      {"role": "assistant", "content": "For high-read workloads, I recommend Redis as a caching layer."}
+    ],
+    "memory_to_store": "Assistant recommends Redis as a caching layer for high-read workloads.",
+    "question": "What caching solution did the assistant recommend for high-read workloads?",
+    "answer_keywords": ["redis"],
+    "distractor_memories": ["Assistant recommends Memcached as a caching layer"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_012",
+    "category": "single_session_assistant",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "I need a CSS solution for rapid prototyping."},
+      {"role": "assistant", "content": "You should try Tailwind CSS for accelerating user interface prototyping workflows."}
+    ],
+    "memory_to_store": "Assistant suggests utilizing Tailwind CSS for accelerating user interface prototyping workflows.",
+    "question": "Which CSS framework did the assistant suggest for rapid prototyping?",
+    "answer_keywords": ["tailwind"],
+    "distractor_memories": ["Assistant suggests utilizing Bootstrap for rapid prototyping"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_013",
+    "category": "single_session_assistant",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "Which library is best for NLP tasks right now?"},
+      {"role": "assistant", "content": "I identify Hugging Face Transformers as the optimal library for NLP tasks."}
+    ],
+    "memory_to_store": "Assistant identifies Hugging Face Transformers as the optimal library for NLP tasks.",
+    "question": "What library did the assistant identify as optimal for NLP?",
+    "answer_keywords": ["transformers"],
+    "distractor_memories": ["Assistant identifies spaCy as the optimal library for NLP"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_014",
+    "category": "single_session_assistant",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "How can I simplify my CI pipeline?"},
+      {"role": "assistant", "content": "I propose GitHub Actions to streamline the continuous integration pipeline."}
+    ],
+    "memory_to_store": "Assistant proposes GitHub Actions to streamline the continuous integration pipeline.",
+    "question": "What CI tool did the assistant propose to streamline pipelines?",
+    "answer_keywords": ["github actions"],
+    "distractor_memories": ["Assistant proposes CircleCI to streamline the pipeline"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_015",
+    "category": "single_session_assistant",
+    "difficulty": "medium",
+    "setup_turns": [
+      {"role": "user", "content": "I'm tired of running multiple linting tools."},
+      {"role": "assistant", "content": "Ruff can consolidate flake8 and isort into a single workflow tool."}
+    ],
+    "memory_to_store": "Assistant states Ruff can consolidate flake8 and isort into a single workflow tool.",
+    "question": "Which linter did the assistant say could consolidate multiple formatting tools?",
+    "answer_keywords": ["ruff"],
+    "distractor_memories": ["Assistant states Pylint can consolidate multiple formatting tools"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_016",
+    "category": "single_session_assistant",
+    "difficulty": "medium",
+    "setup_turns": [
+      {"role": "user", "content": "We need better docs sharing across teams."},
+      {"role": "assistant", "content": "Notion facilitates effective documentation sharing across different teams."}
+    ],
+    "memory_to_store": "Assistant notes Notion facilitates effective documentation sharing across different teams.",
+    "question": "What platform did the assistant note facilitates cross-team documentation sharing?",
+    "answer_keywords": ["notion"],
+    "distractor_memories": ["Assistant notes Confluence facilitates cross-team documentation sharing"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_017",
+    "category": "single_session_assistant",
+    "difficulty": "medium",
+    "setup_turns": [
+      {"role": "user", "content": "What hardware runs local models well?"},
+      {"role": "assistant", "content": "Apple Silicon Macs deliver strong performance for local model inference."}
+    ],
+    "memory_to_store": "Assistant claims Apple Silicon Macs deliver strong performance for local model inference.",
+    "question": "Which hardware architecture did the assistant claim excels at local inference?",
+    "answer_keywords": ["apple silicon"],
+    "distractor_memories": ["Assistant claims Intel Xeon servers excel at local inference"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_018",
+    "category": "single_session_assistant",
+    "difficulty": "hard",
+    "setup_turns": [
+      {"role": "user", "content": "My Django app struggles with background AI jobs."},
+      {"role": "assistant", "content": "Pairing Celery with Django efficiently manages background AI processing tasks."}
+    ],
+    "memory_to_store": "Assistant explains that pairing Celery with Django efficiently manages background AI processing tasks.",
+    "question": "What task queue did the assistant recommend pairing with a Python web framework for background AI jobs?",
+    "answer_keywords": ["celery"],
+    "distractor_memories": ["Assistant explains that pairing RabbitMQ with Django manages background tasks"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_019",
+    "category": "knowledge_update",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "I use Flask for APIs."},
+      {"role": "assistant", "content": "Got it."},
+      {"role": "user", "content": "Actually, I switched to FastAPI recently."},
+      {"role": "assistant", "content": "Updated your preference to FastAPI."}
+    ],
+    "memory_to_store": "User recently migrated their API development workflow from Flask to FastAPI.",
+    "question": "What framework does the user currently use for APIs?",
+    "answer_keywords": ["fastapi"],
+    "distractor_memories": ["User currently uses Flask for API development"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_020",
+    "category": "knowledge_update",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "My app runs on MongoDB."},
+      {"role": "assistant", "content": "Understood."},
+      {"role": "user", "content": "Wait, we migrated everything to PostgreSQL last week."},
+      {"role": "assistant", "content": "Noted the migration to PostgreSQL."}
+    ],
+    "memory_to_store": "User migrated their application database from MongoDB to PostgreSQL last week.",
+    "question": "Which database does the user's application currently run on?",
+    "answer_keywords": ["postgresql"],
+    "distractor_memories": ["User application currently runs on MongoDB"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_021",
+    "category": "knowledge_update",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "I train models with TensorFlow."},
+      {"role": "assistant", "content": "Noted."},
+      {"role": "user", "content": "Correction, I fully switched to PyTorch for training."},
+      {"role": "assistant", "content": "Switched your training framework to PyTorch."}
+    ],
+    "memory_to_store": "User completely transitioned their model training pipeline from TensorFlow to PyTorch.",
+    "question": "What framework does the user currently use for model training?",
+    "answer_keywords": ["pytorch"],
+    "distractor_memories": ["User currently uses TensorFlow for model training"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_022",
+    "category": "knowledge_update",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "I write components in JavaScript."},
+      {"role": "assistant", "content": "Okay."},
+      {"role": "user", "content": "Actually, I refactored everything to TypeScript for safety."},
+      {"role": "assistant", "content": "Updated to TypeScript."}
+    ],
+    "memory_to_store": "User refactored their component codebase from JavaScript to TypeScript for type safety.",
+    "question": "What language does the user currently write components in?",
+    "answer_keywords": ["typescript"],
+    "distractor_memories": ["User currently writes components in JavaScript"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_023",
+    "category": "knowledge_update",
+    "difficulty": "medium",
+    "setup_turns": [
+      {"role": "user", "content": "I deploy manually via SSH."},
+      {"role": "assistant", "content": "I see."},
+      {"role": "user", "content": "I automated it all with Kubernetes clusters now."},
+      {"role": "assistant", "content": "Noted the shift to Kubernetes."}
+    ],
+    "memory_to_store": "User replaced manual SSH deployments with automated Kubernetes cluster orchestration.",
+    "question": "How does the user currently handle application deployments?",
+    "answer_keywords": ["kubernetes"],
+    "distractor_memories": ["User currently handles deployments manually via SSH"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_024",
+    "category": "knowledge_update",
+    "difficulty": "medium",
+    "setup_turns": [
+      {"role": "user", "content": "I use pylint for linting."},
+      {"role": "assistant", "content": "Got it."},
+      {"role": "user", "content": "I dropped pylint and adopted ruff for speed."},
+      {"role": "assistant", "content": "Updated linter to ruff."}
+    ],
+    "memory_to_store": "User abandoned pylint and adopted ruff to achieve faster code linting.",
+    "question": "Which linter does the user currently rely on for speed?",
+    "answer_keywords": ["ruff"],
+    "distractor_memories": ["User currently relies on pylint for code linting"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_025",
+    "category": "knowledge_update",
+    "difficulty": "medium",
+    "setup_turns": [
+      {"role": "user", "content": "I track bugs in Jira."},
+      {"role": "assistant", "content": "Noted."},
+      {"role": "user", "content": "We moved all bug tracking to Linear recently."},
+      {"role": "assistant", "content": "Tracking updated to Linear."}
+    ],
+    "memory_to_store": "User transferred all bug tracking operations from Jira to Linear recently.",
+    "question": "Where does the user currently track software bugs?",
+    "answer_keywords": ["linear"],
+    "distractor_memories": ["User currently tracks software bugs in Jira"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_026",
+    "category": "knowledge_update",
+    "difficulty": "medium",
+    "setup_turns": [
+      {"role": "user", "content": "I host on Azure."},
+      {"role": "assistant", "content": "Understood."},
+      {"role": "user", "content": "Actually, we migrated our infrastructure to Google Cloud."},
+      {"role": "assistant", "content": "Hosting updated to Google Cloud."}
+    ],
+    "memory_to_store": "User migrated their hosting infrastructure from Azure to Google Cloud Platform.",
+    "question": "Which cloud provider does the user currently host infrastructure on?",
+    "answer_keywords": ["google cloud"],
+    "distractor_memories": ["User currently hosts infrastructure on Azure"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_027",
+    "category": "knowledge_update",
+    "difficulty": "hard",
+    "setup_turns": [
+      {"role": "user", "content": "I backup SQLite files manually."},
+      {"role": "assistant", "content": "Okay."},
+      {"role": "user", "content": "I switched to PostgreSQL and automated backups with pg_dump scripts."},
+      {"role": "assistant", "content": "Noted the database upgrade and automation."}
+    ],
+    "memory_to_store": "User upgraded to PostgreSQL and automated database backups using pg_dump scripts.",
+    "question": "What tool does the user currently employ to automate their upgraded database backups?",
+    "answer_keywords": ["pg_dump"],
+    "distractor_memories": ["User employs cron jobs to automate SQLite backups"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_028",
+    "category": "knowledge_update",
+    "difficulty": "hard",
+    "setup_turns": [
+      {"role": "user", "content": "I serve models via Flask."},
+      {"role": "assistant", "content": "Got it."},
+      {"role": "user", "content": "I replaced Flask with a Next.js frontend calling FastAPI endpoints."},
+      {"role": "assistant", "content": "Architecture updated to Next.js and FastAPI."}
+    ],
+    "memory_to_store": "User replaced Flask with a Next.js frontend that queries FastAPI model endpoints.",
+    "question": "What frontend framework does the user currently use to interface with their model API?",
+    "answer_keywords": ["next.js"],
+    "distractor_memories": ["User currently uses React to interface with model APIs"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_029",
+    "category": "temporal_reasoning",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "I built the legacy app with Django."},
+      {"role": "assistant", "content": "Noted."},
+      {"role": "user", "content": "I'm rewriting it in FastAPI now."},
+      {"role": "assistant", "content": "Good luck with the rewrite."}
+    ],
+    "memory_to_store": "User originally constructed the legacy application using the Django web framework.",
+    "question": "What framework did the user use for the legacy app before the rewrite?",
+    "answer_keywords": ["django"],
+    "distractor_memories": ["User originally constructed the legacy app with Flask"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_030",
+    "category": "temporal_reasoning",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "We started with MySQL for the prototype."},
+      {"role": "assistant", "content": "Understood."},
+      {"role": "user", "content": "We're migrating to CockroachDB for scale."},
+      {"role": "assistant", "content": "Migration noted."}
+    ],
+    "memory_to_store": "User initially selected MySQL as the database for the prototype phase.",
+    "question": "Which database did the user start with before planning the migration?",
+    "answer_keywords": ["mysql"],
+    "distractor_memories": ["User initially selected PostgreSQL for the prototype"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_031",
+    "category": "temporal_reasoning",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "My first experiments used scikit-learn."},
+      {"role": "assistant", "content": "Got it."},
+      {"role": "user", "content": "I'm moving to deep learning with PyTorch now."},
+      {"role": "assistant", "content": "Noted the shift to deep learning."}
+    ],
+    "memory_to_store": "User conducted initial machine learning experiments using the scikit-learn library.",
+    "question": "What library did the user use for initial experiments before switching to deep learning?",
+    "answer_keywords": ["scikit-learn"],
+    "distractor_memories": ["User used TensorFlow for initial experiments"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_032",
+    "category": "temporal_reasoning",
+    "difficulty": "medium",
+    "setup_turns": [
+      {"role": "user", "content": "The dashboard was originally styled with Bootstrap."},
+      {"role": "assistant", "content": "I see."},
+      {"role": "user", "content": "We're rebuilding it with Tailwind CSS."},
+      {"role": "assistant", "content": "Rebuild noted."}
+    ],
+    "memory_to_store": "User originally applied Bootstrap styling to the dashboard interface components.",
+    "question": "Which CSS framework styled the dashboard before the rebuild?",
+    "answer_keywords": ["bootstrap"],
+    "distractor_memories": ["User originally applied Bulma styling to the dashboard"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_033",
+    "category": "temporal_reasoning",
+    "difficulty": "medium",
+    "setup_turns": [
+      {"role": "user", "content": "We used Jenkins for CI initially."},
+      {"role": "assistant", "content": "Noted."},
+      {"role": "user", "content": "We're switching to GitLab CI for better integration."},
+      {"role": "assistant", "content": "Switch recorded."}
+    ],
+    "memory_to_store": "User initially configured Jenkins servers to handle all continuous integration pipelines.",
+    "question": "What CI system did the user configure before switching to GitLab?",
+    "answer_keywords": ["jenkins"],
+    "distractor_memories": ["User initially configured Travis CI for pipelines"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_034",
+    "category": "temporal_reasoning",
+    "difficulty": "medium",
+    "setup_turns": [
+      {"role": "user", "content": "I formatted code with yapf originally."},
+      {"role": "assistant", "content": "Understood."},
+      {"role": "user", "content": "I standardized on black across the team now."},
+      {"role": "assistant", "content": "Standardization noted."}
+    ],
+    "memory_to_store": "User originally formatted their Python codebase using the yapf tool.",
+    "question": "Which formatter did the user originally use before team standardization?",
+    "answer_keywords": ["yapf"],
+    "distractor_memories": ["User originally formatted code using autopep8"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_035",
+    "category": "temporal_reasoning",
+    "difficulty": "hard",
+    "setup_turns": [
+      {"role": "user", "content": "We tracked hardware inventory in Excel sheets."},
+      {"role": "assistant", "content": "Okay."},
+      {"role": "user", "content": "We migrated inventory tracking to a custom Rust backend."},
+      {"role": "assistant", "content": "Migration to Rust backend noted."}
+    ],
+    "memory_to_store": "User previously tracked hardware inventory using manual Excel spreadsheet files.",
+    "question": "What method did the user rely on for inventory tracking before building the custom backend?",
+    "answer_keywords": ["excel"],
+    "distractor_memories": ["User relied on Google Sheets for inventory tracking"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_036",
+    "category": "temporal_reasoning",
+    "difficulty": "hard",
+    "setup_turns": [
+      {"role": "user", "content": "I stored embeddings in a CSV file initially."},
+      {"role": "assistant", "content": "Got it."},
+      {"role": "user", "content": "I migrated them to a Pinecone vector database."},
+      {"role": "assistant", "content": "Vector migration noted."}
+    ],
+    "memory_to_store": "User initially persisted model embeddings inside a local CSV file.",
+    "question": "Where did the user store embeddings before migrating to a vector database?",
+    "answer_keywords": ["csv"],
+    "distractor_memories": ["User stored embeddings in a JSON file initially"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_037",
+    "category": "multi_session",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "I'm building a REST API with FastAPI."},
+      {"role": "assistant", "content": "Great choice."},
+      {"role": "user", "content": "I need a database that handles JSON well. I'll use PostgreSQL then."},
+      {"role": "assistant", "content": "PostgreSQL is excellent for JSON."}
+    ],
+    "memory_to_store": "User builds a FastAPI REST API and selected PostgreSQL for JSON handling.",
+    "question": "Which database did the user select for their FastAPI project?",
+    "answer_keywords": ["postgresql"],
+    "distractor_memories": ["User selected MongoDB for their FastAPI project"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_038",
+    "category": "multi_session",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "I trained a sentiment analysis model."},
+      {"role": "assistant", "content": "Nice work."},
+      {"role": "user", "content": "I want to deploy the model behind a React dashboard."},
+      {"role": "assistant", "content": "I can help with that integration."}
+    ],
+    "memory_to_store": "User trained a sentiment analysis model to deploy behind a React dashboard.",
+    "question": "What frontend framework will host the user's sentiment model?",
+    "answer_keywords": ["react"],
+    "distractor_memories": ["User will host the model behind a Vue.js dashboard"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_039",
+    "category": "multi_session",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "I set up a GitHub Actions pipeline."},
+      {"role": "assistant", "content": "Good start."},
+      {"role": "user", "content": "I want the pipeline to fail if ruff finds errors."},
+      {"role": "assistant", "content": "I'll add that linting step."}
+    ],
+    "memory_to_store": "User configured a GitHub Actions pipeline to fail on ruff linting errors.",
+    "question": "Which linter does the user want to enforce in their CI pipeline?",
+    "answer_keywords": ["ruff"],
+    "distractor_memories": ["User wants to enforce flake8 in their CI pipeline"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_040",
+    "category": "multi_session",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "I'm provisioning ARM-based cloud instances."},
+      {"role": "assistant", "content": "Noted."},
+      {"role": "user", "content": "I need a lightweight database for these ARM servers. I'll go with SQLite."},
+      {"role": "assistant", "content": "SQLite is a solid lightweight choice."}
+    ],
+    "memory_to_store": "User provisions ARM cloud instances and selected SQLite as the lightweight database.",
+    "question": "What database did the user choose for their ARM-based servers?",
+    "answer_keywords": ["sqlite"],
+    "distractor_memories": ["User chose Redis for their ARM-based servers"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_041",
+    "category": "multi_session",
+    "difficulty": "medium",
+    "setup_turns": [
+      {"role": "user", "content": "We use ClickUp for sprint planning."},
+      {"role": "assistant", "content": "Understood."},
+      {"role": "user", "content": "I'm starting the new Django backend task today."},
+      {"role": "assistant", "content": "I'll log it in ClickUp."}
+    ],
+    "memory_to_store": "User manages sprint planning in ClickUp and started a new Django backend task.",
+    "question": "Where does the user log tasks for their new Django backend?",
+    "answer_keywords": ["clickup"],
+    "distractor_memories": ["User logs tasks for their Django backend in Trello"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_042",
+    "category": "multi_session",
+    "difficulty": "medium",
+    "setup_turns": [
+      {"role": "user", "content": "I'm fine-tuning a Llama 3 model."},
+      {"role": "assistant", "content": "Exciting project."},
+      {"role": "user", "content": "I need to containerize the inference server. I'll write a Dockerfile."},
+      {"role": "assistant", "content": "Docker is standard for that."}
+    ],
+    "memory_to_store": "User fine-tunes a Llama 3 model and containerizes the inference server with Docker.",
+    "question": "What tool does the user employ to containerize their Llama 3 inference server?",
+    "answer_keywords": ["docker"],
+    "distractor_memories": ["User employs Podman to containerize the inference server"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_043",
+    "category": "multi_session",
+    "difficulty": "hard",
+    "setup_turns": [
+      {"role": "user", "content": "I'm migrating our legacy jQuery code to Vue.js."},
+      {"role": "assistant", "content": "Big upgrade."},
+      {"role": "user", "content": "I want to enforce strict linting and use MongoDB for the new data layer."},
+      {"role": "assistant", "content": "I'll configure eslint and the mongo driver."}
+    ],
+    "memory_to_store": "User migrates jQuery to Vue.js, enforces eslint, and adopts MongoDB for the data layer.",
+    "question": "What database pairs with the user's new Vue.js migration and strict linting setup?",
+    "answer_keywords": ["mongodb"],
+    "distractor_memories": ["User pairs PostgreSQL with the Vue.js migration"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_044",
+    "category": "multi_session",
+    "difficulty": "hard",
+    "setup_turns": [
+      {"role": "user", "content": "I'm setting up a Kubernetes cluster on bare metal."},
+      {"role": "assistant", "content": "Complex setup."},
+      {"role": "user", "content": "I need to schedule GPU-heavy training jobs on those nodes. I'll configure the NVIDIA plugin."},
+      {"role": "assistant", "content": "Device plugins are required for that."}
+    ],
+    "memory_to_store": "User runs a bare metal Kubernetes cluster and configures NVIDIA plugins for GPU training jobs.",
+    "question": "What hardware plugin does the user configure for GPU jobs on their bare metal cluster?",
+    "answer_keywords": ["nvidia"],
+    "distractor_memories": ["User configures AMD plugins for GPU jobs"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_045",
+    "category": "implicit_preference",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "Show me how to define a route in FastAPI."},
+      {"role": "assistant", "content": "Here's an example."},
+      {"role": "user", "content": "How do I add middleware in FastAPI?"},
+      {"role": "assistant", "content": "Like this."},
+      {"role": "user", "content": "What's the best way to handle dependencies in FastAPI?"}
+    ],
+    "memory_to_store": "User consistently requests implementation examples and best practices for FastAPI development.",
+    "question": "Which web framework does the user consistently seek guidance on?",
+    "answer_keywords": ["fastapi"],
+    "distractor_memories": ["User consistently seeks guidance on Flask development"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_046",
+    "category": "implicit_preference",
+    "difficulty": "easy",
+    "setup_turns": [
+      {"role": "user", "content": "How do I create a table in PostgreSQL?"},
+      {"role": "assistant", "content": "Use CREATE TABLE."},
+      {"role": "user", "content": "How do I add an index in PostgreSQL?"},
+      {"role": "assistant", "content": "Use CREATE INDEX."},
+      {"role": "user", "content": "Explain VACUUM in PostgreSQL."}
+    ],
+    "memory_to_store": "User repeatedly asks for schema management and maintenance commands specific to PostgreSQL.",
+    "question": "Which database system does the user repeatedly ask about?",
+    "answer_keywords": ["postgresql"],
+    "distractor_memories": ["User repeatedly asks about MySQL commands"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_047",
+    "category": "implicit_preference",
+    "difficulty": "medium",
+    "setup_turns": [
+      {"role": "user", "content": "Generate a script to tokenize text for transformers."},
+      {"role": "assistant", "content": "Done."},
+      {"role": "user", "content": "Now write a training loop using Hugging Face Trainer."},
+      {"role": "assistant", "content": "Here it is."},
+      {"role": "user", "content": "How do I push this model to the Hugging Face Hub?"}
+    ],
+    "memory_to_store": "User consistently focuses on Hugging Face ecosystem tools for NLP model development.",
+    "question": "Which AI ecosystem does the user consistently focus on for NLP tasks?",
+    "answer_keywords": ["hugging face"],
+    "distractor_memories": ["User consistently focuses on LangChain ecosystem for NLP"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_048",
+    "category": "implicit_preference",
+    "difficulty": "medium",
+    "setup_turns": [
+      {"role": "user", "content": "Convert this HTML to JSX."},
+      {"role": "assistant", "content": "Converted."},
+      {"role": "user", "content": "How do I manage state with React hooks?"},
+      {"role": "assistant", "content": "Use useState."},
+      {"role": "user", "content": "Show me a React component structure for a modal."}
+    ],
+    "memory_to_store": "User consistently requests code conversions and patterns specific to React component architecture.",
+    "question": "Which frontend library does the user consistently request patterns for?",
+    "answer_keywords": ["react"],
+    "distractor_memories": ["User consistently requests patterns for Angular components"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_049",
+    "category": "implicit_preference",
+    "difficulty": "hard",
+    "setup_turns": [
+      {"role": "user", "content": "Write a pre-commit hook that runs black."},
+      {"role": "assistant", "content": "Created."},
+      {"role": "user", "content": "Add a CI step that fails if black formatting is off."},
+      {"role": "assistant", "content": "Added."},
+      {"role": "user", "content": "How do I enforce black in VS Code settings?"}
+    ],
+    "memory_to_store": "User systematically integrates black formatting into local hooks, CI pipelines, and editor settings.",
+    "question": "Which code formatter does the user systematically enforce across their entire development workflow?",
+    "answer_keywords": ["black"],
+    "distractor_memories": ["User systematically enforces prettier across their workflow"],
+    "project": "eval-project"
+  },
+  {
+    "id": "lme_050",
+    "category": "implicit_preference",
+    "difficulty": "hard",
+    "setup_turns": [
+      {"role": "user", "content": "Draft a spec for upgrading our AWS EC2 instances."},
+      {"role": "assistant", "content": "Drafted."},
+      {"role": "user", "content": "Create a cost comparison for AWS vs on-prem servers."},
+      {"role": "assistant", "content": "Compared."},
+      {"role": "user", "content": "Schedule a migration timeline for our AWS RDS databases."}
+    ],
+    "memory_to_store": "User consistently plans infrastructure upgrades, cost analyses, and migrations centered around AWS services.",
+    "question": "Which cloud provider does the user consistently center their infrastructure planning around?",
+    "answer_keywords": ["aws"],
+    "distractor_memories": ["User consistently centers planning around Google Cloud services"],
+    "project": "eval-project"
+  }
+]
