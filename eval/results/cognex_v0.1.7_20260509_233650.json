@@ -1,0 +1,1048 @@
+{
+  "cognex_version": "v0.1.7",
+  "timestamp": "20260509_233650",
+  "summary": {
+    "total": 35,
+    "overall": {
+      "R@1": 11.4,
+      "R@3": 97.1,
+      "R@5": 97.1
+    },
+    "by_category": {
+      "fact_recall": {
+        "R@1": 20.0,
+        "R@3": 100.0,
+        "R@5": 100.0
+      },
+      "preference_application": {
+        "R@1": 20.0,
+        "R@3": 80.0,
+        "R@5": 80.0
+      },
+      "decision_consistency": {
+        "R@1": 20.0,
+        "R@3": 100.0,
+        "R@5": 100.0
+      },
+      "rationale_recall": {
+        "R@1": 0.0,
+        "R@3": 100.0,
+        "R@5": 100.0
+      },
+      "pattern_discovery": {
+        "R@1": 20.0,
+        "R@3": 100.0,
+        "R@5": 100.0
+      },
+      "tradeoff_reasoning": {
+        "R@1": 0.0,
+        "R@3": 100.0,
+        "R@5": 100.0
+      },
+      "lessons_learned": {
+        "R@1": 0.0,
+        "R@3": 100.0,
+        "R@5": 100.0
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "R@1": 7.1,
+        "R@3": 92.9,
+        "R@5": 92.9
+      },
+      "medium": {
+        "R@1": 7.1,
+        "R@3": 100.0,
+        "R@5": 100.0
+      },
+      "hard": {
+        "R@1": 28.6,
+        "R@3": 100.0,
+        "R@5": 100.0
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "fact_recall_001",
+      "category": "fact_recall",
+      "difficulty": "easy",
+      "question": "What database indexing strategy did I recommend?",
+      "memory_to_store": "Always index frequently-queried columns and use EXPLAIN PLAN to verify index usage.",
+      "answer_keywords": [
+        "index",
+        "frequently-queried"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "index",
+          "matched_memory": "always index frequently-queried columns and use explain plan to verify index usage."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "index",
+          "matched_memory": "always index frequently-queried columns and use explain plan to verify index usage."
+        }
+      }
+    },
+    {
+      "id": "fact_recall_002",
+      "category": "fact_recall",
+      "difficulty": "easy",
+      "question": "What did I say about Python type hints?",
+      "memory_to_store": "Always use type hints in function signatures for better IDE support and self-documenting code.",
+      "answer_keywords": [
+        "type hints",
+        "function signatures"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "type hints",
+          "matched_memory": "always use type hints in function signatures for better ide support and self-documenting code."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "type hints",
+          "matched_memory": "always use type hints in function signatures for better ide support and self-documenting code."
+        }
+      }
+    },
+    {
+      "id": "fact_recall_003",
+      "category": "fact_recall",
+      "difficulty": "medium",
+      "question": "What should I remember about authentication tokens?",
+      "memory_to_store": "JWT tokens should be stored in httpOnly cookies to prevent XSS attacks and include refresh token rotation.",
+      "answer_keywords": [
+        "httpOnly cookies",
+        "refresh token"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "httpOnly cookies",
+          "matched_memory": "jwt tokens should be stored in httponly cookies to prevent xss attacks and include refresh token rotation."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "httpOnly cookies",
+          "matched_memory": "jwt tokens should be stored in httponly cookies to prevent xss attacks and include refresh token rotation."
+        }
+      }
+    },
+    {
+      "id": "fact_recall_004",
+      "category": "fact_recall",
+      "difficulty": "medium",
+      "question": "What did I learn about API pagination?",
+      "memory_to_store": "Always implement cursor-based pagination for large datasets instead of offset-based to avoid performance issues with late pages.",
+      "answer_keywords": [
+        "cursor-based pagination",
+        "large datasets"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "cursor-based pagination",
+          "matched_memory": "cursor-based pagination is slower than offset pagination."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "cursor-based pagination",
+          "matched_memory": "cursor-based pagination is slower than offset pagination."
+        }
+      }
+    },
+    {
+      "id": "fact_recall_005",
+      "category": "fact_recall",
+      "difficulty": "hard",
+      "question": "What are the key considerations for database migration?",
+      "memory_to_store": "Database migrations should be idempotent, tested locally against production schema, include rollback procedures, and be monitored closely during deployment.",
+      "answer_keywords": [
+        "idempotent",
+        "rollback procedures"
+      ],
+      "results": {
+        "R@1": {
+          "hit": true,
+          "matched_keyword": "idempotent",
+          "matched_memory": "database migrations should be idempotent, tested locally against production schema, include rollback procedures, and be monitored closely during deployment."
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "idempotent",
+          "matched_memory": "database migrations should be idempotent, tested locally against production schema, include rollback procedures, and be monitored closely during deployment."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "idempotent",
+          "matched_memory": "database migrations should be idempotent, tested locally against production schema, include rollback procedures, and be monitored closely during deployment."
+        }
+      }
+    },
+    {
+      "id": "preference_001",
+      "category": "preference_application",
+      "difficulty": "easy",
+      "question": "What's my preferred testing framework?",
+      "memory_to_store": "I prefer pytest over unittest because of simpler syntax and better fixture management.",
+      "answer_keywords": [
+        "pytest",
+        "fixture management"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@5": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        }
+      }
+    },
+    {
+      "id": "preference_002",
+      "category": "preference_application",
+      "difficulty": "easy",
+      "question": "What code editor do I prefer?",
+      "memory_to_store": "I prefer VS Code because of excellent Python support via Pylance, built-in git integration, and extensive marketplace of extensions.",
+      "answer_keywords": [
+        "VS Code",
+        "Pylance"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "VS Code",
+          "matched_memory": "i prefer vs code because of excellent python support via pylance, built-in git integration, and extensive marketplace of extensions."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "VS Code",
+          "matched_memory": "i prefer vs code because of excellent python support via pylance, built-in git integration, and extensive marketplace of extensions."
+        }
+      }
+    },
+    {
+      "id": "preference_003",
+      "category": "preference_application",
+      "difficulty": "medium",
+      "question": "What's my approach to code documentation?",
+      "memory_to_store": "I prefer docstrings with type hints over external documentation because they stay in sync and are immediate context for developers.",
+      "answer_keywords": [
+        "docstrings",
+        "type hints"
+      ],
+      "results": {
+        "R@1": {
+          "hit": true,
+          "matched_keyword": "docstrings",
+          "matched_memory": "comments in code are superior to docstrings."
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "docstrings",
+          "matched_memory": "comments in code are superior to docstrings."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "docstrings",
+          "matched_memory": "comments in code are superior to docstrings."
+        }
+      }
+    },
+    {
+      "id": "preference_004",
+      "category": "preference_application",
+      "difficulty": "medium",
+      "question": "How do I prefer to structure projects?",
+      "memory_to_store": "I prefer feature-based directory structure over layer-based because it reduces coupling and makes independent deployment easier.",
+      "answer_keywords": [
+        "feature-based",
+        "independent deployment"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "feature-based",
+          "matched_memory": "i prefer feature-based directory structure over layer-based because it reduces coupling and makes independent deployment easier."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "feature-based",
+          "matched_memory": "i prefer feature-based directory structure over layer-based because it reduces coupling and makes independent deployment easier."
+        }
+      }
+    },
+    {
+      "id": "preference_005",
+      "category": "preference_application",
+      "difficulty": "hard",
+      "question": "What's my philosophy on technical debt?",
+      "memory_to_store": "Technical debt should be tracked explicitly with estimated payoff time and interest cost, prioritized quarterly, and never allowed to exceed 20% of sprint velocity.",
+      "answer_keywords": [
+        "explicitly tracked",
+        "20% of sprint velocity"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "20% of sprint velocity",
+          "matched_memory": "technical debt should be tracked explicitly with estimated payoff time and interest cost, prioritized quarterly, and never allowed to exceed 20% of sprint velocity."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "20% of sprint velocity",
+          "matched_memory": "technical debt should be tracked explicitly with estimated payoff time and interest cost, prioritized quarterly, and never allowed to exceed 20% of sprint velocity."
+        }
+      }
+    },
+    {
+      "id": "decision_consistency_001",
+      "category": "decision_consistency",
+      "difficulty": "easy",
+      "question": "What database did I choose for the user session store?",
+      "memory_to_store": "I chose Redis for session storage because of low latency, atomic operations, and built-in TTL for automatic expiration.",
+      "answer_keywords": [
+        "Redis",
+        "atomic operations"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "Redis",
+          "matched_memory": "i chose redis for session storage because of low latency, atomic operations, and built-in ttl for automatic expiration."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "Redis",
+          "matched_memory": "i chose redis for session storage because of low latency, atomic operations, and built-in ttl for automatic expiration."
+        }
+      }
+    },
+    {
+      "id": "decision_consistency_002",
+      "category": "decision_consistency",
+      "difficulty": "easy",
+      "question": "What queue system did I decide to use?",
+      "memory_to_store": "I chose RabbitMQ for our async job queue because of message durability guarantees and flexible routing capabilities.",
+      "answer_keywords": [
+        "RabbitMQ",
+        "message durability"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "RabbitMQ",
+          "matched_memory": "i chose rabbitmq for our async job queue because of message durability guarantees and flexible routing capabilities."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "RabbitMQ",
+          "matched_memory": "i chose rabbitmq for our async job queue because of message durability guarantees and flexible routing capabilities."
+        }
+      }
+    },
+    {
+      "id": "decision_consistency_003",
+      "category": "decision_consistency",
+      "difficulty": "medium",
+      "question": "What architectural pattern did I choose for the service layer?",
+      "memory_to_store": "I decided on the repository pattern to abstract data access and enable testing with in-memory implementations.",
+      "answer_keywords": [
+        "repository pattern",
+        "in-memory implementations"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "repository pattern",
+          "matched_memory": "i decided on the repository pattern to abstract data access and enable testing with in-memory implementations."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "repository pattern",
+          "matched_memory": "i decided on the repository pattern to abstract data access and enable testing with in-memory implementations."
+        }
+      }
+    },
+    {
+      "id": "decision_consistency_004",
+      "category": "decision_consistency",
+      "difficulty": "medium",
+      "question": "What approach did I take for API versioning?",
+      "memory_to_store": "I chose URL-based versioning (e.g. /api/v2/users) over header-based because it's explicit in logs and easier for clients to understand.",
+      "answer_keywords": [
+        "URL-based versioning",
+        "/api/v2"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "URL-based versioning",
+          "matched_memory": "i chose url-based versioning (e.g. /api/v2/users) over header-based because it's explicit in logs and easier for clients to understand."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "URL-based versioning",
+          "matched_memory": "i chose url-based versioning (e.g. /api/v2/users) over header-based because it's explicit in logs and easier for clients to understand."
+        }
+      }
+    },
+    {
+      "id": "decision_consistency_005",
+      "category": "decision_consistency",
+      "difficulty": "hard",
+      "question": "What deployment strategy did I select?",
+      "memory_to_store": "I implemented blue-green deployment with automated health checks to enable instant rollback while keeping traffic stable during updates.",
+      "answer_keywords": [
+        "blue-green deployment",
+        "health checks"
+      ],
+      "results": {
+        "R@1": {
+          "hit": true,
+          "matched_keyword": "health checks",
+          "matched_memory": "health checks are not necessary for deployment."
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "blue-green deployment",
+          "matched_memory": "i implemented blue-green deployment with automated health checks to enable instant rollback while keeping traffic stable during updates."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "blue-green deployment",
+          "matched_memory": "i implemented blue-green deployment with automated health checks to enable instant rollback while keeping traffic stable during updates."
+        }
+      }
+    },
+    {
+      "id": "rationale_recall_001",
+      "category": "rationale_recall",
+      "difficulty": "easy",
+      "question": "Why did I prefer async/await over threading?",
+      "memory_to_store": "Async/await with asyncio is better than threading because it has lower memory overhead and avoids GIL contention in Python.",
+      "answer_keywords": [
+        "lower memory overhead",
+        "GIL contention"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "lower memory overhead",
+          "matched_memory": "async/await with asyncio is better than threading because it has lower memory overhead and avoids gil contention in python."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "lower memory overhead",
+          "matched_memory": "async/await with asyncio is better than threading because it has lower memory overhead and avoids gil contention in python."
+        }
+      }
+    },
+    {
+      "id": "rationale_recall_002",
+      "category": "rationale_recall",
+      "difficulty": "easy",
+      "question": "Why do I cache at multiple layers?",
+      "memory_to_store": "Multi-layer caching reduces database load at each level: HTTP cache headers for browsers, Redis for hot data, and database query caching.",
+      "answer_keywords": [
+        "multi-layer caching",
+        "database load"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "multi-layer caching",
+          "matched_memory": "multi-layer caching reduces database load at each level: http cache headers for browsers, redis for hot data, and database query caching."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "multi-layer caching",
+          "matched_memory": "multi-layer caching reduces database load at each level: http cache headers for browsers, redis for hot data, and database query caching."
+        }
+      }
+    },
+    {
+      "id": "rationale_recall_003",
+      "category": "rationale_recall",
+      "difficulty": "medium",
+      "question": "Why did I choose event sourcing for this module?",
+      "memory_to_store": "Event sourcing provides a complete audit trail, enables temporal queries, and allows replaying events to rebuild state without data loss.",
+      "answer_keywords": [
+        "audit trail",
+        "replaying events"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "audit trail",
+          "matched_memory": "event sourcing provides a complete audit trail, enables temporal queries, and allows replaying events to rebuild state without data loss."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "audit trail",
+          "matched_memory": "event sourcing provides a complete audit trail, enables temporal queries, and allows replaying events to rebuild state without data loss."
+        }
+      }
+    },
+    {
+      "id": "rationale_recall_004",
+      "category": "rationale_recall",
+      "difficulty": "medium",
+      "question": "Why do we use immutable data structures?",
+      "memory_to_store": "Immutable data structures prevent accidental mutations, simplify concurrent access reasoning, and enable structural sharing for memory efficiency.",
+      "answer_keywords": [
+        "prevent accidental mutations",
+        "structural sharing"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "prevent accidental mutations",
+          "matched_memory": "immutable data structures prevent accidental mutations, simplify concurrent access reasoning, and enable structural sharing for memory efficiency."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "prevent accidental mutations",
+          "matched_memory": "immutable data structures prevent accidental mutations, simplify concurrent access reasoning, and enable structural sharing for memory efficiency."
+        }
+      }
+    },
+    {
+      "id": "rationale_recall_005",
+      "category": "rationale_recall",
+      "difficulty": "hard",
+      "question": "Why did I implement eventual consistency instead of strong consistency?",
+      "memory_to_store": "Eventual consistency enables horizontal scaling and resilience to network partitions at the cost of temporary data divergence, acceptable for our use case.",
+      "answer_keywords": [
+        "eventual consistency",
+        "network partitions"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "eventual consistency",
+          "matched_memory": "eventual consistency enables horizontal scaling and resilience to network partitions at the cost of temporary data divergence, acceptable for our use case."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "eventual consistency",
+          "matched_memory": "eventual consistency enables horizontal scaling and resilience to network partitions at the cost of temporary data divergence, acceptable for our use case."
+        }
+      }
+    },
+    {
+      "id": "pattern_001",
+      "category": "pattern_discovery",
+      "difficulty": "easy",
+      "question": "What pattern have I followed when handling errors?",
+      "memory_to_store": "I consistently wrap third-party API calls in try-except blocks and convert exceptions to application-specific error types for consistent error handling.",
+      "answer_keywords": [
+        "try-except blocks",
+        "application-specific error types"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "try-except blocks",
+          "matched_memory": "i consistently wrap third-party api calls in try-except blocks and convert exceptions to application-specific error types for consistent error handling."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "try-except blocks",
+          "matched_memory": "i consistently wrap third-party api calls in try-except blocks and convert exceptions to application-specific error types for consistent error handling."
+        }
+      }
+    },
+    {
+      "id": "pattern_002",
+      "category": "pattern_discovery",
+      "difficulty": "easy",
+      "question": "What pattern do I use for validation?",
+      "memory_to_store": "I use schema validation at entry points before processing and again before database writes to catch errors early.",
+      "answer_keywords": [
+        "schema validation",
+        "entry points"
+      ],
+      "results": {
+        "R@1": {
+          "hit": true,
+          "matched_keyword": "schema validation",
+          "matched_memory": "schema validation is performance-prohibitive."
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "schema validation",
+          "matched_memory": "schema validation is performance-prohibitive."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "schema validation",
+          "matched_memory": "schema validation is performance-prohibitive."
+        }
+      }
+    },
+    {
+      "id": "pattern_003",
+      "category": "pattern_discovery",
+      "difficulty": "medium",
+      "question": "What pattern have I used for dependency injection?",
+      "memory_to_store": "I use constructor injection to pass dependencies explicitly, making them visible in function signatures and enabling easy test mocking.",
+      "answer_keywords": [
+        "constructor injection",
+        "test mocking"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "constructor injection",
+          "matched_memory": "i use constructor injection to pass dependencies explicitly, making them visible in function signatures and enabling easy test mocking."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "constructor injection",
+          "matched_memory": "i use constructor injection to pass dependencies explicitly, making them visible in function signatures and enabling easy test mocking."
+        }
+      }
+    },
+    {
+      "id": "pattern_004",
+      "category": "pattern_discovery",
+      "difficulty": "medium",
+      "question": "What pattern have I followed for API responses?",
+      "memory_to_store": "All API responses follow a consistent envelope with status, data, errors, and pagination info to enable predictable client parsing.",
+      "answer_keywords": [
+        "consistent envelope",
+        "predictable client parsing"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "consistent envelope",
+          "matched_memory": "all api responses follow a consistent envelope with status, data, errors, and pagination info to enable predictable client parsing."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "consistent envelope",
+          "matched_memory": "all api responses follow a consistent envelope with status, data, errors, and pagination info to enable predictable client parsing."
+        }
+      }
+    },
+    {
+      "id": "pattern_005",
+      "category": "pattern_discovery",
+      "difficulty": "hard",
+      "question": "What pattern have I observed in my deployment approach?",
+      "memory_to_store": "I follow an immutable infrastructure pattern where servers are never updated but replaced with new versions built from updated images.",
+      "answer_keywords": [
+        "immutable infrastructure",
+        "replaced with new versions"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "immutable infrastructure",
+          "matched_memory": "i follow an immutable infrastructure pattern where servers are never updated but replaced with new versions built from updated images."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "immutable infrastructure",
+          "matched_memory": "i follow an immutable infrastructure pattern where servers are never updated but replaced with new versions built from updated images."
+        }
+      }
+    },
+    {
+      "id": "tradeoff_001",
+      "category": "tradeoff_reasoning",
+      "difficulty": "easy",
+      "question": "How did I balance code reusability vs. complexity?",
+      "memory_to_store": "I avoid premature abstraction and only extract common patterns after seeing the same code appear three times.",
+      "answer_keywords": [
+        "three times",
+        "premature abstraction"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "three times",
+          "matched_memory": "i avoid premature abstraction and only extract common patterns after seeing the same code appear three times."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "three times",
+          "matched_memory": "i avoid premature abstraction and only extract common patterns after seeing the same code appear three times."
+        }
+      }
+    },
+    {
+      "id": "tradeoff_002",
+      "category": "tradeoff_reasoning",
+      "difficulty": "easy",
+      "question": "How do I balance speed vs. code quality?",
+      "memory_to_store": "I write slow code fast then profile to find bottlenecks, rather than premature optimization that often misses real performance problems.",
+      "answer_keywords": [
+        "profile",
+        "bottlenecks"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "profile",
+          "matched_memory": "i write slow code fast then profile to find bottlenecks, rather than premature optimization that often misses real performance problems."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "profile",
+          "matched_memory": "i write slow code fast then profile to find bottlenecks, rather than premature optimization that often misses real performance problems."
+        }
+      }
+    },
+    {
+      "id": "tradeoff_003",
+      "category": "tradeoff_reasoning",
+      "difficulty": "medium",
+      "question": "How did I balance API simplicity vs. flexibility?",
+      "memory_to_store": "I design APIs with fixed schemas initially then expand through new endpoints rather than adding optional fields that confuse clients.",
+      "answer_keywords": [
+        "fixed schemas",
+        "new endpoints"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "fixed schemas",
+          "matched_memory": "i design apis with fixed schemas initially then expand through new endpoints rather than adding optional fields that confuse clients."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "fixed schemas",
+          "matched_memory": "i design apis with fixed schemas initially then expand through new endpoints rather than adding optional fields that confuse clients."
+        }
+      }
+    },
+    {
+      "id": "tradeoff_004",
+      "category": "tradeoff_reasoning",
+      "difficulty": "medium",
+      "question": "How do I balance testing coverage vs. speed?",
+      "memory_to_store": "I aim for 80% test coverage on critical paths and 40% on edge cases rather than pursuing 100% coverage which has diminishing returns.",
+      "answer_keywords": [
+        "80% test coverage",
+        "diminishing returns"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "80% test coverage",
+          "matched_memory": "i aim for 80% test coverage on critical paths and 40% on edge cases rather than pursuing 100% coverage which has diminishing returns."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "80% test coverage",
+          "matched_memory": "i aim for 80% test coverage on critical paths and 40% on edge cases rather than pursuing 100% coverage which has diminishing returns."
+        }
+      }
+    },
+    {
+      "id": "tradeoff_005",
+      "category": "tradeoff_reasoning",
+      "difficulty": "hard",
+      "question": "How did I balance consistency vs. availability in our system?",
+      "memory_to_store": "For user-facing data I chose availability over consistency, but for financial transactions I enforced strong consistency despite reduced availability.",
+      "answer_keywords": [
+        "availability over consistency",
+        "strong consistency"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "availability over consistency",
+          "matched_memory": "for user-facing data i chose availability over consistency, but for financial transactions i enforced strong consistency despite reduced availability."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "availability over consistency",
+          "matched_memory": "for user-facing data i chose availability over consistency, but for financial transactions i enforced strong consistency despite reduced availability."
+        }
+      }
+    },
+    {
+      "id": "lesson_001",
+      "category": "lessons_learned",
+      "difficulty": "easy",
+      "question": "What did I learn about premature optimization?",
+      "memory_to_store": "Premature optimization is the root of all evil: I spent weeks optimizing code that wasn't actually executed, missing real bottlenecks elsewhere.",
+      "answer_keywords": [
+        "premature optimization",
+        "root of all evil"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "premature optimization",
+          "matched_memory": "premature optimization is never a problem."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "premature optimization",
+          "matched_memory": "premature optimization is never a problem."
+        }
+      }
+    },
+    {
+      "id": "lesson_002",
+      "category": "lessons_learned",
+      "difficulty": "easy",
+      "question": "What did I learn about monolithic databases?",
+      "memory_to_store": "A single database became a bottleneck: we should have sharded by user ID earlier to enable horizontal scaling.",
+      "answer_keywords": [
+        "bottleneck",
+        "sharded by user"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "bottleneck",
+          "matched_memory": "databases never become bottlenecks with proper indexing."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "bottleneck",
+          "matched_memory": "databases never become bottlenecks with proper indexing."
+        }
+      }
+    },
+    {
+      "id": "lesson_003",
+      "category": "lessons_learned",
+      "difficulty": "medium",
+      "question": "What did I learn about error messages?",
+      "memory_to_store": "Cryptic error messages (e.g. 'Invalid request') frustrated users: detailed errors with specific field names and validation rules improved support tickets by 60%.",
+      "answer_keywords": [
+        "detailed errors",
+        "specific field names"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "detailed errors",
+          "matched_memory": "detailed errors expose security vulnerabilities."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "detailed errors",
+          "matched_memory": "detailed errors expose security vulnerabilities."
+        }
+      }
+    },
+    {
+      "id": "lesson_004",
+      "category": "lessons_learned",
+      "difficulty": "medium",
+      "question": "What did I learn about feature flags?",
+      "memory_to_store": "Feature flags enabled incremental rollout and instant rollback: one large deployment caused cascading failures that would have been caught by gradual rollout.",
+      "answer_keywords": [
+        "feature flags",
+        "instant rollback"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "feature flags",
+          "matched_memory": "feature flags are unnecessary overhead."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "feature flags",
+          "matched_memory": "feature flags are unnecessary overhead."
+        }
+      }
+    },
+    {
+      "id": "lesson_005",
+      "category": "lessons_learned",
+      "difficulty": "hard",
+      "question": "What did I learn about event sourcing complexity?",
+      "memory_to_store": "Event sourcing seemed elegant but required complex compensating transactions and audit logic: simpler append-only logs with snapshots worked better.",
+      "answer_keywords": [
+        "compensating transactions",
+        "append-only logs"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "compensating transactions",
+          "matched_memory": "event sourcing seemed elegant but required complex compensating transactions and audit logic: simpler append-only logs with snapshots worked better."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "compensating transactions",
+          "matched_memory": "event sourcing seemed elegant but required complex compensating transactions and audit logic: simpler append-only logs with snapshots worked better."
+        }
+      }
+    }
+  ]
+}

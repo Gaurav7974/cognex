@@ -1,0 +1,352 @@
+[
+  {
+    "id": "fact_recall_001",
+    "category": "fact_recall",
+    "difficulty": "easy",
+    "project": "eval",
+    "question": "What database indexing strategy did I recommend?",
+    "memory_to_store": "Always index frequently-queried columns and use EXPLAIN PLAN to verify index usage.",
+    "distractor_memories": ["Use connection pooling to improve database response time.", "Consider sharding for horizontal scaling at scale."],
+    "answer_keywords": ["index", "frequently-queried"]
+  },
+  {
+    "id": "fact_recall_002",
+    "category": "fact_recall",
+    "difficulty": "easy",
+    "project": "eval",
+    "question": "What did I say about Python type hints?",
+    "memory_to_store": "Always use type hints in function signatures for better IDE support and self-documenting code.",
+    "distractor_memories": ["Type annotations can slow down Python at runtime.", "Dynamic typing is more Pythonic than static typing."],
+    "answer_keywords": ["type hints", "function signatures"]
+  },
+  {
+    "id": "fact_recall_003",
+    "category": "fact_recall",
+    "difficulty": "medium",
+    "project": "eval",
+    "question": "What should I remember about authentication tokens?",
+    "memory_to_store": "JWT tokens should be stored in httpOnly cookies to prevent XSS attacks and include refresh token rotation.",
+    "distractor_memories": ["Store tokens in localStorage for better persistence.", "Token expiration is optional for security."],
+    "answer_keywords": ["httpOnly cookies", "refresh token"]
+  },
+  {
+    "id": "fact_recall_004",
+    "category": "fact_recall",
+    "difficulty": "medium",
+    "project": "eval",
+    "question": "What did I learn about API pagination?",
+    "memory_to_store": "Always implement cursor-based pagination for large datasets instead of offset-based to avoid performance issues with late pages.",
+    "distractor_memories": ["Cursor-based pagination is slower than offset pagination.", "Pagination is unnecessary for REST APIs."],
+    "answer_keywords": ["cursor-based pagination", "large datasets"]
+  },
+  {
+    "id": "fact_recall_005",
+    "category": "fact_recall",
+    "difficulty": "hard",
+    "project": "eval",
+    "question": "What are the key considerations for database migration?",
+    "memory_to_store": "Database migrations should be idempotent, tested locally against production schema, include rollback procedures, and be monitored closely during deployment.",
+    "distractor_memories": ["Migrations can be skipped if no data structure changes occur.", "Downtime-free migrations require event sourcing."],
+    "answer_keywords": ["idempotent", "rollback procedures"]
+  },
+  {
+    "id": "preference_001",
+    "category": "preference_application",
+    "difficulty": "easy",
+    "project": "eval",
+    "question": "What's my preferred testing framework?",
+    "memory_to_store": "I prefer pytest over unittest because of simpler syntax and better fixture management.",
+    "distractor_memories": ["unittest is the most popular Python test framework.", "Testing frameworks don't significantly differ in quality."],
+    "answer_keywords": ["pytest", "fixture management"]
+  },
+  {
+    "id": "preference_002",
+    "category": "preference_application",
+    "difficulty": "easy",
+    "project": "eval",
+    "question": "What code editor do I prefer?",
+    "memory_to_store": "I prefer VS Code because of excellent Python support via Pylance, built-in git integration, and extensive marketplace of extensions.",
+    "distractor_memories": ["Vim is objectively the best code editor.", "IDE choice doesn't affect productivity significantly."],
+    "answer_keywords": ["VS Code", "Pylance"]
+  },
+  {
+    "id": "preference_003",
+    "category": "preference_application",
+    "difficulty": "medium",
+    "project": "eval",
+    "question": "What's my approach to code documentation?",
+    "memory_to_store": "I prefer docstrings with type hints over external documentation because they stay in sync and are immediate context for developers.",
+    "distractor_memories": ["External wiki documentation is always more maintainable.", "Comments in code are superior to docstrings."],
+    "answer_keywords": ["docstrings", "type hints"]
+  },
+  {
+    "id": "preference_004",
+    "category": "preference_application",
+    "difficulty": "medium",
+    "project": "eval",
+    "question": "How do I prefer to structure projects?",
+    "memory_to_store": "I prefer feature-based directory structure over layer-based because it reduces coupling and makes independent deployment easier.",
+    "distractor_memories": ["MVC structure is universally superior.", "Directory structure doesn't impact maintainability."],
+    "answer_keywords": ["feature-based", "independent deployment"]
+  },
+  {
+    "id": "preference_005",
+    "category": "preference_application",
+    "difficulty": "hard",
+    "project": "eval",
+    "question": "What's my philosophy on technical debt?",
+    "memory_to_store": "Technical debt should be tracked explicitly with estimated payoff time and interest cost, prioritized quarterly, and never allowed to exceed 20% of sprint velocity.",
+    "distractor_memories": ["Technical debt should never be incurred under any circumstance.", "Technical debt is not measurable."],
+    "answer_keywords": ["explicitly tracked", "20% of sprint velocity"]
+  },
+  {
+    "id": "decision_consistency_001",
+    "category": "decision_consistency",
+    "difficulty": "easy",
+    "project": "eval",
+    "question": "What database did I choose for the user session store?",
+    "memory_to_store": "I chose Redis for session storage because of low latency, atomic operations, and built-in TTL for automatic expiration.",
+    "distractor_memories": ["PostgreSQL is always the right choice for session data.", "Session storage technology is irrelevant to performance."],
+    "answer_keywords": ["Redis", "atomic operations"]
+  },
+  {
+    "id": "decision_consistency_002",
+    "category": "decision_consistency",
+    "difficulty": "easy",
+    "project": "eval",
+    "question": "What queue system did I decide to use?",
+    "memory_to_store": "I chose RabbitMQ for our async job queue because of message durability guarantees and flexible routing capabilities.",
+    "distractor_memories": ["Kafka is the only acceptable message queue.", "Job queues add unnecessary complexity."],
+    "answer_keywords": ["RabbitMQ", "message durability"]
+  },
+  {
+    "id": "decision_consistency_003",
+    "category": "decision_consistency",
+    "difficulty": "medium",
+    "project": "eval",
+    "question": "What architectural pattern did I choose for the service layer?",
+    "memory_to_store": "I decided on the repository pattern to abstract data access and enable testing with in-memory implementations.",
+    "distractor_memories": ["Direct database calls from controllers are best.", "Architectural patterns are unnecessary overhead."],
+    "answer_keywords": ["repository pattern", "in-memory implementations"]
+  },
+  {
+    "id": "decision_consistency_004",
+    "category": "decision_consistency",
+    "difficulty": "medium",
+    "project": "eval",
+    "question": "What approach did I take for API versioning?",
+    "memory_to_store": "I chose URL-based versioning (e.g. /api/v2/users) over header-based because it's explicit in logs and easier for clients to understand.",
+    "distractor_memories": ["Header-based versioning is universally superior.", "API versioning should not be used at all."],
+    "answer_keywords": ["URL-based versioning", "/api/v2"]
+  },
+  {
+    "id": "decision_consistency_005",
+    "category": "decision_consistency",
+    "difficulty": "hard",
+    "project": "eval",
+    "question": "What deployment strategy did I select?",
+    "memory_to_store": "I implemented blue-green deployment with automated health checks to enable instant rollback while keeping traffic stable during updates.",
+    "distractor_memories": ["Rolling deployments are always better than blue-green.", "Health checks are not necessary for deployment."],
+    "answer_keywords": ["blue-green deployment", "health checks"]
+  },
+  {
+    "id": "rationale_recall_001",
+    "category": "rationale_recall",
+    "difficulty": "easy",
+    "project": "eval",
+    "question": "Why did I prefer async/await over threading?",
+    "memory_to_store": "Async/await with asyncio is better than threading because it has lower memory overhead and avoids GIL contention in Python.",
+    "distractor_memories": ["Threading has no disadvantages compared to async.", "Async/await is harder to debug than threads."],
+    "answer_keywords": ["lower memory overhead", "GIL contention"]
+  },
+  {
+    "id": "rationale_recall_002",
+    "category": "rationale_recall",
+    "difficulty": "easy",
+    "project": "eval",
+    "question": "Why do I cache at multiple layers?",
+    "memory_to_store": "Multi-layer caching reduces database load at each level: HTTP cache headers for browsers, Redis for hot data, and database query caching.",
+    "distractor_memories": ["Single-layer caching is more efficient.", "Caching adds unnecessary complexity."],
+    "answer_keywords": ["multi-layer caching", "database load"]
+  },
+  {
+    "id": "rationale_recall_003",
+    "category": "rationale_recall",
+    "difficulty": "medium",
+    "project": "eval",
+    "question": "Why did I choose event sourcing for this module?",
+    "memory_to_store": "Event sourcing provides a complete audit trail, enables temporal queries, and allows replaying events to rebuild state without data loss.",
+    "distractor_memories": ["Event sourcing has no advantages over CRUD.", "Event stores are always slower than databases."],
+    "answer_keywords": ["audit trail", "replaying events"]
+  },
+  {
+    "id": "rationale_recall_004",
+    "category": "rationale_recall",
+    "difficulty": "medium",
+    "project": "eval",
+    "question": "Why do we use immutable data structures?",
+    "memory_to_store": "Immutable data structures prevent accidental mutations, simplify concurrent access reasoning, and enable structural sharing for memory efficiency.",
+    "distractor_memories": ["Immutability has no performance benefits.", "Mutable data is easier to reason about."],
+    "answer_keywords": ["prevent accidental mutations", "structural sharing"]
+  },
+  {
+    "id": "rationale_recall_005",
+    "category": "rationale_recall",
+    "difficulty": "hard",
+    "project": "eval",
+    "question": "Why did I implement eventual consistency instead of strong consistency?",
+    "memory_to_store": "Eventual consistency enables horizontal scaling and resilience to network partitions at the cost of temporary data divergence, acceptable for our use case.",
+    "distractor_memories": ["Strong consistency is always required.", "Consistency levels don't affect scalability."],
+    "answer_keywords": ["eventual consistency", "network partitions"]
+  },
+  {
+    "id": "pattern_001",
+    "category": "pattern_discovery",
+    "difficulty": "easy",
+    "project": "eval",
+    "question": "What pattern have I followed when handling errors?",
+    "memory_to_store": "I consistently wrap third-party API calls in try-except blocks and convert exceptions to application-specific error types for consistent error handling.",
+    "distractor_memories": ["Error handling patterns are inconsistent and unnecessary.", "Exceptions should propagate without handling."],
+    "answer_keywords": ["try-except blocks", "application-specific error types"]
+  },
+  {
+    "id": "pattern_002",
+    "category": "pattern_discovery",
+    "difficulty": "easy",
+    "project": "eval",
+    "question": "What pattern do I use for validation?",
+    "memory_to_store": "I use schema validation at entry points before processing and again before database writes to catch errors early.",
+    "distractor_memories": ["Validation is only needed at the database layer.", "Schema validation is performance-prohibitive."],
+    "answer_keywords": ["schema validation", "entry points"]
+  },
+  {
+    "id": "pattern_003",
+    "category": "pattern_discovery",
+    "difficulty": "medium",
+    "project": "eval",
+    "question": "What pattern have I used for dependency injection?",
+    "memory_to_store": "I use constructor injection to pass dependencies explicitly, making them visible in function signatures and enabling easy test mocking.",
+    "distractor_memories": ["Global singletons are better than dependency injection.", "Dependency injection adds too much complexity."],
+    "answer_keywords": ["constructor injection", "test mocking"]
+  },
+  {
+    "id": "pattern_004",
+    "category": "pattern_discovery",
+    "difficulty": "medium",
+    "project": "eval",
+    "question": "What pattern have I followed for API responses?",
+    "memory_to_store": "All API responses follow a consistent envelope with status, data, errors, and pagination info to enable predictable client parsing.",
+    "distractor_memories": ["Consistent response formats are unnecessary.", "Different response formats per endpoint are fine."],
+    "answer_keywords": ["consistent envelope", "predictable client parsing"]
+  },
+  {
+    "id": "pattern_005",
+    "category": "pattern_discovery",
+    "difficulty": "hard",
+    "project": "eval",
+    "question": "What pattern have I observed in my deployment approach?",
+    "memory_to_store": "I follow an immutable infrastructure pattern where servers are never updated but replaced with new versions built from updated images.",
+    "distractor_memories": ["Updating servers in-place is more efficient.", "Server replacement adds unnecessary deployment steps."],
+    "answer_keywords": ["immutable infrastructure", "replaced with new versions"]
+  },
+  {
+    "id": "tradeoff_001",
+    "category": "tradeoff_reasoning",
+    "difficulty": "easy",
+    "project": "eval",
+    "question": "How did I balance code reusability vs. complexity?",
+    "memory_to_store": "I avoid premature abstraction and only extract common patterns after seeing the same code appear three times.",
+    "distractor_memories": ["Maximum code reusability should be pursued immediately.", "Code duplication is never acceptable."],
+    "answer_keywords": ["three times", "premature abstraction"]
+  },
+  {
+    "id": "tradeoff_002",
+    "category": "tradeoff_reasoning",
+    "difficulty": "easy",
+    "project": "eval",
+    "question": "How do I balance speed vs. code quality?",
+    "memory_to_store": "I write slow code fast then profile to find bottlenecks, rather than premature optimization that often misses real performance problems.",
+    "distractor_memories": ["Optimize everything from the start.", "Performance is irrelevant compared to development speed."],
+    "answer_keywords": ["profile", "bottlenecks"]
+  },
+  {
+    "id": "tradeoff_003",
+    "category": "tradeoff_reasoning",
+    "difficulty": "medium",
+    "project": "eval",
+    "question": "How did I balance API simplicity vs. flexibility?",
+    "memory_to_store": "I design APIs with fixed schemas initially then expand through new endpoints rather than adding optional fields that confuse clients.",
+    "distractor_memories": ["APIs should support unlimited optional fields.", "API versioning is always unnecessary."],
+    "answer_keywords": ["fixed schemas", "new endpoints"]
+  },
+  {
+    "id": "tradeoff_004",
+    "category": "tradeoff_reasoning",
+    "difficulty": "medium",
+    "project": "eval",
+    "question": "How do I balance testing coverage vs. speed?",
+    "memory_to_store": "I aim for 80% test coverage on critical paths and 40% on edge cases rather than pursuing 100% coverage which has diminishing returns.",
+    "distractor_memories": ["100% test coverage is always necessary.", "Testing slows down development too much to be worthwhile."],
+    "answer_keywords": ["80% test coverage", "diminishing returns"]
+  },
+  {
+    "id": "tradeoff_005",
+    "category": "tradeoff_reasoning",
+    "difficulty": "hard",
+    "project": "eval",
+    "question": "How did I balance consistency vs. availability in our system?",
+    "memory_to_store": "For user-facing data I chose availability over consistency, but for financial transactions I enforced strong consistency despite reduced availability.",
+    "distractor_memories": ["All systems should prioritize consistency equally.", "Availability and consistency cannot be tuned independently."],
+    "answer_keywords": ["availability over consistency", "strong consistency"]
+  },
+  {
+    "id": "lesson_001",
+    "category": "lessons_learned",
+    "difficulty": "easy",
+    "project": "eval",
+    "question": "What did I learn about premature optimization?",
+    "memory_to_store": "Premature optimization is the root of all evil: I spent weeks optimizing code that wasn't actually executed, missing real bottlenecks elsewhere.",
+    "distractor_memories": ["Premature optimization is never a problem.", "All code should be optimized from the start."],
+    "answer_keywords": ["premature optimization", "root of all evil"]
+  },
+  {
+    "id": "lesson_002",
+    "category": "lessons_learned",
+    "difficulty": "easy",
+    "project": "eval",
+    "question": "What did I learn about monolithic databases?",
+    "memory_to_store": "A single database became a bottleneck: we should have sharded by user ID earlier to enable horizontal scaling.",
+    "distractor_memories": ["Databases never become bottlenecks with proper indexing.", "Sharding adds unnecessary complexity."],
+    "answer_keywords": ["bottleneck", "sharded by user"]
+  },
+  {
+    "id": "lesson_003",
+    "category": "lessons_learned",
+    "difficulty": "medium",
+    "project": "eval",
+    "question": "What did I learn about error messages?",
+    "memory_to_store": "Cryptic error messages (e.g. 'Invalid request') frustrated users: detailed errors with specific field names and validation rules improved support tickets by 60%.",
+    "distractor_memories": ["Detailed errors expose security vulnerabilities.", "Error message quality doesn't affect user experience."],
+    "answer_keywords": ["detailed errors", "specific field names"]
+  },
+  {
+    "id": "lesson_004",
+    "category": "lessons_learned",
+    "difficulty": "medium",
+    "project": "eval",
+    "question": "What did I learn about feature flags?",
+    "memory_to_store": "Feature flags enabled incremental rollout and instant rollback: one large deployment caused cascading failures that would have been caught by gradual rollout.",
+    "distractor_memories": ["Feature flags are unnecessary overhead.", "All-or-nothing deployments are safer than gradual rollout."],
+    "answer_keywords": ["feature flags", "instant rollback"]
+  },
+  {
+    "id": "lesson_005",
+    "category": "lessons_learned",
+    "difficulty": "hard",
+    "project": "eval",
+    "question": "What did I learn about event sourcing complexity?",
+    "memory_to_store": "Event sourcing seemed elegant but required complex compensating transactions and audit logic: simpler append-only logs with snapshots worked better.",
+    "distractor_memories": ["Event sourcing is always the best architecture.", "Event sourcing and logging are the same thing."],
+    "answer_keywords": ["compensating transactions", "append-only logs"]
+  }
+]
