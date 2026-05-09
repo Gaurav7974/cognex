@@ -41,8 +41,9 @@ except ImportError:
 # - Swarm Planning (1): swarm_compile_intent
 # - Pattern Intelligence (2): pattern_analyze, pattern_stats
 # - Cognitive Units (8): unit_commit, unit_checkout, unit_search, unit_mark_overridden, unit_verify, unit_get_relevant, unit_export_snapshot, unit_decay_stale
-# - Cross-Agent Protocol (3): chp_entangle, chp_transfer, chp_project
-# Total: 18 tools
+# - Audit (2): audit_get_recent, audit_verify
+# - Cross-Agent Protocol (2): chp_transfer, chp_project
+# Total: 32 tools
 
 # QUICK START:
 # 1. Always start with substrate_start_session to initialize memory context
@@ -526,26 +527,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
             "required": ["unit_id"],
         },
     },
-    # CHP Tools (3)
-    {
-        "name": "chp_entangle",
-        "description": "Create quantum entanglement for Cognitive Unit transfer between agents. Use when: transferring state between different agents or machines. Establishes secure channel for cross-agent communication.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "unit_id": {"type": "string", "description": "Cognitive Unit ID"},
-                "source_agent": {
-                    "type": "string",
-                    "description": "Source agent identifier",
-                },
-                "target_agent": {
-                    "type": "string",
-                    "description": "Target agent identifier",
-                },
-            },
-            "required": ["unit_id", "source_agent", "target_agent"],
-        },
-    },
+    # CHP Tools (2)
     {
         "name": "chp_transfer",
         "description": "Transfer Cognitive Unit data via entanglement channel. Use when: sending unit data to another agent after establishing entanglement. Completes the cross-agent state transfer.",
