@@ -21,6 +21,7 @@ env/
 .coverage
 htmlcov/
 .tox/
+tests/integration/mcp/.test_mcp*/
 
 # Database files
 *.db
@@ -60,9 +61,13 @@ nul
 # Local test scripts
 test_handshake.py
 test_mcp_connection.py
+debug_search.py
+test_results.txt
 
 # Internal context files (not for public)
 project_context.md
+REMOVED_TOOL_ANALYSIS.md
+REMOVED_TOOL_REFERENCE.txt
 
 # Benchmark results
 evaluate/results/
@@ -76,7 +81,7 @@ evaluate/results/
 
 # AI agent workspace configs (machine-specific)
 AGENTS.md
-CLUADE.MD
+CLAUDE.md
 CLAUDE.MD
 
 # MCP optimization notes (for AI agents)
