@@ -65,6 +65,7 @@ debug_search.py
 test_results.txt
 
 # Internal context files (not for public)
+CONTEXT.md
 project_context.md
 REMOVED_TOOL_ANALYSIS.md
 REMOVED_TOOL_REFERENCE.txt

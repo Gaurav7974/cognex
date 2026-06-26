@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cognex"
-version = "0.1.7"
+version = "0.2.0"
 description = "Your AI forgets everything. Cognex doesn't."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -44,10 +44,15 @@ dev = [
   "build>=0.10",
   "twine>=4.0",
 ]
+semantic = [
+  "sentence-transformers>=2.7",
+  "sqlite-vec>=0.1",
+]
 
 [project.scripts]
-cognex = "substrate_mcp.server:main"
-cognex-install = "substrate_mcp.installer:run_install"
+cognex = "cognex_mcp.server:main"
+cognex-sync = "cognex_sync.server:main"
+cognex-install = "cognex_mcp.installer:run_install"
 
 [project.urls]
 Homepage = "https://github.com/Gaurav7974/cognex"
