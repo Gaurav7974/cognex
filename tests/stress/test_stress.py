@@ -6,8 +6,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from substrate_mcp.logger import TEST_LOGGER
-from substrate_mcp.tools import (
+from cognex_mcp.logger import TEST_LOGGER
+from cognex_mcp.tools import (
     ledger_find_similar,
     ledger_outcome,
     ledger_record,
@@ -15,10 +15,10 @@ from substrate_mcp.tools import (
     memory_decay,
     memory_get_context,
     memory_search,
-    substrate_end_session,
-    substrate_process_transcript,
-    substrate_report,
-    substrate_start_session,
+    cognex_end_session,
+    cognex_process_transcript,
+    cognex_report,
+    cognex_start_session,
     swarm_compile_intent,
     teleport_create_bundle,
     teleport_rehydrate,
@@ -47,12 +47,12 @@ def log(phase, tool, status, notes=""):
 async def run_phase1():
     TEST_LOGGER.info("Running Phase 1: Basic Operations")
     try:
-        r = await substrate_start_session(
+        r = await cognex_start_session(
             session_id="stress-test-001", project="stress-test"
         )
-        log(1, "substrate_start_session", True, f"session={r['session_id']}")
+        log(1, "cognex_start_session", True, f"session={r['session_id']}")
     except Exception as e:
-        log(1, "substrate_start_session", False, str(e))
+        log(1, "cognex_start_session", False, str(e))
 
     try:
         r = await memory_add(
@@ -159,20 +159,20 @@ async def run_phase1():
         log(1, "teleport_create_bundle", False, str(e))
 
     try:
-        r = await substrate_process_transcript(
+        r = await cognex_process_transcript(
             transcript="User decided to use FastAPI. User prefers async code."
         )
         log(
-            1, "substrate_process_transcript", True, f"extracted {r['extracted_count']}"
+            1, "cognex_process_transcript", True, f"extracted {r['extracted_count']}"
         )
     except Exception as e:
-        log(1, "substrate_process_transcript", False, str(e))
+        log(1, "cognex_process_transcript", False, str(e))
 
     try:
-        r = await substrate_report()
-        log(1, "substrate_report", True, f"memories={r['total_memories']}")
+        r = await cognex_report()
+        log(1, "cognex_report", True, f"memories={r['total_memories']}")
     except Exception as e:
-        log(1, "substrate_report", False, str(e))
+        log(1, "cognex_report", False, str(e))
 
     try:
         r = await memory_decay(factor=0.95)
@@ -181,10 +181,10 @@ async def run_phase1():
         log(1, "memory_decay", False, str(e))
 
     try:
-        r = await substrate_end_session(summary="Stress test phase 1 complete")
-        log(1, "substrate_end_session", True, f"session={r['session_id']}")
+        r = await cognex_end_session(summary="Stress test phase 1 complete")
+        log(1, "cognex_end_session", True, f"session={r['session_id']}")
     except Exception as e:
-        log(1, "substrate_end_session", False, str(e))
+        log(1, "cognex_end_session", False, str(e))
 
 
 async def run_phase2():
@@ -220,17 +220,17 @@ async def run_phase2():
         log(2, "ledger_record empty tool_used", False, f"Wrong error: {e}")
 
     try:
-        await substrate_start_session(session_id="")
+        await cognex_start_session(session_id="")
         log(
             2,
-            "substrate_start_session empty id",
+            "cognex_start_session empty id",
             False,
             "Should have raised error but didn't!",
         )
     except ValueError:
-        log(2, "substrate_start_session empty id", True, "Correctly raised ValueError")
+        log(2, "cognex_start_session empty id", True, "Correctly raised ValueError")
     except Exception as e:
-        log(2, "substrate_start_session empty id", False, f"Wrong error: {e}")
+        log(2, "cognex_start_session empty id", False, f"Wrong error: {e}")
 
     try:
         await memory_add()
@@ -275,16 +275,16 @@ async def run_phase2():
         log(2, "memory_add x10 duplicates", False, str(e))
 
     try:
-        await substrate_start_session(session_id="dup-session", project="dup-test")
-        await substrate_start_session(session_id="dup-session", project="dup-test")
+        await cognex_start_session(session_id="dup-session", project="dup-test")
+        await cognex_start_session(session_id="dup-session", project="dup-test")
         log(
             2,
-            "substrate_start_session x2 same id",
+            "cognex_start_session x2 same id",
             True,
             "No crash on duplicate session",
         )
     except Exception as e:
-        log(2, "substrate_start_session x2 same id", False, str(e))
+        log(2, "cognex_start_session x2 same id", False, str(e))
 
     try:
         for i in range(5):
@@ -315,7 +315,7 @@ async def run_phase2():
 
     try:
         big = "User said: " + "Z" * 20000
-        r = await substrate_process_transcript(transcript=big)
+        r = await cognex_process_transcript(transcript=big)
         log(
             2, "process_transcript 20k chars", True, f"extracted {r['extracted_count']}"
         )
@@ -559,7 +559,7 @@ async def run_phase4():
 async def run_phase5():
     TEST_LOGGER.info("Running Phase 5: Lifecycle & Persistence")
     try:
-        await substrate_start_session(session_id="lifecycle-001")
+        await cognex_start_session(session_id="lifecycle-001")
         await memory_add(content="Lifecycle memory 1", project="lifecycle-test")
         await memory_add(content="Lifecycle memory 2", project="lifecycle-test")
         await memory_add(content="Lifecycle memory 3", project="lifecycle-test")
@@ -577,19 +577,19 @@ async def run_phase5():
             session_id="lifecycle-001",
         )
 
-        await substrate_process_transcript(
+        await cognex_process_transcript(
             transcript="User: I want to build a REST API with FastAPI.\nAI: Great choice! FastAPI has excellent async support.\nUser: Yes, and I prefer type hints everywhere.",
             session_id="lifecycle-001",
             project="lifecycle-test",
         )
 
-        r = await substrate_end_session(
+        r = await cognex_end_session(
             summary="Lifecycle test session complete",
             key_decisions=["Chose FastAPI", "Used type hints"],
             tools_used=[
                 "memory_add",
                 "ledger_record",
-                "substrate_process_transcript",
+                "cognex_process_transcript",
             ],
             input_tokens=1500,
             output_tokens=800,
@@ -604,7 +604,7 @@ async def run_phase5():
         log(5, "end session 001", False, str(e))
 
     try:
-        await substrate_start_session(session_id="lifecycle-002")
+        await cognex_start_session(session_id="lifecycle-002")
         r = await memory_get_context(query="lifecycle test", project="lifecycle-test")
         log(
             5,
@@ -616,7 +616,7 @@ async def run_phase5():
         log(5, "memories persist across sessions", False, str(e))
 
     try:
-        r = await substrate_report()
+        r = await cognex_report()
         log(
             5,
             "session count increased",

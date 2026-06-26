@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from substrate import CognitiveSubstrate, TeleportBundle, TeleportProtocol
+from cognex import CognexEngine, TeleportBundle, TeleportProtocol
 
 
 class TestTeleportBundle:
@@ -59,13 +59,13 @@ class TestTeleportBundle:
 
 class TestTeleportProtocol:
     def test_create_bundle(self, tmp_path):
-        substrate = CognitiveSubstrate(db_path=tmp_path / "sub.db")
-        substrate.start_session("s1", project="api")
-        substrate.process_transcript("I prefer FastAPI", project="api")
+        engine = CognexEngine(db_path=tmp_path / "sub.db")
+        engine.start_session("s1", project="api")
+        engine.process_transcript("I prefer FastAPI", project="api")
 
         protocol = TeleportProtocol()
         bundle = protocol.create_bundle(
-            substrate=substrate,
+            engine=engine,
             source_host="laptop",
             target_host="server",
             pending_tasks=("finish API", "add tests"),
@@ -77,23 +77,23 @@ class TestTeleportProtocol:
         assert bundle.verify() is True
 
     def test_rehydrate_success(self, tmp_path):
-        substrate = CognitiveSubstrate(db_path=tmp_path / "sub.db")
-        substrate.start_session("s1", project="api")
+        engine = CognexEngine(db_path=tmp_path / "sub.db")
+        engine.start_session("s1", project="api")
 
         protocol = TeleportProtocol()
         bundle = protocol.create_bundle(
-            substrate=substrate,
+            engine=engine,
             source_host="laptop",
             target_host="server",
         )
-        target_substrate = CognitiveSubstrate(db_path=tmp_path / "target.db")
-        report = protocol.rehydrate(bundle, target_substrate)
+        target_engine = CognexEngine(db_path=tmp_path / "target.db")
+        report = protocol.rehydrate(bundle, target_engine)
         assert report["status"] == "success"
         assert report["bundle_id"] == bundle.bundle_id
 
     def test_rehydrate_invalid_bundle(self, tmp_path):
-        substrate = CognitiveSubstrate(db_path=tmp_path / "sub.db")
+        engine = CognexEngine(db_path=tmp_path / "sub.db")
         protocol = TeleportProtocol()
         bundle = TeleportBundle(session_id="s1")
-        report = protocol.rehydrate(bundle, substrate)
+        report = protocol.rehydrate(bundle, engine)
         assert report["status"] == "failed"

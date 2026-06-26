@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from substrate import TrustGradientEngine, TrustLevel
+from cognex import TrustGradientEngine, TrustLevel
 
 
 class TestTrustGradientEngine:

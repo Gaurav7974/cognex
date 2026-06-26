@@ -8,15 +8,15 @@ import shutil
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
-from substrate import CognitiveSubstrate
+from cognex import CognexEngine
 
 
 @pytest.fixture
-def substrate(tmp_path):
-    """Create a test substrate instance for E2E tests."""
-    db_path = tmp_path / "e2e_substrate.db"
-    sub = CognitiveSubstrate(db_path=db_path)
-    yield sub
+def engine(tmp_path):
+    """Create a test engine instance for E2E tests."""
+    db_path = tmp_path / "e2e_cognex.db"
+    eng = CognexEngine(db_path=db_path)
+    yield eng
     # Cleanup
     if db_path.exists():
         try:

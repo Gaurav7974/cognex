@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from substrate import AgentRole, IntentCompiler
+from cognex import AgentRole, IntentCompiler
 
 
 class TestIntentCompiler:

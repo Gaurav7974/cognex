@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import pytest
 
-from substrate.ledger import DecisionLedger
-from substrate.patterns import PatternAnalyzer
-from substrate.store import MemoryStore
+from cognex.ledger import DecisionLedger
+from cognex.patterns import PatternAnalyzer
+from cognex.store import MemoryStore
 
 
 class TestPatternAnalyzer:

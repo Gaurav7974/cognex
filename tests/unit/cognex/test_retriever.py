@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from substrate import MemoryEntry, MemoryRetriever, MemoryType
+from cognex import MemoryEntry, MemoryRetriever, MemoryType
 
 
 class TestMemoryRetriever:

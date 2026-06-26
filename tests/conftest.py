@@ -7,7 +7,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from substrate import CognitiveSubstrate, MemoryStore
+from cognex import CognexEngine, MemoryStore
 
 
 @pytest.fixture
@@ -21,5 +21,5 @@ def store(tmp_db):
 
 
 @pytest.fixture
-def substrate(tmp_db):
-    return CognitiveSubstrate(db_path=tmp_db)
+def engine(tmp_db):
+    return CognexEngine(db_path=tmp_db)

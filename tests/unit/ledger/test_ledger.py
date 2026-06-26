@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from substrate import DecisionEntry, DecisionLedger
+from cognex import DecisionEntry, DecisionLedger
 
 
 class TestDecisionLedger:

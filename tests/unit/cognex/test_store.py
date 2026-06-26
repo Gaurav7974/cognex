@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from substrate import MemoryEntry, MemoryScope, MemoryStore, MemoryType, SessionSnapshot
+from cognex import MemoryEntry, MemoryScope, MemoryStore, MemoryType, SessionSnapshot
 
 
 class TestMemoryEntry:

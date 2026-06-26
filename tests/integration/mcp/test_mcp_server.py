@@ -7,12 +7,12 @@ from pathlib import Path
 src_path = Path(__file__).resolve().parents[3] / "src"
 sys.path.insert(0, str(src_path))
 
-from substrate_mcp.context import SubstrateContext
-from substrate_mcp.logger import TEST_LOGGER
-import substrate_mcp.tools.core_tools as core_tools
-import substrate_mcp.tools.ledger_tools as ledger_tools
-import substrate_mcp.tools.memory_tools as memory_tools
-import substrate_mcp.tools.trust_tools as trust_tools
+from cognex_mcp.context import CognexContext
+from cognex_mcp.logger import TEST_LOGGER
+import cognex_mcp.tools.core_tools as core_tools
+import cognex_mcp.tools.ledger_tools as ledger_tools
+import cognex_mcp.tools.memory_tools as memory_tools
+import cognex_mcp.tools.trust_tools as trust_tools
 
 
 TEST_DIR = Path(__file__).parent / ".test_mcp"
@@ -32,8 +32,8 @@ async def test_memory_tools():
     db_path = str(TEST_DIR / "test.db")
     cleanup_test_dir()
 
-    SubstrateContext.reset_instance()
-    SubstrateContext.get_instance(db_path=db_path)
+    CognexContext.reset_instance()
+    CognexContext.get_instance(db_path=db_path)
 
     result = await memory_tools.memory_add(
         content="Test memory: Python is great",
@@ -57,7 +57,7 @@ async def test_memory_tools():
 
     await memory_tools.memory_decay(factor=0.95)
 
-    SubstrateContext.reset_instance()
+    CognexContext.reset_instance()
     cleanup_test_dir()
 
 
@@ -65,19 +65,19 @@ async def test_core_tools():
     db_path = str(TEST_DIR / "test_core.db")
     cleanup_test_dir()
 
-    SubstrateContext.reset_instance()
-    SubstrateContext.get_instance(db_path=db_path)
+    CognexContext.reset_instance()
+    CognexContext.get_instance(db_path=db_path)
 
-    result = await core_tools.substrate_start_session(
+    result = await core_tools.cognex_start_session(
         session_id="test-session-123",
         project="test-project",
     )
     assert result["session_id"] == "test-session-123"
 
-    result = await core_tools.substrate_report()
+    result = await core_tools.cognex_report()
     assert "total_memories" in result
 
-    SubstrateContext.reset_instance()
+    CognexContext.reset_instance()
     cleanup_test_dir()
 
 
@@ -85,8 +85,8 @@ async def test_trust_tools():
     db_path = str(TEST_DIR / "test_trust.db")
     cleanup_test_dir()
 
-    SubstrateContext.reset_instance()
-    SubstrateContext.get_instance(db_path=db_path)
+    CognexContext.reset_instance()
+    CognexContext.get_instance(db_path=db_path)
 
     result = await trust_tools.trust_check(
         tool_name="BashTool",
@@ -110,7 +110,7 @@ async def test_trust_tools():
 
     await trust_tools.trust_summary(project="test-project")
 
-    SubstrateContext.reset_instance()
+    CognexContext.reset_instance()
     cleanup_test_dir()
 
 
@@ -118,8 +118,8 @@ async def test_ledger_tools():
     db_path = str(TEST_DIR / "test_ledger.db")
     cleanup_test_dir()
 
-    SubstrateContext.reset_instance()
-    SubstrateContext.get_instance(db_path=db_path)
+    CognexContext.reset_instance()
+    CognexContext.get_instance(db_path=db_path)
 
     result = await ledger_tools.ledger_record(
         tool_used="EditTool",
@@ -142,20 +142,20 @@ async def test_ledger_tools():
         limit=5,
     )
 
-    SubstrateContext.reset_instance()
+    CognexContext.reset_instance()
     cleanup_test_dir()
 
 
 async def test_all_tools_registered():
     # Verify that all expected tools are registered
     # by checking against the tool registry
-    from substrate_mcp.tools.registry import TOOL_DEFINITIONS
+    from cognex_mcp.tools.registry import TOOL_DEFINITIONS
 
     expected_tool_names = [
-        "substrate_start_session",
-        "substrate_end_session",
-        "substrate_process_transcript",
-        "substrate_report",
+        "cognex_start_session",
+        "cognex_end_session",
+        "cognex_process_transcript",
+        "cognex_report",
         "memory_add",
         "memory_search",
         "memory_get_context",

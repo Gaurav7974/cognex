@@ -5,18 +5,18 @@ from pathlib import Path
 src_path = Path(__file__).resolve().parents[3] / "src"
 sys.path.insert(0, str(src_path))
 
-from substrate_mcp.context import SubstrateContext
-from substrate_mcp.tools.dispatcher import handle_tool_call
+from cognex_mcp.context import CognexContext
+from cognex_mcp.tools.dispatcher import handle_tool_call
 
 
 @pytest.fixture(autouse=True)
 def fresh_context(tmp_path):
     """Create a fresh context for each test."""
-    SubstrateContext.reset_instance()
-    db = str(tmp_path / "substrate.db")
-    SubstrateContext.get_instance(db_path=db, project="test-project")
+    CognexContext.reset_instance()
+    db = str(tmp_path / "cognex.db")
+    CognexContext.get_instance(db_path=db, project="test-project")
     yield
-    SubstrateContext.reset_instance()
+    CognexContext.reset_instance()
 
 
 @pytest.mark.asyncio

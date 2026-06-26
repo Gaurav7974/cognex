@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from substrate import MemoryExtractor, MemoryType
+from cognex import MemoryExtractor, MemoryType
 
 
 class TestMemoryExtractor:

@@ -5,7 +5,7 @@ from pathlib import Path
 src_path = Path(__file__).resolve().parents[3] / "src"
 sys.path.insert(0, str(src_path))
 
-from substrate_mcp.tools.registry import TOOL_DEFINITIONS
+from cognex_mcp.tools.registry import TOOL_DEFINITIONS
 
 
 def test_all_tools_have_required_fields():
@@ -68,16 +68,16 @@ def test_core_ledger_tools_present():
         assert name in names, f"Core ledger tool missing from registry: {name}"
 
 
-def test_core_substrate_tools_present():
-    """Verify core substrate tools are registered."""
+def test_core_cognex_tools_present():
+    """Verify core engine tools are registered."""
     names = [t["name"] for t in TOOL_DEFINITIONS]
-    required_substrate = [
-        "substrate_start_session",
-        "substrate_end_session",
-        "substrate_report",
+    required_cognex = [
+        "cognex_start_session",
+        "cognex_end_session",
+        "cognex_report",
     ]
-    for name in required_substrate:
-        assert name in names, f"Core substrate tool missing from registry: {name}"
+    for name in required_cognex:
+        assert name in names, f"Core engine tool missing from registry: {name}"
 
 
 def test_audit_tools_present():
@@ -101,9 +101,9 @@ def test_unit_and_teleport_tools_present():
         assert name in names, f"Tool missing from registry: {name}"
 
 
-def test_tool_count_is_32():
-    """Verify total tool count is exactly 32 after Phase 3a."""
-    assert len(TOOL_DEFINITIONS) == 32, (
-        f"Expected 32 tools, got {len(TOOL_DEFINITIONS)}. "
+def test_tool_count_is_40():
+    """Verify total tool count is exactly 40 (added consolidator, arcs, health, audit chain, and sync tools)."""
+    assert len(TOOL_DEFINITIONS) == 40, (
+        f"Expected 40 tools, got {len(TOOL_DEFINITIONS)}. "
         f"Tools: {sorted([t['name'] for t in TOOL_DEFINITIONS])}"
     )
