@@ -1,7 +1,7 @@
 """
-Cognitive Substrate MCP Server
+Cognex Engine MCP Server
 
-Exposes the Cognitive Substrate as MCP tools for use with Claude Code,
+Exposes the Cognex Engine as MCP tools for use with Claude Code,
 OpenCode, Cursor, Codex, and any MCP-compatible AI coding assistant.
 
 Uses stdio transport for local tool integration.
@@ -23,8 +23,8 @@ from mcp import types
 from mcp.shared.exceptions import McpError
 from mcp.types import INVALID_PARAMS, INTERNAL_ERROR, ErrorData
 
-from substrate_mcp.context import SubstrateContext
-from substrate_mcp.tools import (
+from cognex_mcp.context import CognexContext
+from cognex_mcp.tools import (
     list_all_tools,
     handle_tool_call,
 )
@@ -35,10 +35,10 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     stream=sys.stderr,
 )
-logger = logging.getLogger("substrate-mcp")
+logger = logging.getLogger("cognex-mcp")
 
 
-def create_server(name: str = "cognitive-substrate") -> Server:
+def create_server(name: str = "cognex-engine") -> Server:
     server = Server(name)
 
     @server.list_tools()
@@ -140,7 +140,7 @@ def create_server(name: str = "cognitive-substrate") -> Server:
         prompts = {
             "start-session": f"""
 Please start a new Cognex session now.
-1. Call substrate_start_session with a unique session_id (use current timestamp) and project="{project}"
+1. Call cognex_start_session with a unique session_id (use current timestamp) and project="{project}"
 2. Call memory_get_context with query="current work preferences decisions" and project="{project}"
 3. Summarize what you found — preferences, recent decisions, patterns
 4. Tell me what context you loaded so I know what you remember
@@ -149,12 +149,12 @@ Please start a new Cognex session now.
 Please end the current Cognex session now.
 1. Call memory_add for each important fact, preference, or pattern from this session
 2. Call ledger_record for each significant decision made
-3. Call substrate_end_session with a clear summary and list of key decisions
+3. Call cognex_end_session with a clear summary and list of key decisions
 4. Tell me what you saved so I can verify nothing important was missed
 """,
             "export-brain": """
 Please export my entire Cognex brain now.
-1. Call substrate_report to show current stats
+1. Call cognex_report to show current stats
 2. Call teleport_create_bundle to create a portable export
 3. Display the bundle JSON so I can save it
 4. Tell me how to import it on another machine
@@ -163,14 +163,14 @@ Please export my entire Cognex brain now.
 Please show me everything Cognex has stored about me.
 1. Call memory_search with query="{topic or "preferences decisions patterns"}" and no project filter
 2. Call trust_summary to show tool approval patterns
-3. Call substrate_report for overall stats
+3. Call cognex_report for overall stats
 4. Organize the results into categories: preferences, decisions, patterns, facts
 """,
             "daily-standup": """
 Please give me a daily standup summary from Cognex.
 1. Call memory_search with query="yesterday recent completed" 
 2. Call ledger_find_similar with query="recent decisions"
-3. Call substrate_report for session stats
+3. Call cognex_report for session stats
 4. Format as: What was done, What decisions were made, What to focus on next
 """,
         }
@@ -193,16 +193,16 @@ Please give me a daily standup summary from Cognex.
 async def run_server(
     db_path: Optional[str] = None,
     project: str = "default",
-    server_name: str = "cognitive-substrate",
+    server_name: str = "cognex-engine",
 ) -> None:
     """Run the MCP server."""
     # Initialize context
-    ctx = SubstrateContext.get_instance(db_path=db_path, project=project)
-    logger.info(f"Starting Cognitive Substrate MCP Server (db: {ctx.db_path})")
+    ctx = CognexContext.get_instance(db_path=db_path, project=project)
+    logger.info(f"Starting Cognex Engine MCP Server (db: {ctx.db_path})")
 
     # Health check: verify database is accessible
     try:
-        count = ctx.substrate.store.count()
+        count = ctx.engine.store.count()
         logger.info(f"Database health check passed: {count} memories")
         logger.info(
             "Cognex ready. Add to your AI tool config to connect. "
@@ -232,7 +232,7 @@ async def run_server(
 def print_status(db_path: Optional[str] = None, project: str = "default") -> None:
     # Print cognex status without starting the server
     # Get context (don't start server)
-    ctx = SubstrateContext.get_instance(db_path=db_path, project=project)
+    ctx = CognexContext.get_instance(db_path=db_path, project=project)
 
     print("Cognex status")
 
@@ -241,14 +241,14 @@ def print_status(db_path: Optional[str] = None, project: str = "default") -> Non
 
     # Memory count
     try:
-        memory_count = ctx.substrate.store.count()
+        memory_count = ctx.engine.store.count()
         print(f"Memories: {memory_count}")
     except Exception as e:
         print(f"Memories: ERROR - {e}")
 
     # Decision count
     try:
-        from substrate.ledger import DecisionLedger
+        from cognex.ledger import DecisionLedger
 
         ledger = DecisionLedger(ctx.db_path)
         decision_count = len(ledger.get_all(limit=9999))
@@ -258,7 +258,7 @@ def print_status(db_path: Optional[str] = None, project: str = "default") -> Non
 
     # Trust records
     try:
-        from substrate.trust import TrustGradientEngine
+        from cognex.trust import TrustGradientEngine
 
         trust = TrustGradientEngine(ctx.db_path)
         trust_summary = trust.get_trust_summary()
@@ -268,7 +268,7 @@ def print_status(db_path: Optional[str] = None, project: str = "default") -> Non
 
     # AI tools configured
     print("Configured AI tools:")
-    from substrate_mcp.installer import detect_installed_platforms
+    from cognex_mcp.installer import detect_installed_platforms
 
     detected = detect_installed_platforms()
     if detected:
@@ -282,18 +282,18 @@ def main() -> None:
     """Main entry point for the MCP server."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Cognitive Substrate MCP Server")
+    parser = argparse.ArgumentParser(description="Cognex Engine MCP Server")
     parser.add_argument(
         "--db-path",
         type=str,
         default=None,
-        help="Path to database file (default: .substrate/substrate.db)",
+        help="Path to database file (default: ~/.cognex.db/cognex.db)",
     )
     parser.add_argument(
         "--project", type=str, default="default", help="Default project name"
     )
     parser.add_argument(
-        "--name", type=str, default="cognitive-substrate", help="Server name"
+        "--name", type=str, default="cognex-engine", help="Server name"
     )
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument(
@@ -322,7 +322,7 @@ def main() -> None:
 
     # Handle install command
     if args.install:
-        from substrate_mcp.installer import run_install
+        from cognex_mcp.installer import run_install
 
         run_install(platform=args.platform, dry_run=args.dry_run)
         return
@@ -345,7 +345,7 @@ def main() -> None:
     except KeyboardInterrupt:
         logger.info("Server stopped")
     finally:
-        SubstrateContext.reset_instance()
+        CognexContext.reset_instance()
 
 
 if __name__ == "__main__":

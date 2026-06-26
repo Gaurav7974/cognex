@@ -4,7 +4,7 @@ Trust tools - approval checking and trust management.
 
 from typing import Any
 
-from substrate_mcp.context import SubstrateContext
+from cognex_mcp.context import CognexContext
 
 
 async def trust_check(
@@ -13,7 +13,7 @@ async def trust_check(
     project: str | None = None,
 ) -> dict[str, Any]:
     """Check if an operation requires approval."""
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     requires_approval = ctx.trust.requires_approval(
         tool_name=tool_name,
@@ -50,7 +50,7 @@ async def trust_record(
             f"action must be one of: approval, denial, violation, got {action!r}"
         )
 
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     if action == "approval":
         decision = ctx.trust.record_approval(
@@ -87,8 +87,8 @@ async def trust_record(
     }
 
     # Warn if no active session
-    if not ctx.substrate.current_session:
-        result["warning"] = "no active session — call substrate_start_session first"
+    if not ctx.engine.current_session:
+        result["warning"] = "no active session — call cognex_start_session first"
 
     return result
 
@@ -99,7 +99,7 @@ async def trust_get(
     project: str | None = None,
 ) -> dict[str, Any]:
     """Get trust record for a tool."""
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     record = ctx.trust.get_trust(
         tool_name=tool_name,
@@ -122,7 +122,7 @@ async def trust_get(
 
 async def trust_summary(project: str | None = None) -> dict[str, Any]:
     """Get trust summary for all tools or a project."""
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     records = ctx.trust.get_trust_summary(project=project or "")
 

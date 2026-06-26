@@ -3,14 +3,14 @@
 from datetime import datetime, timezone
 from typing import Any
 
-from substrate.models import CognitiveUnit
-from substrate_mcp.context import SubstrateContext
-from substrate_mcp.sanitizer import (
+from cognex.models import CognitiveUnit
+from cognex_mcp.context import CognexContext
+from cognex_mcp.sanitizer import (
     sanitize_content,
     sanitize_project,
     sanitize_tags,
 )
-from substrate_mcp.tools.dispatcher import run_in_thread
+from cognex_mcp.tools.dispatcher import run_in_thread
 
 # Valid unit types
 VALID_UNIT_TYPES = {"decision", "constraint", "progress", "task_state"}
@@ -42,10 +42,10 @@ async def unit_commit(
     # Clamp confidence
     confidence = max(0.0, min(1.0, float(confidence)))
 
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
-    # Get session_id from substrate if available
-    session_id = ctx.substrate.current_session or ""
+    # Get session_id from engine if available
+    session_id = ctx.engine.current_session or ""
 
     unit = CognitiveUnit(
         unit_type=unit_type,
@@ -93,7 +93,7 @@ async def unit_checkout(
     if not project:
         raise ValueError("project is required")
 
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     # Get snapshot in thread pool
     snapshot = await run_in_thread(
@@ -122,7 +122,7 @@ async def unit_search(
     limit: int = 20,
 ) -> dict[str, Any]:
     # FTS search over cognitive units.
-    from substrate_mcp.sanitizer import sanitize_query
+    from cognex_mcp.sanitizer import sanitize_query
 
     query = sanitize_query(query or "")
     project = sanitize_project(project)
@@ -130,7 +130,7 @@ async def unit_search(
     # Apply hard limit
     limit = min(int(limit), 50)
 
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     # Search in thread pool
     units = await run_in_thread(
@@ -163,7 +163,7 @@ async def unit_mark_overridden(unit_id: str) -> dict[str, Any]:
     if not unit_id:
         raise ValueError("unit_id is required")
 
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     # Check if unit exists
     unit = await run_in_thread(ctx.unit_store.get, unit_id)
@@ -176,7 +176,7 @@ async def unit_mark_overridden(unit_id: str) -> dict[str, Any]:
     # Audit log (direct call - AuditLog is thread-safe)
     ctx.audit.append(
         event_type="unit_overridden",
-        session_id=ctx.substrate.current_session,
+        session_id=ctx.engine.current_session,
         project=unit.project,
         agent_id=None,
         payload={"unit_id": unit_id, "reason": "contradicted"},
@@ -194,7 +194,7 @@ async def unit_verify(unit_id: str) -> dict[str, Any]:
     if not unit_id:
         raise ValueError("unit_id is required")
 
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     # Check if unit exists
     unit = await run_in_thread(ctx.unit_store.get, unit_id)
@@ -218,7 +218,7 @@ async def unit_get_relevant(
     limit: int = 10,
 ) -> dict[str, Any]:
     # Get relevant units with FTS search and scoring.
-    from substrate_mcp.sanitizer import sanitize_query
+    from cognex_mcp.sanitizer import sanitize_query
 
     query = sanitize_query(query)
     project = sanitize_project(project)
@@ -229,7 +229,7 @@ async def unit_get_relevant(
     # Apply hard limit
     limit = min(int(limit), 50)
 
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     # Get relevant units in thread pool
     units = await run_in_thread(
@@ -269,7 +269,7 @@ async def unit_export_snapshot(
     if not project:
         raise ValueError("project is required")
 
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     # Get snapshot in thread pool
     snapshot = await run_in_thread(
@@ -291,7 +291,7 @@ async def unit_decay_stale(
 
     threshold = max(0.0, min(1.0, float(threshold)))
 
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     # Get affected units first
     all_units = await run_in_thread(ctx.unit_store.get_bundle, project, None, True)

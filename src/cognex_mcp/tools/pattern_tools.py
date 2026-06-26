@@ -1,16 +1,16 @@
 # MCP tools for pattern analysis.
 
 from typing import Any
-from substrate_mcp.context import SubstrateContext
-from substrate.patterns import PatternAnalyzer
+from cognex_mcp.context import CognexContext
+from cognex.patterns import PatternAnalyzer
 
 
 async def pattern_analyze(
     project: str | None = None, save_patterns: bool = True
 ) -> dict[str, Any]:
     # Analyze decision history for behavioral patterns
-    ctx = SubstrateContext.get_instance()
-    analyzer = PatternAnalyzer(ledger=ctx.ledger, store=ctx.substrate.store)
+    ctx = CognexContext.get_instance()
+    analyzer = PatternAnalyzer(ledger=ctx.ledger, store=ctx.engine.store)
 
     stats = analyzer.get_stats(project or "")
     insights = analyzer.analyze_all(project or "")
@@ -39,8 +39,8 @@ async def pattern_analyze(
 
 async def pattern_stats(project: str | None = None) -> dict[str, Any]:
     # Get decision stats for pattern analysis readiness
-    ctx = SubstrateContext.get_instance()
-    analyzer = PatternAnalyzer(ledger=ctx.ledger, store=ctx.substrate.store)
+    ctx = CognexContext.get_instance()
+    analyzer = PatternAnalyzer(ledger=ctx.ledger, store=ctx.engine.store)
     stats = analyzer.get_stats(project or "")
 
     if stats["total"] == 0:

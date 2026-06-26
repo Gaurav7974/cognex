@@ -1,24 +1,24 @@
 """
-Core substrate tools - session management and reporting.
+Core cognex tools - session management and reporting.
 """
 
 from typing import Any
 
-from substrate_mcp.context import SubstrateContext
-from substrate_mcp.tools.dispatcher import run_in_thread
+from cognex_mcp.context import CognexContext
+from cognex_mcp.tools.dispatcher import run_in_thread
 
 
-async def substrate_start_session(
+async def cognex_start_session(
     session_id: str,
     project: str = "",
 ) -> dict[str, Any]:
-    """Start a new session in the cognitive substrate."""
+    """Start a new session in the cognex engine."""
     if not session_id:
         raise ValueError("session_id is required")
 
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
     memories = await run_in_thread(
-        ctx.substrate.start_session, session_id=session_id, project=project
+        ctx.engine.start_session, session_id=session_id, project=project
     )
 
     # Audit log (direct call - AuditLog is thread-safe)
@@ -28,6 +28,12 @@ async def substrate_start_session(
         project=project,
         agent_id=None,
         payload={"project": project, "session_id": session_id},
+    )
+
+    # Session arc integration (P3.2)
+    from cognex.arcs import SessionArcManager
+    arc_info = await run_in_thread(
+        SessionArcManager.get_active_arc, project=project, store=ctx.engine.store
     )
 
     return {
@@ -42,10 +48,11 @@ async def substrate_start_session(
             }
             for m in memories
         ],
+        "active_arc": arc_info,
     }
 
 
-async def substrate_end_session(
+async def cognex_end_session(
     summary: str = "",
     key_decisions: list[str] | None = None,
     tools_used: list[str] | None = None,
@@ -54,9 +61,9 @@ async def substrate_end_session(
     output_tokens: int = 0,
 ) -> dict[str, Any]:
     """End the current session with summary and metrics."""
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
-    snapshot = ctx.substrate.end_session(
+    snapshot = ctx.engine.end_session(
         summary=summary,
         key_decisions=tuple(key_decisions or []),
         tools_used=tuple(tools_used or []),
@@ -86,17 +93,17 @@ async def substrate_end_session(
     }
 
 
-async def substrate_process_transcript(
+async def cognex_process_transcript(
     transcript: str,
     session_id: str | None = None,
     project: str | None = None,
     context: str = "",
 ) -> dict[str, Any]:
     """Extract memories from a conversation transcript."""
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     result = await run_in_thread(
-        ctx.substrate.process_transcript,
+        ctx.engine.process_transcript,
         transcript=transcript,
         session_id=session_id,
         project=project,
@@ -112,10 +119,10 @@ async def substrate_process_transcript(
     }
 
 
-async def substrate_report() -> dict[str, Any]:
-    """Get substrate health and statistics report."""
-    ctx = SubstrateContext.get_instance()
-    report = ctx.substrate.report()
+async def cognex_report() -> dict[str, Any]:
+    """Get cognex health and statistics report."""
+    ctx = CognexContext.get_instance()
+    report = ctx.engine.report()
 
     return {
         "total_memories": report.total_memories,

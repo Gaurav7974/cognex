@@ -180,14 +180,14 @@ def write_config(platform: str, dry_run: bool = False) -> bool:
 
 def inject_agents_md(dry_run: bool = False) -> None:
     """Inject Cognex instructions into AGENTS.md or CLAUDE.md if present."""
-    instruction = """<!-- cognex-agents v0.1.7 -->
+    instruction = """<!-- cognex-agents v0.1.8 -->
 ## Cognex Memory (Auto-injected)
 Cognex MCP is connected. Use it automatically:
-- Session start: call substrate_start_session with project name
+- Session start: call cognex_start_session with project name
 - When user says "remember": call memory_add
 - When starting work: call memory_get_context to load context
 - When user asks about past decisions: call ledger_find_similar
-- Session end: call substrate_end_session with summary
+- Session end: call cognex_end_session with summary
 - Never ask user to repeat context if it can be loaded from Cognex
 """
     for fname in ["AGENTS.md", "CLAUDE.md", ".cursorrules"]:

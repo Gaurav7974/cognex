@@ -5,8 +5,8 @@ Teleport tools - state serialization and transfer.
 import json
 from typing import Any
 
-from substrate_mcp.context import SubstrateContext
-from substrate_mcp.tools.dispatcher import run_in_thread
+from cognex_mcp.context import CognexContext
+from cognex_mcp.tools.dispatcher import run_in_thread
 
 
 async def teleport_create_bundle(
@@ -21,10 +21,10 @@ async def teleport_create_bundle(
 
     v2.0: Now includes full memory and decision content for cross-machine transfer.
     """
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     bundle = ctx.teleport.create_bundle(
-        substrate=ctx.substrate,
+        engine=ctx.engine,
         source_host=source_host or "",
         target_host=target_host or "",
         pending_tasks=tuple(pending_tasks or []),
@@ -38,7 +38,7 @@ async def teleport_create_bundle(
     # Audit log (direct call - AuditLog is thread-safe)
     ctx.audit.append(
         event_type="bundle_created",
-        session_id=ctx.substrate.get_current_session(),
+        session_id=ctx.engine.get_current_session(),
         project=None,
         agent_id=None,
         payload={"bundle_id": bundle.bundle_id, "source_host": source_host or "", "target_host": target_host or ""},
@@ -58,13 +58,13 @@ async def teleport_create_bundle(
 
 
 async def teleport_rehydrate(bundle_json: str | dict) -> dict[str, Any]:
-    """Rehydrate substrate state from a bundle.
+    """Rehydrate engine state from a bundle.
 
     v2.0: Now restores full memory and decision content for cross-machine transfer.
     """
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
-    from substrate import TeleportBundle
+    from cognex import TeleportBundle
 
     # Handle multiple input forms:
     # 1. Raw serialized bundle string (from TeleportBundle.serialize())
@@ -104,7 +104,7 @@ async def teleport_rehydrate(bundle_json: str | dict) -> dict[str, Any]:
 
     report = ctx.teleport.rehydrate(
         bundle=bundle,
-        substrate=ctx.substrate,
+        engine=ctx.engine,
         trust_engine=ctx.trust,
         decision_ledger=ctx.ledger,
     )
@@ -112,7 +112,7 @@ async def teleport_rehydrate(bundle_json: str | dict) -> dict[str, Any]:
     # Audit log (direct call - AuditLog is thread-safe)
     ctx.audit.append(
         event_type="bundle_rehydrated",
-        session_id=ctx.substrate.get_current_session(),
+        session_id=ctx.engine.get_current_session(),
         project=None,
         agent_id=None,
         payload={"bundle_id": report.get("bundle_id", ""), "memories_restored": report.get("memories_restored", 0)},

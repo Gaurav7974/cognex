@@ -2,15 +2,15 @@
 
 from typing import Any
 
-from substrate import MemoryType, MemoryScope
-from substrate_mcp.context import SubstrateContext
-from substrate_mcp.sanitizer import (
+from cognex import MemoryType, MemoryScope
+from cognex_mcp.context import CognexContext
+from cognex_mcp.sanitizer import (
     sanitize_content,
     sanitize_project,
     sanitize_tags,
     sanitize_query,
 )
-from substrate_mcp.tools.dispatcher import run_in_thread
+from cognex_mcp.tools.dispatcher import run_in_thread
 
 # Hard limits - never exceed these
 MAX_SEARCH_LIMIT = 50
@@ -27,17 +27,17 @@ async def memory_add(
     tags: list[str] | None = None,
     context: str = "",
 ) -> dict[str, Any]:
-    """Add a memory to the cognitive substrate."""
-    # Sanitize inputs
-    content = sanitize_content(content)
+    """Add a memory to the cognex engine."""
+    # Sanitize inputs — pass memory_type for per-type length limits (P0.1)
+    content = sanitize_content(content, memory_type=memory_type)
     project = sanitize_project(project)
     tags_list = sanitize_tags(tags or [])
-    context = sanitize_content(context)
+    context = sanitize_content(context, memory_type="context")
 
     if not content:
         raise ValueError("content is required and cannot be empty")
 
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     tags_tuple = tuple(tags_list)
 
@@ -52,7 +52,7 @@ async def memory_add(
     except KeyError:
         mem_scope = MemoryScope.PRIVATE
 
-    entry = ctx.substrate.add_memory(
+    entry = ctx.engine.add_memory(
         content=content,
         memory_type=mem_type,
         scope=mem_scope,
@@ -70,8 +70,8 @@ async def memory_add(
     }
 
     # Warn if no active session
-    if not ctx.substrate.current_session:
-        result["warning"] = "no active session — call substrate_start_session first"
+    if not ctx.engine.current_session:
+        result["warning"] = "no active session — call cognex_start_session first"
 
     return result
 
@@ -83,21 +83,32 @@ async def memory_search(
     scope: str | None = None,
     tags: list[str] | None = None,
     limit: int = 20,
+    boost_project: str = "",
+    recency_days: int = 0,
 ) -> dict[str, Any]:
-    """Search memories with filters."""
-    # Sanitize inputs
+    """Search memories with filters.
+
+    Args:
+        query: Free-text search query.
+        memory_type: Filter by memory type.
+        project: Filter by project name.
+        scope: Filter by scope.
+        tags: Require all listed tags.
+        limit: Max results (capped at 50).
+        boost_project: When non-empty, results from this project are sorted first.
+        recency_days: When > 0, results from the last N days are sorted first.
+    """
     query = sanitize_query(query or "")
     project = sanitize_project(project)
+    boost_project = sanitize_project(boost_project)
     tags_list = sanitize_tags(tags or [])
 
-    # Apply hard limit
     limit = min(int(limit), MAX_SEARCH_LIMIT)
+    recency_days = max(0, int(recency_days))
 
-    ctx = SubstrateContext.get_instance()
-
+    ctx = CognexContext.get_instance()
     tags_tuple = tuple(tags_list)
 
-    # Convert string to enum
     mem_type = None
     if memory_type:
         try:
@@ -113,13 +124,15 @@ async def memory_search(
             pass
 
     memories = await run_in_thread(
-        ctx.substrate.store.search,
+        ctx.engine.store.search,
         query=query,
         memory_type=mem_type,
         project=project,
         scope=mem_scope,
         tags=tags_tuple,
         limit=limit,
+        boost_project=boost_project,
+        recency_days=recency_days,
     )
 
     return {
@@ -161,14 +174,14 @@ async def memory_get_context(
     # Apply hard limit
     limit = min(int(limit), MAX_CONTEXT_LIMIT)
 
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     memories = await run_in_thread(
-        ctx.substrate.get_context, query=query, project=project, limit=limit
+        ctx.engine.get_context, query=query, project=project, limit=limit
     )
 
     # Detect which search type was actually used
-    search_type = await run_in_thread(ctx.substrate.store.get_search_type, query=query)
+    search_type = await run_in_thread(ctx.engine.store.get_search_type, query=query)
 
     # Strip common filler prefixes to compress content
     FILLER_PREFIXES = [
@@ -252,7 +265,7 @@ async def memory_decay(
     factor: float = 0.95,
 ) -> dict[str, Any]:
     """Apply aging/decay to all memories."""
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     if not isinstance(factor, (int, float)):
         raise ValueError(
@@ -263,6 +276,6 @@ async def memory_decay(
     if not (MAX_DECAY_FACTOR_LOW <= factor <= MAX_DECAY_FACTOR_HIGH):
         raise ValueError(f"factor must be between 0 and 1, got {factor}")
 
-    removed_count = ctx.substrate.decay_memories(factor=factor)
+    removed_count = ctx.engine.decay_memories(factor=factor)
 
     return {"decay_factor": factor, "memories_removed": removed_count}

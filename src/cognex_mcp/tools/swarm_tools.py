@@ -4,7 +4,7 @@ Swarm tools - intent compilation and swarm planning.
 
 from typing import Any
 
-from substrate_mcp.context import SubstrateContext
+from cognex_mcp.context import CognexContext
 
 
 async def swarm_compile_intent(
@@ -12,7 +12,7 @@ async def swarm_compile_intent(
     project: str | None = None,
 ) -> dict[str, Any]:
     """Compile natural language intent into a swarm plan."""
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     plan = ctx.swarm.compile(intent=intent, project=project or "")
 

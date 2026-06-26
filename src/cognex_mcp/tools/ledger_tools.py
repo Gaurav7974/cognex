@@ -4,8 +4,8 @@ Ledger tools - decision recording and outcome tracking.
 
 from typing import Any
 
-from substrate_mcp.context import SubstrateContext
-from substrate_mcp.sanitizer import sanitize_query
+from cognex_mcp.context import CognexContext
+from cognex_mcp.sanitizer import sanitize_query
 
 
 async def ledger_record(
@@ -21,7 +21,7 @@ async def ledger_record(
     if not tool_used:
         raise ValueError("tool_used is required")
 
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     entry = ctx.ledger.record(
         tool_used=tool_used,
@@ -42,8 +42,8 @@ async def ledger_record(
     }
 
     # Warn if no active session
-    if not ctx.substrate.current_session:
-        result["warning"] = "no active session — call substrate_start_session first"
+    if not ctx.engine.current_session:
+        result["warning"] = "no active session — call cognex_start_session first"
 
     return result
 
@@ -54,7 +54,7 @@ async def ledger_outcome(
     success: bool | None = None,
 ) -> dict[str, Any]:
     """Record outcome for a decision."""
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     entry = ctx.ledger.record_outcome(
         decision_id=decision_id,
@@ -64,6 +64,17 @@ async def ledger_outcome(
 
     if entry is None:
         raise ValueError(f"Decision not found: {decision_id}")
+
+    # Trigger outcome feedback (P2.3)
+    if success is not None:
+        from cognex.feedback import OutcomeFeedback
+        OutcomeFeedback.apply_outcome_feedback(
+            session_id=entry.session_id,
+            success=success,
+            store=ctx.engine.store,
+            ledger=ctx.ledger,
+            audit=ctx.audit,
+        )
 
     return {
         "id": entry.id,
@@ -88,7 +99,7 @@ async def ledger_find_similar(
     if not query:
         raise ValueError("query is required and cannot be empty")
 
-    ctx = SubstrateContext.get_instance()
+    ctx = CognexContext.get_instance()
 
     decisions = ctx.ledger.find_similar(
         context_query=query,

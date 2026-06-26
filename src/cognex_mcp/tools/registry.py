@@ -33,7 +33,8 @@ except ImportError:
 # Each dict has: name, description, inputSchema
 
 # TOOL CATEGORIES:
-# - Session Management (4): substrate_start_session, substrate_end_session, substrate_process_transcript, substrate_report
+# - Session Management (4): cognex_start_session, cognex_end_session, cognex_process_transcript, cognex_report
+# - Health (1): cognex_health
 # - Memory (4): memory_add, memory_search, memory_get_context, memory_decay
 # - Trust (4): trust_check, trust_record, trust_get, trust_summary
 # - Decision Ledger (3): ledger_record, ledger_outcome, ledger_find_similar
@@ -41,22 +42,24 @@ except ImportError:
 # - Swarm Planning (1): swarm_compile_intent
 # - Pattern Intelligence (2): pattern_analyze, pattern_stats
 # - Cognitive Units (8): unit_commit, unit_checkout, unit_search, unit_mark_overridden, unit_verify, unit_get_relevant, unit_export_snapshot, unit_decay_stale
-# - Audit (2): audit_get_recent, audit_verify
+# - Audit (3): audit_get_recent, audit_verify, audit_verify_chain
 # - Cross-Agent Protocol (2): chp_transfer, chp_project
-# Total: 32 tools
+# - Session Arcs (3): arc_start, arc_close, arc_get_context
+# - Sync Protocol (2): sync_push, sync_pull
+# Total: 40 tools
 
 # QUICK START:
-# 1. Always start with substrate_start_session to initialize memory context
+# 1. Always start with cognex_start_session to initialize memory context
 # 2. Use memory_add to save things the user wants remembered
 # 3. Use memory_get_context to retrieve relevant context before decisions
 # 4. Use ledger_record before making important choices
 # 5. Use unit_commit to capture structured cognitive state
 # 6. Use teleport_create_bundle to transfer state between machines
 TOOL_DEFINITIONS: list[dict[str, Any]] = [
-    # Core substrate tools (4)
+    # Core cognex tools (4)
     {
-        "name": "substrate_start_session",
-        "description": "Start a new session in the cognitive substrate and return relevant memories. Use when: beginning a new work session, task, or conversation. This initializes session tracking and retrieves context from past sessions.",
+        "name": "cognex_start_session",
+        "description": "Start a new session in the cognex engine and return relevant memories. Use when: beginning a new work session, task, or conversation. This initializes session tracking and retrieves context from past sessions.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -74,7 +77,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
         },
     },
     {
-        "name": "substrate_end_session",
+        "name": "cognex_end_session",
         "description": "End the current session with summary and metrics. Use when: finishing a work session, task, or conversation. This saves session insights, records key decisions, and tracks performance metrics.",
         "inputSchema": {
             "type": "object",
@@ -109,7 +112,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
         },
     },
     {
-        "name": "substrate_process_transcript",
+        "name": "cognex_process_transcript",
         "description": "Extract memories from a conversation transcript. Use when: reviewing past conversations to capture important insights, decisions, or preferences mentioned by the user that should be remembered for future sessions.",
         "inputSchema": {
             "type": "object",
@@ -126,14 +129,14 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
         },
     },
     {
-        "name": "substrate_report",
-        "description": "Get substrate health and statistics report. Use when: checking memory bank status, monitoring database health, or verifying how many memories and decisions have been stored.",
+        "name": "cognex_report",
+        "description": "Get cognex health and statistics report. Use when: checking memory bank status, monitoring database health, or verifying how many memories and decisions have been stored.",
         "inputSchema": {"type": "object", "properties": {}},
     },
     # Memory tools (4)
     {
         "name": "memory_add",
-        "description": "Add a memory to the cognitive substrate. Use when: user says 'remember', wants to save a preference, preference, decision, insight, pattern, or any knowledge they want preserved across sessions. Memories are searchable and persistent.",
+        "description": "Add a memory to the cognex engine. Use when: user says 'remember', wants to save a preference, preference, decision, insight, pattern, or any knowledge they want preserved across sessions. Memories are searchable and persistent.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -225,6 +228,25 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
                     "description": "Decay factor",
                     "default": 0.95,
                 }
+            },
+        },
+    },
+    {
+        "name": "memory_consolidate",
+        "description": "Consolidate episodic memories into semantic clusters and promote stable ones to schemas.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "project": {
+                    "type": "string",
+                    "description": "Filter to specific project",
+                    "default": "",
+                },
+                "min_cluster_size": {
+                    "type": "integer",
+                    "description": "Minimum count of similar episodic memories to form a cluster",
+                    "default": 5,
+                },
             },
         },
     },
@@ -367,7 +389,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "name": "teleport_rehydrate",
-        "description": "Rehydrate substrate state from a teleport bundle. Use when: restoring agent state from a bundle created on another machine. Reverses teleport_create_bundle to resume work.",
+        "description": "Rehydrate engine state from a teleport bundle. Use when: restoring agent state from a bundle created on another machine. Reverses teleport_create_bundle to resume work.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -659,6 +681,115 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
             "required": ["log_id"],
         },
     },
+    {
+        "name": "audit_verify_chain",
+        "description": "Walk the full audit log hash chain and verify every link. Detects tampering (deletion or modification of any log entry) because any change breaks all subsequent checksums. Use after suspected tampering, compliance audits, or periodic integrity checks.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "project": {
+                    "type": "string",
+                    "description": "Optional project filter.  Empty = check all projects.",
+                    "default": "",
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Maximum entries to scan (1-10000)",
+                    "default": 200,
+                },
+            },
+            "required": [],
+        },
+    },
+    {
+        "name": "arc_start",
+        "description": "Start or retrieve the active session arc for a project.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "project": {
+                    "type": "string",
+                    "description": "Project name",
+                },
+            },
+            "required": ["project"],
+        },
+    },
+    {
+        "name": "arc_close",
+        "description": "Close an active session arc and generate its narrative summary.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "arc_id": {
+                    "type": "string",
+                    "description": "The unique arc ID to close",
+                },
+            },
+            "required": ["arc_id"],
+        },
+    },
+    {
+        "name": "arc_get_context",
+        "description": "Get the active session arc narrative for a project.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "project": {
+                    "type": "string",
+                    "description": "Project name",
+                },
+            },
+            "required": ["project"],
+        },
+    },
+    {
+        "name": "cognex_health",
+        "description": "Return a health snapshot of all Cognex engine components. Checks: initialization status, database reachability, FTS5 availability, memory count, and uptime. Use at session start to confirm the engine is operational.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "required": [],
+        },
+    },
+    {
+        "name": "sync_push",
+        "description": "Push local cognex changes (memories, decisions, cognitive units) to a peer sync server.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "peer_host": {
+                    "type": "string",
+                    "description": "The IP or hostname of the remote peer to connect to.",
+                },
+                "peer_port": {
+                    "type": "integer",
+                    "description": "The TCP port of the remote peer's sync server.",
+                    "default": 7474,
+                },
+            },
+            "required": ["peer_host"],
+        },
+    },
+    {
+        "name": "sync_pull",
+        "description": "Pull remote cognex changes (memories, decisions, cognitive units) from a peer sync server and merge them.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "peer_host": {
+                    "type": "string",
+                    "description": "The IP or hostname of the remote peer to connect to.",
+                },
+                "peer_port": {
+                    "type": "integer",
+                    "description": "The TCP port of the remote peer's sync server.",
+                    "default": 7474,
+                },
+            },
+            "required": ["peer_host"],
+        },
+    },
 ]
 
 
@@ -670,6 +801,6 @@ def list_all_tools() -> list[types.Tool]:
     the previous ~400 lines of repetitive Tool() instantiation.
 
     Returns:
-        List of 18 Tool objects representing all available MCP tools
+        List of 40 Tool objects representing all available MCP tools
     """
     return [types.Tool(**tool_def) for tool_def in TOOL_DEFINITIONS]
