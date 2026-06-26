@@ -1,7 +1,9 @@
 """LongMemEval runner — orchestrate evaluation harness."""
 
+import argparse
 import json
 import asyncio
+import logging
 import tempfile
 import os
 import shutil
@@ -13,10 +15,14 @@ from collections import defaultdict
 from runner import load_case
 from retriever import retrieve
 from scorer import score
-from substrate_mcp.context import SubstrateContext
+from cognex_mcp.context import CognexContext
 
+import cognex
 
-DATASET_PATH = Path(__file__).resolve().parents[1] / "dataset" / "longmemeval_subset.json"
+# Suppress migration logging noise during eval
+logging.getLogger("cognex.migrations").setLevel(logging.WARNING)
+
+DATASET_DIR = Path(__file__).resolve().parents[1] / "dataset"
 RESULTS_PATH = Path(__file__).resolve().parents[1] / "results"
 
 K_VALUES = [1, 3, 5]  # compute R@1, R@3, R@5
@@ -29,11 +35,11 @@ async def run_single_case(case: dict, tmp_dir: str) -> dict:
     returns result dict with all metrics.
     """
     db_path = os.path.join(tmp_dir, f"{case['id']}.db")
-    await load_case(case, db_path)
+    load_case(case, db_path)
 
     results_per_k = {}
     for k in K_VALUES:
-        retrieved = await retrieve(
+        retrieved = retrieve(
             question=case["question"],
             project=case["project"],
             top_k=k
@@ -43,13 +49,13 @@ async def run_single_case(case: dict, tmp_dir: str) -> dict:
 
     # Close context and release DB connection
     try:
-        ctx = SubstrateContext.get_instance()
+        ctx = CognexContext.get_instance()
         if ctx:
             ctx.close()
-        SubstrateContext.reset_instance()
+        CognexContext.reset_instance()
     except Exception as e:
         print(f"Warning: Error closing context for {case['id']}: {e}")
-        SubstrateContext.reset_instance()
+        CognexContext.reset_instance()
     
     # Force garbage collection to release file handles
     gc.collect()
@@ -68,11 +74,24 @@ async def run_single_case(case: dict, tmp_dir: str) -> dict:
     }
 
 
-async def main():
+async def main(dataset_path: str | None = None):
     """Main evaluation loop — load dataset, run all cases, compute summary."""
-    with open(DATASET_PATH) as f:
+    # Resolve dataset path: CLI arg > default 50-case dataset
+    if dataset_path:
+        dataset_file = Path(dataset_path)
+        if not dataset_file.is_absolute():
+            dataset_file = DATASET_DIR / dataset_file
+    else:
+        dataset_file = DATASET_DIR / "longmemeval_50.json"
+
+    if not dataset_file.exists():
+        print(f"Error: Dataset not found at {dataset_file}")
+        return
+
+    with open(dataset_file) as f:
         dataset = json.load(f)
 
+    print(f"Dataset: {dataset_file.name}")
     print(f"Running eval on {len(dataset)} cases...")
     print("-" * 60)
 
@@ -173,7 +192,7 @@ def save_results(results: list, summary: dict):
     """Save results and summary to JSON file in results/ directory."""
     RESULTS_PATH.mkdir(exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    version = "v0.1.7"
+    version = cognex.__version__
 
     output = {
         "cognex_version": version,
@@ -182,11 +201,19 @@ def save_results(results: list, summary: dict):
         "cases": results
     }
 
-    out_path = RESULTS_PATH / f"cognex_{version}_{timestamp}.json"
+    out_path = RESULTS_PATH / f"cognex_v{version}_{timestamp}.json"
     with open(out_path, "w") as f:
         json.dump(output, f, indent=2)
     print(f"\nResults saved to: {out_path}")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    parser = argparse.ArgumentParser(description="Run Cognex LongMemEval benchmark")
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        default=None,
+        help="Dataset filename (in dataset/ dir) or absolute path. Defaults to longmemeval_50.json",
+    )
+    args = parser.parse_args()
+    asyncio.run(main(dataset_path=args.dataset))

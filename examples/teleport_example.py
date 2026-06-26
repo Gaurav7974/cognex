@@ -1,6 +1,6 @@
 """
 Teleport example.
-Shows how to export your cognitive substrate state and rehydrate it elsewhere.
+Shows how to export your cognex state and rehydrate it elsewhere.
 """
 
 import sys
@@ -9,7 +9,7 @@ import json
 
 sys.path.insert(0, "../src")
 
-from substrate_mcp.tools import handle_tool_call
+from cognex_mcp.tools import handle_tool_call
 
 
 async def main():

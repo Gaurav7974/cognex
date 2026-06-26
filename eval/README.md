@@ -30,9 +30,19 @@ cd eval/harness
 python run_eval.py
 ```
 
+To use a specific dataset:
+
+```bash
+python run_eval.py --dataset longmemeval_50.json
+python run_eval.py --dataset longmemeval_subset.json
+```
+
 Outputs:
 - Summary table to stdout (R@1, R@3, R@5 by category and difficulty)
-- Full results JSON saved to `../results/cognex_v0.1.7_TIMESTAMP.json`
+- Full results JSON saved to `../results/cognex_v<version>_<TIMESTAMP>.json`
+
+The version in the output filename is read dynamically from the installed
+Cognex package — it is never hardcoded.
 
 ## Dataset Structure
 
@@ -92,31 +102,8 @@ Each test case in `dataset/longmemeval_50.json`:
 
 Higher is better. R@5 > R@3 > R@1 always (monotonic).
 
-## Typical Results (BM25 Baseline)
+## Typical Results
 
-50-case evaluation results (keyword-only BM25):
-
-**Overall Scores:**
-- R@1: 9.0% (4.5/50 cases - correct memory is #1 result)
-- R@3: 94.0% (47/50 cases - correct memory in top 3)
-- R@5: 98.0% (49/50 cases - correct memory in top 5)
-
-**By Category:**
-- single_session_user (10 cases): R@1=8.0%, R@3=90.0%, R@5=100.0%
-- single_session_assistant (8 cases): R@1=12.5%, R@3=87.5%, R@5=100.0%
-- knowledge_update (10 cases): R@1=10.0%, R@3=90.0%, R@5=100.0%
-- temporal_reasoning (8 cases): R@1=0.0%, R@3=100.0%, R@5=100.0%
-- multi_session (8 cases): R@1=12.5%, R@3=100.0%, R@5=100.0%
-- implicit_preference (6 cases): R@1=16.7%, R@3=100.0%, R@5=100.0%
-
-**By Difficulty:**
-- easy (17 cases): R@1=9.4%, R@3=88.2%, R@5=100.0%
-- medium (20 cases): R@1=10.0%, R@3=90.0%, R@5=100.0%
-- hard (13 cases): R@1=9.1%, R@3=100.0%, R@5=100.0%
-
-Expected range for keyword-only BM25:
-- R@1: 60–75% (our 9% reflects challenging keyword matching)
-- R@3: 75–85% (our 94% exceeds expectations)
-- R@5: 80–90% (our 98% exceeds expectations)
-
-(Actual results depend on keyword specificity and FTS5 BM25 quality.)
+Results are generated dynamically by running the eval — they are never
+hardcoded. Run `python run_eval.py` to get current numbers for your
+installed Cognex version.

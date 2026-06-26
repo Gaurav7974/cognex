@@ -1,4 +1,4 @@
-"""Full demo: All 5 layers of the Cognitive Substrate working together."""
+"""Full demo: All 5 layers of the Cognex Engine working together."""
 
 from __future__ import annotations
 
@@ -7,8 +7,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from substrate import (
-    CognitiveSubstrate,
+from cognex import (
+    CognexEngine,
     TrustGradientEngine, TrustLevel,
     DecisionLedger,
     TeleportProtocol, TeleportBundle,
@@ -22,7 +22,7 @@ def main():
     for f in base.parent.glob("demo_full*"):
         f.unlink(missing_ok=True)
 
-    substrate = CognitiveSubstrate(db_path=base)
+    engine = CognexEngine(db_path=base)
     trust = TrustGradientEngine(db_path=base.with_suffix(".trust.db"))
     ledger = DecisionLedger(db_path=base.with_suffix(".ledger.db"))
     teleport = TeleportProtocol()
@@ -36,7 +36,7 @@ def main():
     print("=" * 70)
 
     print("\n--- Session 1: First time meeting the AI ---")
-    memories = substrate.start_session("session-1", project="ecommerce-api")
+    memories = engine.start_session("session-1", project="ecommerce-api")
     print(f"AI: 'Hello! I have no memories of you yet. What are we building?'")
 
     transcript_1 = """
@@ -47,15 +47,15 @@ User: I always use pytest, never unittest.
 User: We chose Stripe for payments because their docs are better.
 User: Last time we deployed to AWS ECS, staging had memory limit issues.
 """
-    result = substrate.process_transcript(transcript_1, session_id="session-1", project="ecommerce-api")
+    result = engine.process_transcript(transcript_1, session_id="session-1", project="ecommerce-api")
     print(f"\nAI processed the conversation and extracted {result.count} memories:")
     for m in result.memories:
         print(f"  [{m.type.value:12s}] {m.content[:70]}")
 
-    substrate.end_session(summary="Set up e-commerce API project")
+    engine.end_session(summary="Set up e-commerce API project")
 
     print("\n--- Session 2: The AI remembers ---")
-    memories = substrate.start_session("session-2", project="ecommerce-api")
+    memories = engine.start_session("session-2", project="ecommerce-api")
     print(f"AI: 'Welcome back. I remember {len(memories)} things about this project.'")
     for m in memories[:4]:
         print(f"  - {m.content[:70]}")
@@ -140,7 +140,7 @@ User: Last time we deployed to AWS ECS, staging had memory limit issues.
 
     print("\n--- Creating teleport bundle from laptop ---")
     bundle = teleport.create_bundle(
-        substrate=substrate,
+        engine=engine,
         source_host="laptop",
         target_host="production-server",
         pending_tasks=("finish payment integration", "add rate limiting"),
@@ -161,12 +161,13 @@ User: Last time we deployed to AWS ECS, staging had memory limit issues.
 
     # Rehydrate on "target machine"
     print("\n--- Rehydrating on production server ---")
-    target_substrate = CognitiveSubstrate(db_path=base.with_suffix(".target.db"))
+    target_engine = CognexEngine(db_path=base.with_suffix(".target.db"))
     loaded = TeleportBundle.load_from_file(bundle_path)
-    report = teleport.rehydrate(loaded, target_substrate)
+    report = teleport.rehydrate(loaded, target_engine)
     print(f"  Status: {report['status']}")
-    print(f"  Restored: {', '.join(report['restored'])}")
-    print(f"  Ready for: {report['ready_for']}")
+    print(f"  Memories Restored: {report.get('memories_restored', 0)}")
+    print(f"  Decisions Restored: {report.get('decisions_restored', 0)}")
+    print(f"  Sessions Restored: {report.get('sessions_restored', 0)}")
 
     # ================================================================
     # LAYER 5: SWARM — "Just tell it what you want"
@@ -229,7 +230,7 @@ The user just said what they wanted. The system handled the rest.
 """)
 
     # Cleanup — close connections first
-    substrate.store.close()
+    engine.store.close()
     trust.close()
     ledger.close()
     teleport.close()

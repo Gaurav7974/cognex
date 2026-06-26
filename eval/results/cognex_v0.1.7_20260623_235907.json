@@ -1,0 +1,1413 @@
+{
+  "cognex_version": "0.1.7",
+  "timestamp": "20260623_235907",
+  "summary": {
+    "total": 50,
+    "overall": {
+      "R@1": 0.0,
+      "R@3": 96.0,
+      "R@5": 96.0
+    },
+    "by_category": {
+      "single_session_user": {
+        "R@1": 0.0,
+        "R@3": 90.0,
+        "R@5": 90.0
+      },
+      "single_session_assistant": {
+        "R@1": 0.0,
+        "R@3": 100.0,
+        "R@5": 100.0
+      },
+      "knowledge_update": {
+        "R@1": 0.0,
+        "R@3": 90.0,
+        "R@5": 90.0
+      },
+      "temporal_reasoning": {
+        "R@1": 0.0,
+        "R@3": 100.0,
+        "R@5": 100.0
+      },
+      "multi_session": {
+        "R@1": 0.0,
+        "R@3": 100.0,
+        "R@5": 100.0
+      },
+      "implicit_preference": {
+        "R@1": 0.0,
+        "R@3": 100.0,
+        "R@5": 100.0
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "R@1": 0.0,
+        "R@3": 100.0,
+        "R@5": 100.0
+      },
+      "medium": {
+        "R@1": 0.0,
+        "R@3": 88.9,
+        "R@5": 88.9
+      },
+      "hard": {
+        "R@1": 0.0,
+        "R@3": 100.0,
+        "R@5": 100.0
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "lme_001",
+      "category": "single_session_user",
+      "difficulty": "easy",
+      "question": "What web framework does the user prefer for building APIs?",
+      "memory_to_store": "User prefers FastAPI over Flask for building APIs due to async support.",
+      "answer_keywords": [
+        "fastapi"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "fastapi",
+          "matched_memory": "User prefers FastAPI over Flask for building APIs due to async support."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "fastapi",
+          "matched_memory": "User prefers FastAPI over Flask for building APIs due to async support."
+        }
+      }
+    },
+    {
+      "id": "lme_002",
+      "category": "single_session_user",
+      "difficulty": "easy",
+      "question": "Which database does the user default to for relational data?",
+      "memory_to_store": "User selects PostgreSQL as the default database for relational data storage.",
+      "answer_keywords": [
+        "postgresql"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "postgresql",
+          "matched_memory": "User selects PostgreSQL as the default database for relational data storage."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "postgresql",
+          "matched_memory": "User selects PostgreSQL as the default database for relational data storage."
+        }
+      }
+    },
+    {
+      "id": "lme_003",
+      "category": "single_session_user",
+      "difficulty": "easy",
+      "question": "What deep learning framework does the user rely on?",
+      "memory_to_store": "User relies exclusively on PyTorch for conducting all deep learning experiments.",
+      "answer_keywords": [
+        "pytorch"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "pytorch",
+          "matched_memory": "User relies exclusively on PyTorch for conducting all deep learning experiments."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "pytorch",
+          "matched_memory": "User relies exclusively on PyTorch for conducting all deep learning experiments."
+        }
+      }
+    },
+    {
+      "id": "lme_004",
+      "category": "single_session_user",
+      "difficulty": "easy",
+      "question": "Which framework does the user choose for dashboards?",
+      "memory_to_store": "User chooses Vue.js as the primary framework for dashboard interfaces.",
+      "answer_keywords": [
+        "vue.js"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "vue.js",
+          "matched_memory": "User chooses Vue.js as the primary framework for dashboard interfaces."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "vue.js",
+          "matched_memory": "User chooses Vue.js as the primary framework for dashboard interfaces."
+        }
+      }
+    },
+    {
+      "id": "lme_005",
+      "category": "single_session_user",
+      "difficulty": "medium",
+      "question": "What containerization technology does the user utilize for deployments?",
+      "memory_to_store": "User deploys applications using Docker containers hosted on AWS infrastructure.",
+      "answer_keywords": [
+        "docker"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@5": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        }
+      }
+    },
+    {
+      "id": "lme_006",
+      "category": "single_session_user",
+      "difficulty": "medium",
+      "question": "Which tool does the user run to enforce formatting consistency?",
+      "memory_to_store": "User executes black automatically on commits to maintain consistent code formatting.",
+      "answer_keywords": [
+        "black"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "black",
+          "matched_memory": "User executes black automatically on commits to maintain consistent code formatting."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "black",
+          "matched_memory": "User executes black automatically on commits to maintain consistent code formatting."
+        }
+      }
+    },
+    {
+      "id": "lme_007",
+      "category": "single_session_user",
+      "difficulty": "medium",
+      "question": "Where does the user keep track of engineering tasks?",
+      "memory_to_store": "User tracks engineering tasks exclusively within the Linear project management tool.",
+      "answer_keywords": [
+        "linear"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "linear",
+          "matched_memory": "User tracks engineering tasks exclusively within the Linear project management tool."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "linear",
+          "matched_memory": "User tracks engineering tasks exclusively within the Linear project management tool."
+        }
+      }
+    },
+    {
+      "id": "lme_008",
+      "category": "single_session_user",
+      "difficulty": "medium",
+      "question": "Which operating system does the user develop on?",
+      "memory_to_store": "User conducts all software development work on Ubuntu Linux operating systems.",
+      "answer_keywords": [
+        "ubuntu"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "ubuntu",
+          "matched_memory": "User conducts all software development work on Ubuntu Linux operating systems."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "ubuntu",
+          "matched_memory": "User conducts all software development work on Ubuntu Linux operating systems."
+        }
+      }
+    },
+    {
+      "id": "lme_009",
+      "category": "single_session_user",
+      "difficulty": "hard",
+      "question": "What ORM does the user integrate with their preferred web framework for type safety?",
+      "memory_to_store": "User combines SQLAlchemy with FastAPI to execute type-safe database queries.",
+      "answer_keywords": [
+        "sqlalchemy"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "sqlalchemy",
+          "matched_memory": "User combines SQLAlchemy with FastAPI to execute type-safe database queries."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "sqlalchemy",
+          "matched_memory": "User combines SQLAlchemy with FastAPI to execute type-safe database queries."
+        }
+      }
+    },
+    {
+      "id": "lme_010",
+      "category": "single_session_user",
+      "difficulty": "hard",
+      "question": "How does the user ensure their AI agent deployments remain reproducible across environments?",
+      "memory_to_store": "User packages LangChain agents inside Docker containers to ensure deployment reproducibility.",
+      "answer_keywords": [
+        "docker"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "docker",
+          "matched_memory": "User packages LangChain agents inside Docker containers to ensure deployment reproducibility."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "docker",
+          "matched_memory": "User packages LangChain agents inside Docker containers to ensure deployment reproducibility."
+        }
+      }
+    },
+    {
+      "id": "lme_011",
+      "category": "single_session_assistant",
+      "difficulty": "easy",
+      "question": "What caching solution did the assistant recommend for high-read workloads?",
+      "memory_to_store": "Assistant recommends Redis as a caching layer for high-read workloads.",
+      "answer_keywords": [
+        "redis"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "redis",
+          "matched_memory": "Assistant recommends Redis as a caching layer for high-read workloads."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "redis",
+          "matched_memory": "Assistant recommends Redis as a caching layer for high-read workloads."
+        }
+      }
+    },
+    {
+      "id": "lme_012",
+      "category": "single_session_assistant",
+      "difficulty": "easy",
+      "question": "Which CSS framework did the assistant suggest for rapid prototyping?",
+      "memory_to_store": "Assistant suggests utilizing Tailwind CSS for accelerating user interface prototyping workflows.",
+      "answer_keywords": [
+        "tailwind"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "tailwind",
+          "matched_memory": "Assistant suggests utilizing Tailwind CSS for accelerating user interface prototyping workflows."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "tailwind",
+          "matched_memory": "Assistant suggests utilizing Tailwind CSS for accelerating user interface prototyping workflows."
+        }
+      }
+    },
+    {
+      "id": "lme_013",
+      "category": "single_session_assistant",
+      "difficulty": "easy",
+      "question": "What library did the assistant identify as optimal for NLP?",
+      "memory_to_store": "Assistant identifies Hugging Face Transformers as the optimal library for NLP tasks.",
+      "answer_keywords": [
+        "transformers"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "transformers",
+          "matched_memory": "Assistant identifies Hugging Face Transformers as the optimal library for NLP tasks."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "transformers",
+          "matched_memory": "Assistant identifies Hugging Face Transformers as the optimal library for NLP tasks."
+        }
+      }
+    },
+    {
+      "id": "lme_014",
+      "category": "single_session_assistant",
+      "difficulty": "easy",
+      "question": "What CI tool did the assistant propose to streamline pipelines?",
+      "memory_to_store": "Assistant proposes GitHub Actions to streamline the continuous integration pipeline.",
+      "answer_keywords": [
+        "github actions"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "github actions",
+          "matched_memory": "Assistant proposes GitHub Actions to streamline the continuous integration pipeline."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "github actions",
+          "matched_memory": "Assistant proposes GitHub Actions to streamline the continuous integration pipeline."
+        }
+      }
+    },
+    {
+      "id": "lme_015",
+      "category": "single_session_assistant",
+      "difficulty": "medium",
+      "question": "Which linter did the assistant say could consolidate multiple formatting tools?",
+      "memory_to_store": "Assistant states Ruff can consolidate flake8 and isort into a single workflow tool.",
+      "answer_keywords": [
+        "ruff"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "ruff",
+          "matched_memory": "Assistant states Ruff can consolidate flake8 and isort into a single workflow tool."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "ruff",
+          "matched_memory": "Assistant states Ruff can consolidate flake8 and isort into a single workflow tool."
+        }
+      }
+    },
+    {
+      "id": "lme_016",
+      "category": "single_session_assistant",
+      "difficulty": "medium",
+      "question": "What platform did the assistant note facilitates cross-team documentation sharing?",
+      "memory_to_store": "Assistant notes Notion facilitates effective documentation sharing across different teams.",
+      "answer_keywords": [
+        "notion"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "notion",
+          "matched_memory": "Assistant notes Notion facilitates effective documentation sharing across different teams."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "notion",
+          "matched_memory": "Assistant notes Notion facilitates effective documentation sharing across different teams."
+        }
+      }
+    },
+    {
+      "id": "lme_017",
+      "category": "single_session_assistant",
+      "difficulty": "medium",
+      "question": "Which hardware architecture did the assistant claim excels at local inference?",
+      "memory_to_store": "Assistant claims Apple Silicon Macs deliver strong performance for local model inference.",
+      "answer_keywords": [
+        "apple silicon"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "apple silicon",
+          "matched_memory": "Assistant claims Apple Silicon Macs deliver strong performance for local model inference."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "apple silicon",
+          "matched_memory": "Assistant claims Apple Silicon Macs deliver strong performance for local model inference."
+        }
+      }
+    },
+    {
+      "id": "lme_018",
+      "category": "single_session_assistant",
+      "difficulty": "hard",
+      "question": "What task queue did the assistant recommend pairing with a Python web framework for background AI jobs?",
+      "memory_to_store": "Assistant explains that pairing Celery with Django efficiently manages background AI processing tasks.",
+      "answer_keywords": [
+        "celery"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "celery",
+          "matched_memory": "Assistant explains that pairing Celery with Django efficiently manages background AI processing tasks."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "celery",
+          "matched_memory": "Assistant explains that pairing Celery with Django efficiently manages background AI processing tasks."
+        }
+      }
+    },
+    {
+      "id": "lme_019",
+      "category": "knowledge_update",
+      "difficulty": "easy",
+      "question": "What framework does the user currently use for APIs?",
+      "memory_to_store": "User recently migrated their API development workflow from Flask to FastAPI.",
+      "answer_keywords": [
+        "fastapi"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "fastapi",
+          "matched_memory": "User recently migrated their API development workflow from Flask to FastAPI."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "fastapi",
+          "matched_memory": "User recently migrated their API development workflow from Flask to FastAPI."
+        }
+      }
+    },
+    {
+      "id": "lme_020",
+      "category": "knowledge_update",
+      "difficulty": "easy",
+      "question": "Which database does the user's application currently run on?",
+      "memory_to_store": "User migrated their application database from MongoDB to PostgreSQL last week.",
+      "answer_keywords": [
+        "postgresql"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "postgresql",
+          "matched_memory": "User migrated their application database from MongoDB to PostgreSQL last week."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "postgresql",
+          "matched_memory": "User migrated their application database from MongoDB to PostgreSQL last week."
+        }
+      }
+    },
+    {
+      "id": "lme_021",
+      "category": "knowledge_update",
+      "difficulty": "easy",
+      "question": "What framework does the user currently use for model training?",
+      "memory_to_store": "User completely transitioned their model training pipeline from TensorFlow to PyTorch.",
+      "answer_keywords": [
+        "pytorch"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "pytorch",
+          "matched_memory": "User completely transitioned their model training pipeline from TensorFlow to PyTorch."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "pytorch",
+          "matched_memory": "User completely transitioned their model training pipeline from TensorFlow to PyTorch."
+        }
+      }
+    },
+    {
+      "id": "lme_022",
+      "category": "knowledge_update",
+      "difficulty": "easy",
+      "question": "What language does the user currently write components in?",
+      "memory_to_store": "User refactored their component codebase from JavaScript to TypeScript for type safety.",
+      "answer_keywords": [
+        "typescript"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "typescript",
+          "matched_memory": "User refactored their component codebase from JavaScript to TypeScript for type safety."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "typescript",
+          "matched_memory": "User refactored their component codebase from JavaScript to TypeScript for type safety."
+        }
+      }
+    },
+    {
+      "id": "lme_023",
+      "category": "knowledge_update",
+      "difficulty": "medium",
+      "question": "How does the user currently handle application deployments?",
+      "memory_to_store": "User replaced manual SSH deployments with automated Kubernetes cluster orchestration.",
+      "answer_keywords": [
+        "kubernetes"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@5": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        }
+      }
+    },
+    {
+      "id": "lme_024",
+      "category": "knowledge_update",
+      "difficulty": "medium",
+      "question": "Which linter does the user currently rely on for speed?",
+      "memory_to_store": "User abandoned pylint and adopted ruff to achieve faster code linting.",
+      "answer_keywords": [
+        "ruff"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "ruff",
+          "matched_memory": "User abandoned pylint and adopted ruff to achieve faster code linting."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "ruff",
+          "matched_memory": "User abandoned pylint and adopted ruff to achieve faster code linting."
+        }
+      }
+    },
+    {
+      "id": "lme_025",
+      "category": "knowledge_update",
+      "difficulty": "medium",
+      "question": "Where does the user currently track software bugs?",
+      "memory_to_store": "User transferred all bug tracking operations from Jira to Linear recently.",
+      "answer_keywords": [
+        "linear"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "linear",
+          "matched_memory": "User transferred all bug tracking operations from Jira to Linear recently."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "linear",
+          "matched_memory": "User transferred all bug tracking operations from Jira to Linear recently."
+        }
+      }
+    },
+    {
+      "id": "lme_026",
+      "category": "knowledge_update",
+      "difficulty": "medium",
+      "question": "Which cloud provider does the user currently host infrastructure on?",
+      "memory_to_store": "User migrated their hosting infrastructure from Azure to Google Cloud Platform.",
+      "answer_keywords": [
+        "google cloud"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "google cloud",
+          "matched_memory": "User migrated their hosting infrastructure from Azure to Google Cloud Platform."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "google cloud",
+          "matched_memory": "User migrated their hosting infrastructure from Azure to Google Cloud Platform."
+        }
+      }
+    },
+    {
+      "id": "lme_027",
+      "category": "knowledge_update",
+      "difficulty": "hard",
+      "question": "What tool does the user currently employ to automate their upgraded database backups?",
+      "memory_to_store": "User upgraded to PostgreSQL and automated database backups using pg_dump scripts.",
+      "answer_keywords": [
+        "pg_dump"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "pg_dump",
+          "matched_memory": "User upgraded to PostgreSQL and automated database backups using pg_dump scripts."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "pg_dump",
+          "matched_memory": "User upgraded to PostgreSQL and automated database backups using pg_dump scripts."
+        }
+      }
+    },
+    {
+      "id": "lme_028",
+      "category": "knowledge_update",
+      "difficulty": "hard",
+      "question": "What frontend framework does the user currently use to interface with their model API?",
+      "memory_to_store": "User replaced Flask with a Next.js frontend that queries FastAPI model endpoints.",
+      "answer_keywords": [
+        "next.js"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "next.js",
+          "matched_memory": "User replaced Flask with a Next.js frontend that queries FastAPI model endpoints."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "next.js",
+          "matched_memory": "User replaced Flask with a Next.js frontend that queries FastAPI model endpoints."
+        }
+      }
+    },
+    {
+      "id": "lme_029",
+      "category": "temporal_reasoning",
+      "difficulty": "easy",
+      "question": "What framework did the user use for the legacy app before the rewrite?",
+      "memory_to_store": "User originally constructed the legacy application using the Django web framework.",
+      "answer_keywords": [
+        "django"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "django",
+          "matched_memory": "User originally constructed the legacy application using the Django web framework."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "django",
+          "matched_memory": "User originally constructed the legacy application using the Django web framework."
+        }
+      }
+    },
+    {
+      "id": "lme_030",
+      "category": "temporal_reasoning",
+      "difficulty": "easy",
+      "question": "Which database did the user start with before planning the migration?",
+      "memory_to_store": "User initially selected MySQL as the database for the prototype phase.",
+      "answer_keywords": [
+        "mysql"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "mysql",
+          "matched_memory": "User initially selected MySQL as the database for the prototype phase."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "mysql",
+          "matched_memory": "User initially selected MySQL as the database for the prototype phase."
+        }
+      }
+    },
+    {
+      "id": "lme_031",
+      "category": "temporal_reasoning",
+      "difficulty": "easy",
+      "question": "What library did the user use for initial experiments before switching to deep learning?",
+      "memory_to_store": "User conducted initial machine learning experiments using the scikit-learn library.",
+      "answer_keywords": [
+        "scikit-learn"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "scikit-learn",
+          "matched_memory": "User conducted initial machine learning experiments using the scikit-learn library."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "scikit-learn",
+          "matched_memory": "User conducted initial machine learning experiments using the scikit-learn library."
+        }
+      }
+    },
+    {
+      "id": "lme_032",
+      "category": "temporal_reasoning",
+      "difficulty": "medium",
+      "question": "Which CSS framework styled the dashboard before the rebuild?",
+      "memory_to_store": "User originally applied Bootstrap styling to the dashboard interface components.",
+      "answer_keywords": [
+        "bootstrap"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "bootstrap",
+          "matched_memory": "User originally applied Bootstrap styling to the dashboard interface components."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "bootstrap",
+          "matched_memory": "User originally applied Bootstrap styling to the dashboard interface components."
+        }
+      }
+    },
+    {
+      "id": "lme_033",
+      "category": "temporal_reasoning",
+      "difficulty": "medium",
+      "question": "What CI system did the user configure before switching to GitLab?",
+      "memory_to_store": "User initially configured Jenkins servers to handle all continuous integration pipelines.",
+      "answer_keywords": [
+        "jenkins"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "jenkins",
+          "matched_memory": "User initially configured Jenkins servers to handle all continuous integration pipelines."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "jenkins",
+          "matched_memory": "User initially configured Jenkins servers to handle all continuous integration pipelines."
+        }
+      }
+    },
+    {
+      "id": "lme_034",
+      "category": "temporal_reasoning",
+      "difficulty": "medium",
+      "question": "Which formatter did the user originally use before team standardization?",
+      "memory_to_store": "User originally formatted their Python codebase using the yapf tool.",
+      "answer_keywords": [
+        "yapf"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "yapf",
+          "matched_memory": "User originally formatted their Python codebase using the yapf tool."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "yapf",
+          "matched_memory": "User originally formatted their Python codebase using the yapf tool."
+        }
+      }
+    },
+    {
+      "id": "lme_035",
+      "category": "temporal_reasoning",
+      "difficulty": "hard",
+      "question": "What method did the user rely on for inventory tracking before building the custom backend?",
+      "memory_to_store": "User previously tracked hardware inventory using manual Excel spreadsheet files.",
+      "answer_keywords": [
+        "excel"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "excel",
+          "matched_memory": "User previously tracked hardware inventory using manual Excel spreadsheet files."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "excel",
+          "matched_memory": "User previously tracked hardware inventory using manual Excel spreadsheet files."
+        }
+      }
+    },
+    {
+      "id": "lme_036",
+      "category": "temporal_reasoning",
+      "difficulty": "hard",
+      "question": "Where did the user store embeddings before migrating to a vector database?",
+      "memory_to_store": "User initially persisted model embeddings inside a local CSV file.",
+      "answer_keywords": [
+        "csv"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "csv",
+          "matched_memory": "User initially persisted model embeddings inside a local CSV file."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "csv",
+          "matched_memory": "User initially persisted model embeddings inside a local CSV file."
+        }
+      }
+    },
+    {
+      "id": "lme_037",
+      "category": "multi_session",
+      "difficulty": "easy",
+      "question": "Which database did the user select for their FastAPI project?",
+      "memory_to_store": "User builds a FastAPI REST API and selected PostgreSQL for JSON handling.",
+      "answer_keywords": [
+        "postgresql"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "postgresql",
+          "matched_memory": "User builds a FastAPI REST API and selected PostgreSQL for JSON handling."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "postgresql",
+          "matched_memory": "User builds a FastAPI REST API and selected PostgreSQL for JSON handling."
+        }
+      }
+    },
+    {
+      "id": "lme_038",
+      "category": "multi_session",
+      "difficulty": "easy",
+      "question": "What frontend framework will host the user's sentiment model?",
+      "memory_to_store": "User trained a sentiment analysis model to deploy behind a React dashboard.",
+      "answer_keywords": [
+        "react"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "react",
+          "matched_memory": "User trained a sentiment analysis model to deploy behind a React dashboard."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "react",
+          "matched_memory": "User trained a sentiment analysis model to deploy behind a React dashboard."
+        }
+      }
+    },
+    {
+      "id": "lme_039",
+      "category": "multi_session",
+      "difficulty": "easy",
+      "question": "Which linter does the user want to enforce in their CI pipeline?",
+      "memory_to_store": "User configured a GitHub Actions pipeline to fail on ruff linting errors.",
+      "answer_keywords": [
+        "ruff"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "ruff",
+          "matched_memory": "User configured a GitHub Actions pipeline to fail on ruff linting errors."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "ruff",
+          "matched_memory": "User configured a GitHub Actions pipeline to fail on ruff linting errors."
+        }
+      }
+    },
+    {
+      "id": "lme_040",
+      "category": "multi_session",
+      "difficulty": "easy",
+      "question": "What database did the user choose for their ARM-based servers?",
+      "memory_to_store": "User provisions ARM cloud instances and selected SQLite as the lightweight database.",
+      "answer_keywords": [
+        "sqlite"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "sqlite",
+          "matched_memory": "User provisions ARM cloud instances and selected SQLite as the lightweight database."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "sqlite",
+          "matched_memory": "User provisions ARM cloud instances and selected SQLite as the lightweight database."
+        }
+      }
+    },
+    {
+      "id": "lme_041",
+      "category": "multi_session",
+      "difficulty": "medium",
+      "question": "Where does the user log tasks for their new Django backend?",
+      "memory_to_store": "User manages sprint planning in ClickUp and started a new Django backend task.",
+      "answer_keywords": [
+        "clickup"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "clickup",
+          "matched_memory": "User manages sprint planning in ClickUp and started a new Django backend task."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "clickup",
+          "matched_memory": "User manages sprint planning in ClickUp and started a new Django backend task."
+        }
+      }
+    },
+    {
+      "id": "lme_042",
+      "category": "multi_session",
+      "difficulty": "medium",
+      "question": "What tool does the user employ to containerize their Llama 3 inference server?",
+      "memory_to_store": "User fine-tunes a Llama 3 model and containerizes the inference server with Docker.",
+      "answer_keywords": [
+        "docker"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "docker",
+          "matched_memory": "User fine-tunes a Llama 3 model and containerizes the inference server with Docker."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "docker",
+          "matched_memory": "User fine-tunes a Llama 3 model and containerizes the inference server with Docker."
+        }
+      }
+    },
+    {
+      "id": "lme_043",
+      "category": "multi_session",
+      "difficulty": "hard",
+      "question": "What database pairs with the user's new Vue.js migration and strict linting setup?",
+      "memory_to_store": "User migrates jQuery to Vue.js, enforces eslint, and adopts MongoDB for the data layer.",
+      "answer_keywords": [
+        "mongodb"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "mongodb",
+          "matched_memory": "User migrates jQuery to Vue.js, enforces eslint, and adopts MongoDB for the data layer."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "mongodb",
+          "matched_memory": "User migrates jQuery to Vue.js, enforces eslint, and adopts MongoDB for the data layer."
+        }
+      }
+    },
+    {
+      "id": "lme_044",
+      "category": "multi_session",
+      "difficulty": "hard",
+      "question": "What hardware plugin does the user configure for GPU jobs on their bare metal cluster?",
+      "memory_to_store": "User runs a bare metal Kubernetes cluster and configures NVIDIA plugins for GPU training jobs.",
+      "answer_keywords": [
+        "nvidia"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "nvidia",
+          "matched_memory": "User runs a bare metal Kubernetes cluster and configures NVIDIA plugins for GPU training jobs."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "nvidia",
+          "matched_memory": "User runs a bare metal Kubernetes cluster and configures NVIDIA plugins for GPU training jobs."
+        }
+      }
+    },
+    {
+      "id": "lme_045",
+      "category": "implicit_preference",
+      "difficulty": "easy",
+      "question": "Which web framework does the user consistently seek guidance on?",
+      "memory_to_store": "User consistently requests implementation examples and best practices for FastAPI development.",
+      "answer_keywords": [
+        "fastapi"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "fastapi",
+          "matched_memory": "User consistently requests implementation examples and best practices for FastAPI development."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "fastapi",
+          "matched_memory": "User consistently requests implementation examples and best practices for FastAPI development."
+        }
+      }
+    },
+    {
+      "id": "lme_046",
+      "category": "implicit_preference",
+      "difficulty": "easy",
+      "question": "Which database system does the user repeatedly ask about?",
+      "memory_to_store": "User repeatedly asks for schema management and maintenance commands specific to PostgreSQL.",
+      "answer_keywords": [
+        "postgresql"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "postgresql",
+          "matched_memory": "User repeatedly asks for schema management and maintenance commands specific to PostgreSQL."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "postgresql",
+          "matched_memory": "User repeatedly asks for schema management and maintenance commands specific to PostgreSQL."
+        }
+      }
+    },
+    {
+      "id": "lme_047",
+      "category": "implicit_preference",
+      "difficulty": "medium",
+      "question": "Which AI ecosystem does the user consistently focus on for NLP tasks?",
+      "memory_to_store": "User consistently focuses on Hugging Face ecosystem tools for NLP model development.",
+      "answer_keywords": [
+        "hugging face"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "hugging face",
+          "matched_memory": "User consistently focuses on Hugging Face ecosystem tools for NLP model development."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "hugging face",
+          "matched_memory": "User consistently focuses on Hugging Face ecosystem tools for NLP model development."
+        }
+      }
+    },
+    {
+      "id": "lme_048",
+      "category": "implicit_preference",
+      "difficulty": "medium",
+      "question": "Which frontend library does the user consistently request patterns for?",
+      "memory_to_store": "User consistently requests code conversions and patterns specific to React component architecture.",
+      "answer_keywords": [
+        "react"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "react",
+          "matched_memory": "User consistently requests code conversions and patterns specific to React component architecture."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "react",
+          "matched_memory": "User consistently requests code conversions and patterns specific to React component architecture."
+        }
+      }
+    },
+    {
+      "id": "lme_049",
+      "category": "implicit_preference",
+      "difficulty": "hard",
+      "question": "Which code formatter does the user systematically enforce across their entire development workflow?",
+      "memory_to_store": "User systematically integrates black formatting into local hooks, CI pipelines, and editor settings.",
+      "answer_keywords": [
+        "black"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "black",
+          "matched_memory": "User systematically integrates black formatting into local hooks, CI pipelines, and editor settings."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "black",
+          "matched_memory": "User systematically integrates black formatting into local hooks, CI pipelines, and editor settings."
+        }
+      }
+    },
+    {
+      "id": "lme_050",
+      "category": "implicit_preference",
+      "difficulty": "hard",
+      "question": "Which cloud provider does the user consistently center their infrastructure planning around?",
+      "memory_to_store": "User consistently plans infrastructure upgrades, cost analyses, and migrations centered around AWS services.",
+      "answer_keywords": [
+        "aws"
+      ],
+      "results": {
+        "R@1": {
+          "hit": false,
+          "matched_keyword": null,
+          "matched_memory": null
+        },
+        "R@3": {
+          "hit": true,
+          "matched_keyword": "aws",
+          "matched_memory": "User consistently plans infrastructure upgrades, cost analyses, and migrations centered around AWS services."
+        },
+        "R@5": {
+          "hit": true,
+          "matched_keyword": "aws",
+          "matched_memory": "User consistently plans infrastructure upgrades, cost analyses, and migrations centered around AWS services."
+        }
+      }
+    }
+  ]
+}

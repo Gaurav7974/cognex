@@ -8,7 +8,7 @@ import asyncio
 
 sys.path.insert(0, "../src")
 
-from substrate_mcp.tools import handle_tool_call
+from cognex_mcp.tools import handle_tool_call
 
 
 async def main():

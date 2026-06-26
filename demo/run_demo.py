@@ -1,4 +1,4 @@
-"""Demo: Watch the Cognitive Substrate remember things across sessions."""
+"""Demo: Watch the Cognex Engine remember things across sessions."""
 
 from pathlib import Path
 import sys
@@ -6,21 +6,21 @@ import sys
 # Add src to path for demo
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from substrate import CognitiveSubstrate, MemoryType
+from cognex import CognexEngine, MemoryType
 
 
 def main():
     db = Path(__file__).parent / "demo_memory.db"
     db.unlink(missing_ok=True)  # Clean start
 
-    substrate = CognitiveSubstrate(db_path=db)
+    engine = CognexEngine(db_path=db)
 
     # ── Session 1: User sets up a project ─────────────────────
     print("=" * 60)
     print("SESSION 1: Setting up the project")
     print("=" * 60)
 
-    memories = substrate.start_session("session-1", project="my-api")
+    memories = engine.start_session("session-1", project="my-api")
     print(f"Starting session. Loaded {len(memories)} memories (expected: 0 — first time)")
 
     transcript_1 = """
@@ -36,12 +36,12 @@ Assistant: Noted. What's the deployment target?
 User: We deploy to AWS ECS. The staging environment had issues with memory limits last time.
 """
 
-    result = substrate.process_transcript(transcript_1, session_id="session-1", project="my-api")
+    result = engine.process_transcript(transcript_1, session_id="session-1", project="my-api")
     print(f"Extracted {result.count} memories from session 1:")
     for m in result.memories:
         print(f"  [{m.type.value}] {m.content[:80]}")
 
-    substrate.end_session(
+    engine.end_session(
         summary="Set up e-commerce API project. User prefers FastAPI, pytest, raw SQL.",
         key_decisions=("Chose FastAPI over Flask", "Chose Stripe over PayPal", "Chose raw SQL over ORM"),
         tools_used=("FileReadTool", "BashTool"),
@@ -53,7 +53,7 @@ User: We deploy to AWS ECS. The staging environment had issues with memory limit
     print("SESSION 2: User returns — the AI remembers")
     print("=" * 60)
 
-    memories = substrate.start_session("session-2", project="my-api")
+    memories = engine.start_session("session-2", project="my-api")
     print(f"Starting session. Loaded {len(memories)} relevant memories:")
     for m in memories:
         print(f"  [{m.type.value}] {m.content[:80]}")
@@ -71,7 +71,7 @@ Assistant: Interesting — you previously had issues with memory limits on stagi
 User: Yeah, that's why we're moving. Cloud Run handles scaling better.
 """
 
-    result = substrate.process_transcript(transcript_2, session_id="session-2", project="my-api")
+    result = engine.process_transcript(transcript_2, session_id="session-2", project="my-api")
     print(f"\nExtracted {result.count} new memories:")
     for m in result.memories:
         print(f"  [{m.type.value}] {m.content[:80]}")
@@ -81,22 +81,22 @@ User: Yeah, that's why we're moving. Cloud Run handles scaling better.
     print("SESSION 3: Decision history — 'What did we decide before?'")
     print("=" * 60)
 
-    substrate.start_session("session-3", project="my-api")
+    engine.start_session("session-3", project="my-api")
 
-    similar = substrate.find_similar_decisions("choosing between frameworks")
+    similar = engine.find_similar_decisions("choosing between frameworks")
     print(f"Found {len(similar)} past decisions about frameworks:")
     for m in similar:
         print(f"  [{m.type.value}] {m.content[:80]}")
 
     # ── Report ────────────────────────────────────────────────
     print("\n" + "=" * 60)
-    print("SUBSTRATE REPORT")
+    print("COGNEX ENGINE REPORT")
     print("=" * 60)
-    report = substrate.report()
+    report = engine.report()
     print(report.as_text())
 
     # Cleanup — close connections first
-    substrate.store.close()
+    engine.store.close()
     import gc; gc.collect()  # Force cleanup of any lingering refs
     import time; time.sleep(0.2)  # Let SQLite release locks
     db.unlink(missing_ok=True)

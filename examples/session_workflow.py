@@ -8,19 +8,19 @@ import asyncio
 
 sys.path.insert(0, "../src")
 
-from substrate_mcp.tools import handle_tool_call
+from cognex_mcp.tools import handle_tool_call
 
 
 async def main():
     # Step 1: Start a session
     result = await handle_tool_call(
-        "substrate_start_session", {"session_id": "session-001", "project": "my-api"}
+        "cognex_start_session", {"session_id": "session-001", "project": "my-api"}
     )
     print("Session started:", result)
 
     # Step 2: Process some conversation transcript
     result = await handle_tool_call(
-        "substrate_process_transcript",
+        "cognex_process_transcript",
         {
             "transcript": "I prefer using pytest over unittest for testing. Also, always use type hints in Python code.",
             "session_id": "session-001",
@@ -50,7 +50,7 @@ async def main():
 
     # Step 5: End the session
     result = await handle_tool_call(
-        "substrate_end_session",
+        "cognex_end_session",
         {
             "summary": "Set up project structure and chose pytest as test framework",
             "key_decisions": ["Use pytest for testing", "Use FastAPI for API"],

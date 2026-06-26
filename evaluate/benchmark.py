@@ -10,13 +10,13 @@ def estimate_tokens(text: str) -> int:
 
 
 async def run_benchmark():
-    from substrate_mcp.tools import (
+    from cognex_mcp.tools import (
         handle_tool_call,
-        substrate_start_session,
-        substrate_end_session,
+        cognex_start_session,
+        cognex_end_session,
     )
 
-    await substrate_start_session(session_id="benchmark-run", project="benchmark")
+    await cognex_start_session(session_id="benchmark-run", project="benchmark")
 
     production_memories = [
         {
@@ -172,7 +172,7 @@ async def run_benchmark():
     print(f"Token reduction: {avg_saving:.0f}%")
     print(f"Per query savings: ~{int(avg_manual_tokens - avg_cognex_tokens)} tokens")
 
-    await substrate_end_session(
+    await cognex_end_session(
         session_id="benchmark-run", project="benchmark", summary="Benchmark completed"
     )
 
