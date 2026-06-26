@@ -14,8 +14,8 @@ from .retriever import MemoryRetriever
 
 
 @dataclass
-class SubstrateReport:
-    """Summary of the substrate's current state."""
+class CognexReport:
+    """Summary of the cognex engine's current state."""
 
     total_memories: int
     memories_by_type: dict[str, int]
@@ -26,7 +26,7 @@ class SubstrateReport:
 
     def as_text(self) -> str:
         lines = [
-            "=== Cognitive Substrate ===",
+            "=== Cognex Engine ===",
             f"Memories: {self.total_memories}",
             f"Sessions: {self.total_sessions}",
             "",
@@ -42,17 +42,17 @@ class SubstrateReport:
         return "\n".join(lines)
 
 
-class CognitiveSubstrate:
+class CognexEngine:
     """The persistent memory layer for an AI agent.
 
     Usage:
-        substrate = CognitiveSubstrate()
+        engine = CognexEngine()
         # Start a session
-        substrate.start_session("session-abc", project="my-api")
+        engine.start_session("session-abc", project="my-api")
         # Process conversation
-        substrate.process_transcript("I prefer pytest over unittest...")
+        engine.process_transcript("I prefer pytest over unittest...", project="my-api")
         # Get context for next session
-        memories = substrate.get_context("my-api")
+        memories = engine.get_context("my-api")
     """
 
     def __init__(self, db_path: str | Path | None = None, pool_size: int | None = None):
@@ -90,7 +90,15 @@ class CognitiveSubstrate:
                 "active": True
             }
         self._current_project = project
-        return self.retriever.get_session_context(project=project)
+
+        # Session arc integration (P3.2)
+        from .arcs import SessionArcManager
+        try:
+            SessionArcManager.get_or_create_arc(session_id, project, self.store)
+        except Exception as e:
+            logger.error("Failed to get or create session arc: %s", e)
+
+        return self.retriever.get_session_context(project=project, session_id=session_id)
 
     def end_session(
         self,
@@ -114,6 +122,15 @@ class CognitiveSubstrate:
             output_tokens=output_tokens,
         )
         self.store.save_session(session)
+
+        # Session arc integration (P3.2): update arc last_session_at
+        if current_session_id and self._current_project:
+            from .arcs import SessionArcManager
+            try:
+                SessionArcManager.get_or_create_arc(current_session_id, self._current_project, self.store)
+            except Exception as e:
+                logger.error("Failed to update session arc on end_session: %s", e)
+
         # Mark session as inactive
         if current_session_id:
             with self._sessions_lock:
@@ -168,9 +185,14 @@ class CognitiveSubstrate:
     ) -> list[MemoryEntry]:
         """Get relevant memories for the current context."""
         proj = project or self._current_project
+        session_id = self.get_current_session() or ""
         if query:
-            return self.retriever.find_relevant(query=query, project=proj, limit=limit)
-        return self.retriever.get_session_context(project=proj, limit=limit)
+            return self.retriever.find_relevant_hybrid(
+                query=query, project=proj, limit=limit, session_id=session_id
+            )
+        return self.retriever.get_session_context(
+            project=proj, limit=limit, session_id=session_id
+        )
 
     def find_similar_decisions(self, situation: str) -> list[MemoryEntry]:
         """Find past decisions similar to current situation."""
@@ -183,10 +205,12 @@ class CognitiveSubstrate:
 
     def decay_memories(self, factor: float = 0.95) -> int:
         """Age all memories. Faded ones are auto-deleted."""
-        return self.store.decay_all(factor)
+        from .feedback import OutcomeFeedback
+        modifiers = OutcomeFeedback.compute_uniqueness_modifiers(self.store)
+        return self.store.decay_all(factor, modifiers=modifiers)
 
-    def report(self) -> SubstrateReport:
-        """Get a summary of the substrate's state.
+    def report(self) -> CognexReport:
+        """Get a summary of the cognex engine's state.
 
         All queries run in a single transaction for consistent snapshot.
         """
@@ -223,7 +247,7 @@ class CognitiveSubstrate:
 
                 conn.commit()
 
-                return SubstrateReport(
+                return CognexReport(
                     total_memories=total,
                     memories_by_type=by_type,
                     total_sessions=len(sessions),

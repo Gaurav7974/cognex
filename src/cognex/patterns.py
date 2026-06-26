@@ -64,7 +64,7 @@ class PatternAnalyzer:
         """
         params.append(self.MIN_SAMPLES)
 
-        with self.ledger._connect() as conn:
+        with self.ledger._pool.get_connection() as conn:
             rows = conn.execute(sql, params).fetchall()
 
         if len(rows) < 2:
@@ -134,7 +134,7 @@ class PatternAnalyzer:
         """
         params.append(self.MIN_SAMPLES)
 
-        with self.ledger._connect() as conn:
+        with self.ledger._pool.get_connection() as conn:
             rows = conn.execute(sql, params).fetchall()
 
         if not rows:
@@ -191,7 +191,7 @@ class PatternAnalyzer:
         where = "WHERE project = ?" if project else ""
         params = [project] if project else []
 
-        with self.ledger._connect() as conn:
+        with self.ledger._pool.get_connection() as conn:
             total = conn.execute(
                 f"SELECT COUNT(*) FROM decisions {where}", params
             ).fetchone()[0]

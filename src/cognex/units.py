@@ -4,78 +4,20 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
+from ._pool import ConnectionPool
 from .models import CognitiveUnit
 
 
-class ConnectionPool:
-    # Thread-local connection pool for SQLite (reused from store.py pattern).
-
-    def __init__(self, db_path: Path, pool_size: int = 3):
-        self.db_path = db_path
-        self.pool_size = pool_size
-        self._local = __import__("threading").local()
-        self._lock = __import__("threading").Lock()
-        self._connections: list[sqlite3.Connection] = []
-        self._init_pool()
-
-    def _init_pool(self) -> None:
-        for _ in range(self.pool_size):
-            conn = self._create_connection()
-            self._connections.append(conn)
-
-    def _create_connection(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(str(self.db_path), check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA busy_timeout = 10000")
-        conn.execute("PRAGMA journal_mode = WAL")
-        conn.execute("PRAGMA wal_autocheckpoint = 100")
-        conn.execute("PRAGMA cache_size=-32000")
-        conn.execute("PRAGMA mmap_size=134217728")
-        conn.execute("PRAGMA synchronous=NORMAL")
-        conn.execute("PRAGMA temp_store=MEMORY")
-        return conn
-
-    @contextmanager
-    def get_connection(self):
-        conn = getattr(self._local, "conn", None)
-        if conn is None:
-            with self._lock:
-                if self._connections:
-                    conn = self._connections.pop(0)
-                else:
-                    conn = self._create_connection()
-            self._local.conn = conn
-        try:
-            yield conn
-        finally:
-            pass
-
-    def close_all(self) -> None:
-        with self._lock:
-            for conn in self._connections:
-                try:
-                    conn.close()
-                except Exception:
-                    pass
-            self._connections.clear()
-        if hasattr(self._local, "conn"):
-            try:
-                self._local.conn.close()
-            except Exception:
-                pass
-            self._local.conn = None
 
 
 class CognitiveUnitStore:
     # Storage for Cognitive Units and CHP handoff support.
 
     def __init__(self, db_path: str | Path | None = None):
-        self.db_path = Path(db_path) if db_path else Path(".substrate/substrate.db")
+        self.db_path = Path(db_path) if db_path else Path.home() / ".cognex.db" / "cognex.db"
         self._pool = ConnectionPool(self.db_path, pool_size=3)
         self._init_db()
 

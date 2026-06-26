@@ -2,6 +2,8 @@
 # Invented protocol for seamless Cognitive Units transfer between AI agents
 # Inspired by quantum entanglement and holographic projection
 
+import threading
+from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 from .models import CognitiveUnit
 
@@ -10,9 +12,14 @@ class CHPProtocol:
     """
     Cognitive Handoff Protocol (CHP) - A groundbreaking protocol for agent-to-agent
     Cognitive Unit transfer using quantum-inspired entanglement and holographic projection.
+
+    Designed as a shared singleton (see CognexContext) so handoff state persists
+    across tool calls. All mutable state access is guarded by a lock for safe use
+    under concurrent sessions.
     """
 
     def __init__(self):
+        self._lock = threading.Lock()
         self.active_entanglements: Dict[
             str, Dict[str, Any]
         ] = {}  # Quantum entanglement states
@@ -29,13 +36,14 @@ class CHPProtocol:
         """
         entanglement_key = f"ent_{unit_id}_{source_agent}_{target_agent}_{len(self.active_entanglements)}"
 
-        self.active_entanglements[entanglement_key] = {
-            "unit_id": unit_id,
-            "state": "entangled",
-            "agents": [source_agent, target_agent],
-            "created_at": "simulated_time",
-            "transferred_data": None,
-        }
+        with self._lock:
+            self.active_entanglements[entanglement_key] = {
+                "unit_id": unit_id,
+                "state": "entangled",
+                "agents": [source_agent, target_agent],
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "transferred_data": None,
+            }
 
         return entanglement_key
 
@@ -46,13 +54,26 @@ class CHPProtocol:
         Transfer Cognitive Unit data instantly through the entanglement channel.
         In a real implementation, this would use advanced networking or shared memory.
         """
-        if entanglement_key in self.active_entanglements:
-            entanglement = self.active_entanglements[entanglement_key]
-            if entanglement["state"] == "entangled":
-                entanglement["transferred_data"] = unit_data
-                entanglement["state"] = "transferred"
-                return True
+        with self._lock:
+            if entanglement_key in self.active_entanglements:
+                entanglement = self.active_entanglements[entanglement_key]
+                if entanglement["state"] == "entangled":
+                    entanglement["transferred_data"] = unit_data
+                    entanglement["state"] = "transferred"
+                    return True
         return False
+
+    def get_entanglement(self, entanglement_key: str) -> Optional[Dict[str, Any]]:
+        """
+        Retrieve the current state of an entanglement channel, including any
+        transferred data. Used by the receiving agent to complete a handoff.
+        """
+        with self._lock:
+            entanglement = self.active_entanglements.get(entanglement_key)
+            if entanglement is None:
+                return None
+            # Return a copy so callers can't mutate internal state
+            return dict(entanglement)
 
     def holographic_project(self, unit: CognitiveUnit) -> Dict[str, Any]:
         """
@@ -80,7 +101,8 @@ class CHPProtocol:
             },
         }
 
-        self.holographic_projections[projection_key] = projection
+        with self._lock:
+            self.holographic_projections[projection_key] = projection
         return projection
 
     def adaptive_evolution(
@@ -133,10 +155,11 @@ class CHPProtocol:
         """
         Validate the integrity of a handoff using protocol-specific checks.
         """
-        if entanglement_key in self.active_entanglements:
-            entanglement = self.active_entanglements[entanglement_key]
-            return (
-                entanglement.get("transferred_data") is not None
-                and entanglement["state"] == "transferred"
-            )
+        with self._lock:
+            if entanglement_key in self.active_entanglements:
+                entanglement = self.active_entanglements[entanglement_key]
+                return (
+                    entanglement.get("transferred_data") is not None
+                    and entanglement["state"] == "transferred"
+                )
         return False

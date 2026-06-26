@@ -1,4 +1,4 @@
-"""Core data models for the Cognitive Substrate."""
+"""Core data models for the Cognex Engine."""
 
 from __future__ import annotations
 
