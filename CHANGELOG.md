@@ -6,10 +6,25 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-06-26
+
+### Added
+- Three-Tier Memory Hierarchy: consolidation of episodic memories into clusters (`memory_clusters`) and promotion to behavioral schemas (`memory_schemas`).
+- Session Arc Abstraction: grouping of sessions within 7 days into session arcs (`session_arcs`) with multi-session narrative summaries.
+- Peer-to-Peer Cognex Sync: content-addressed delta sync over TCP supporting `pull_and_merge` and `push` client-server replication.
+- Cryptographic Handshake: Ed25519 signature verification on TCP sync server challenge messages to authenticate remote peers.
+- Trust-Gated Merge & Conflict Resolution: last-writer-wins and confidence-weighted conflict resolution rules for merging memories, decisions, and cognitive units.
+- Local Embedding Integration: offline vector embeddings via `sentence-transformers` and `sqlite-vec` integration.
+- Reciprocal Rank Fusion (RRF): hybrid retrieval merging lexical (BM25) and semantic channels.
+- Outcome-Conditioned Feedback Loops: retroactive memory relevance adjustment based on decision success/failure in ledger outcomes.
+- Configurable Semaphore Backpressure: queue depth control and server-busy feedback for tool calls.
+- Paginated Memory Decay: cursor-based batched decay commits to minimize SQLite locking duration.
+- Explicit lifecycle initialization and dynamic imports for optional tools.
+
 ## [0.1.7] - 2026-05-03
 
 ### Added
-- Concurrent sessions: multiple active sessions per SubstrateContext with thread-safe `_sessions` dict + `threading.Lock()`
+- Concurrent sessions: multiple active sessions per CognexContext with thread-safe `_sessions` dict + `threading.Lock()`
 - Audit logging: structured append-only event log with SHA256 checksums for immutability
 - AuditLog class: append-only event store with `append(event_type, session_id, project, agent_id, payload)` and `get_recent(project, limit=50)` methods
 - Audit verification: `verify_integrity(log_id)` method to recompute and verify entry checksums
@@ -22,8 +37,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - Indices: idx_audit_log_project, idx_audit_log_created_at for efficient querying
 
 ### Changed
-- DB path moved from `.substrate/substrate.db` (project cwd) to `~/.cognex/substrate.db` (user home directory)
-- All components (substrate, trust, ledger, unit_store, audit) now share centralized `~/.cognex/` directory
+- DB path moved from `.substrate/cognex.db` (project cwd) to `~/.cognex.db/cognex.db` (user home directory)
+- All components (engine, trust, ledger, unit_store, audit) now share centralized `~/.cognex.db/` directory
 
 ### Fixed
 - Session tracking now thread-safe: concurrent sessions no longer overwrite each other
@@ -52,7 +67,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Security
 - Replaced forgeable SHA-256 truncated teleport bundle signature with Ed25519 signing
-- Keys stored at .substrate/signing_key.pem, generated on first run
+- Keys stored at ~/.cognex.db/keys/signing_key.pem, generated on first run
 - Added verify_bundle() for receivers to validate incoming bundles
 - Trust record injection attack prevention: rejects approval_count > 500 or violation_count > 100 on rehydration
 
@@ -130,13 +145,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - `memory_search` now returns results ranked by relevance not recency
 - `memory_get_context` now accepts `format` parameter (minimal/medium/full)
 - `memory_get_context` now accepts `limit` parameter (capped at 10)
-- `substrate_start_session` returns compressed memories by default
+- `cognex_start_session` returns compressed memories by default
 
 ## [0.1.0] - 2026-04-04
 
 ### Added
 - 18 MCP tools across 6 categories: session, memory, trust, ledger, teleport, swarm
-- Persistent SQLite storage at ~/.cognex/cognex.db
+- Persistent SQLite storage at ~/.cognex.db.db/cognex.db
 - Session management with start/end/transcript processing
 - Memory add/search/context/decay with relevance scoring
 - Trust engine: per-tool approval tracking with pattern learning

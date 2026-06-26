@@ -8,8 +8,8 @@ Cognex provides **18 MCP tools** across 6 categories.
 
 ## Session Management (4 tools)
 
-### `substrate_start_session`
-Start a new session in the cognitive substrate and return relevant memories.
+### `cognex_start_session`
+Start a new session in the cognex engine and return relevant memories.
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
@@ -20,7 +20,7 @@ Start a new session in the cognitive substrate and return relevant memories.
 
 ---
 
-### `substrate_end_session`
+### `cognex_end_session`
 End the current session with summary and metrics.
 
 | Parameter | Type | Required | Default | Description |
@@ -36,7 +36,7 @@ End the current session with summary and metrics.
 
 ---
 
-### `substrate_process_transcript`
+### `cognex_process_transcript`
 Extract memories from a conversation transcript.
 
 | Parameter | Type | Required | Default | Description |
@@ -50,8 +50,8 @@ Extract memories from a conversation transcript.
 
 ---
 
-### `substrate_report`
-Get substrate health and statistics report.
+### `cognex_report`
+Get cognex health and statistics report.
 
 **No parameters required.**
 
@@ -62,7 +62,7 @@ Get substrate health and statistics report.
 ## Memory (4 tools)
 
 ### `memory_add`
-Add a memory to the cognitive substrate.
+Add a memory to the cognex engine.
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
@@ -235,7 +235,7 @@ Create a teleport bundle for state transfer.
 ---
 
 ### `teleport_rehydrate`
-Rehydrate substrate state from a bundle.
+Rehydrate cognex state from a bundle.
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|

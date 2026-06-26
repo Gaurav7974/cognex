@@ -32,7 +32,7 @@ Your AI forgets everything between sessions. **Cognex** fixes that — and in v0
 - **Audit Logging:** Structured append-only event log with checksums (created audit_log table in v9 migration)
 - **Audit Tools:** New MCP tools `audit_get_recent()` and `audit_verify()` for retrieving and verifying audit events
 - **Wired Audit Calls:** All 6 core MCP tools now log events: session_start, session_end, unit_commit, unit_overridden, bundle_created, bundle_rehydrated
-- **DB Path Centralization:** Changed default DB path from `.substrate/` to `~/.cognex/` in user home directory
+- **DB Path Centralization:** Changed default DB path from `.substrate/` to `~/.cognex.db/` in user home directory
 - **Graceful Error Handling:** Non-blocking audit logging with graceful database lock handling
 
 ---
@@ -100,7 +100,7 @@ Steps:
    - command: "cognex"
    - no extra args needed
 5. Tell me to restart my AI tool
-6. After I restart, call substrate_start_session with session_id "setup-verify" to confirm it works
+6. After I restart, call cognex_start_session with session_id "setup-verify" to confirm it works
 ```
 
 ### Option D — Manual
@@ -119,12 +119,12 @@ cognex --status
 
 Output:
 ```
-Cognex v0.1.5
+Cognex v0.2.0
 ─────────────────────────
 Memories:       142
 Decisions:       38
 Trust records:   21
-DB path:        .substrate/substrate.db
+DB path:        ~/.cognex.db/cognex.db
 
 Configured tools:
   ✓ Claude Code
@@ -381,10 +381,10 @@ Verify in OpenCode:
 ### Session Management
 | Tool | Description |
 |------|-------------|
-| `substrate_start_session` | Start a new work session |
-| `substrate_end_session` | End session with summary and metrics |
-| `substrate_process_transcript` | Extract memories from conversation |
-| `substrate_report` | Get memory health report |
+| `cognex_start_session` | Start a new work session |
+| `cognex_end_session` | End session with summary and metrics |
+| `cognex_process_transcript` | Extract memories from conversation |
+| `cognex_report` | Get memory health report |
 
 ### Memory
 | Tool | Description |
@@ -481,14 +481,14 @@ cognex teleport import bundle.json → full state restored, signature verified
 
 ## Where Data Lives
 
-All data stays local in SQLite under `.substrate/` in your project directory:
+All data stays local in SQLite under the centralized `~/.cognex.db/` directory in your user home folder:
 
 ```
-.substrate/
-├── substrate.db   — memories, sessions, cognitive units
-├── trust.db       — tool approval history
-├── decisions.db   — decision ledger
-└── signing_key.pem — Ed25519 private key (generated on first run, never leaves your machine)
+~/.cognex.db/
+├── cognex.db     — unified database (memories, sessions, cognitive units, trust records, decision ledger, audit logs)
+└── keys/
+    ├── signing_key.pem  — Ed25519 private key (generated on first run, never leaves your machine)
+    └── signing_key.pub  — Ed25519 public key
 ```
 
 ---

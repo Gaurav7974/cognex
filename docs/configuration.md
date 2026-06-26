@@ -60,7 +60,7 @@ When working on the codebase directly:
   "mcpServers": {
     "cognex": {
       "command": "python",
-      "args": ["-m", "substrate_mcp.server"],
+      "args": ["-m", "cognex_mcp.server"],
       "cwd": "/path/to/cognex",
       "env": {"PYTHONPATH": "/path/to/cognex/src"}
     }
@@ -74,24 +74,24 @@ When working on the codebase directly:
 
 ### Session Tools
 
-#### `substrate_start_session`
+#### `cognex_start_session`
 - **Required:** `session_id` (string)
 - **Optional:** `project` (string, default: "")
 - **Purpose:** Initialize a work session and load relevant memories
 
-#### `substrate_end_session`
+#### `cognex_end_session`
 - **Required:** none
 - **Optional:** `summary`, `key_decisions` (array), `tools_used` (array), `errors` (array), `input_tokens` (int), `output_tokens` (int)
 - **Purpose:** Save session snapshot and extract final memories
 
-#### `substrate_process_transcript`
+#### `cognex_process_transcript`
 - **Required:** `transcript` (string)
 - **Optional:** `session_id`, `project`, `context`
 - **Purpose:** Automatically extract memories from conversation text
 
-#### `substrate_report`
+#### `cognex_report`
 - **Required:** none
-- **Purpose:** Get health statistics about the substrate (memory counts, sessions, etc.)
+- **Purpose:** Get health statistics about the cognex engine (memory counts, sessions, etc.)
 
 ---
 
@@ -189,7 +189,7 @@ When working on the codebase directly:
 All data is stored locally in SQLite:
 
 ```
-~/.cognex/
+~/.cognex.db/
 └── cognex.db
 ```
 
@@ -197,4 +197,4 @@ The database uses WAL (Write-Ahead Logging) mode for safe concurrent access from
 
 ## Environment Variables
 
-No environment variables are required. The database path defaults to `~/.cognex/cognex.db`.
+No environment variables are required. The database path defaults to `~/.cognex.db/cognex.db`.

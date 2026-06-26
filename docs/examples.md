@@ -6,7 +6,7 @@
 
 ```python
 import asyncio
-from substrate_mcp.tools import handle_tool_call
+from cognex_mcp.tools import handle_tool_call
 
 async def main():
     # Add a preference
@@ -35,17 +35,17 @@ asyncio.run(main())
 
 ```python
 import asyncio
-from substrate_mcp.tools import handle_tool_call
+from cognex_mcp.tools import handle_tool_call
 
 async def main():
     # 1. Start a session
-    await handle_tool_call("substrate_start_session", {
+    await handle_tool_call("cognex_start_session", {
         "session_id": "session-001",
         "project": "my-api"
     })
 
     # 2. Process conversation
-    await handle_tool_call("substrate_process_transcript", {
+    await handle_tool_call("cognex_process_transcript", {
         "transcript": "I prefer pytest over unittest for testing.",
         "session_id": "session-001",
         "project": "my-api"
@@ -60,7 +60,7 @@ async def main():
     })
 
     # 4. End session
-    await handle_tool_call("substrate_end_session", {
+    await handle_tool_call("cognex_end_session", {
         "summary": "Set up project structure",
         "key_decisions": ["Use pytest"],
         "tools_used": ["memory_add", "ledger_record"],
@@ -79,7 +79,7 @@ asyncio.run(main())
 
 ```python
 import asyncio
-from substrate_mcp.tools import handle_tool_call
+from cognex_mcp.tools import handle_tool_call
 
 async def main():
     # Check if a tool needs approval
@@ -113,7 +113,7 @@ asyncio.run(main())
 ```python
 import asyncio
 import json
-from substrate_mcp.tools import handle_tool_call
+from cognex_mcp.tools import handle_tool_call
 
 async def main():
     # Export full state
@@ -146,7 +146,7 @@ asyncio.run(main())
 
 ```python
 import asyncio
-from substrate_mcp.tools import handle_tool_call
+from cognex_mcp.tools import handle_tool_call
 
 async def main():
     result = await handle_tool_call("swarm_compile_intent", {
@@ -166,7 +166,7 @@ asyncio.run(main())
 
 ```python
 import asyncio
-from substrate_mcp.tools import handle_tool_call
+from cognex_mcp.tools import handle_tool_call
 
 async def main():
     # Age all memories by 5% (default factor)
@@ -180,16 +180,16 @@ asyncio.run(main())
 
 ---
 
-## Substrate Report
+## Cognex Report
 
 ### Get Health Statistics
 
 ```python
 import asyncio
-from substrate_mcp.tools import handle_tool_call
+from cognex_mcp.tools import handle_tool_call
 
 async def main():
-    result = await handle_tool_call("substrate_report")
+    result = await handle_tool_call("cognex_report")
     print(result)
 
 asyncio.run(main())
@@ -199,32 +199,32 @@ asyncio.run(main())
 
 ## Using Cognex Programmatically (Without MCP)
 
-You can also use the core substrate directly:
+You can also use the core cognex engine directly:
 
 ```python
 import sys
 sys.path.insert(0, 'src')
 
-from substrate.substrate import CognitiveSubstrate
+from cognex import CognexEngine
 
-substrate = CognitiveSubstrate()
+engine = CognexEngine()
 
 # Start session
-substrate.start_session("session-001", project="my-api")
+engine.start_session("session-001", project="my-api")
 
 # Add memory
-substrate.add_memory(
+engine.add_memory(
     content="Use pytest for testing",
     memory_type="preference",
     project="my-api"
 )
 
 # Get context
-context = substrate.get_context(query="testing", project="my-api")
+context = engine.get_context(query="testing", project="my-api")
 print(context)
 
 # End session
-substrate.end_session(
+engine.end_session(
     summary="Set up testing",
     key_decisions=("Use pytest",),
     tools_used=("add_memory",)
