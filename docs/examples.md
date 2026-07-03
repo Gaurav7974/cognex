@@ -29,43 +29,44 @@ asyncio.run(main())
 
 ---
 
-## Full Session Workflow
+## Session Arcs Workflow
 
-### Start, Work, End
+### Start Arc, Work, Close Arc
 
 ```python
 import asyncio
 from cognex_mcp.tools import handle_tool_call
 
 async def main():
-    # 1. Start a session
+    # 1. Start a session arc for the week
+    await handle_tool_call("arc_start", {
+        "project": "my-api"
+    })
+
+    # 2. Start a daily session
     await handle_tool_call("cognex_start_session", {
         "session_id": "session-001",
         "project": "my-api"
     })
 
-    # 2. Process conversation
-    await handle_tool_call("cognex_process_transcript", {
-        "transcript": "I prefer pytest over unittest for testing.",
-        "session_id": "session-001",
+    # 3. Record a structured State Unit
+    await handle_tool_call("unit_commit", {
+        "content": "Use pytest instead of unittest",
+        "rationale": "Better fixtures and less boilerplate",
+        "unit_type": "decision",
+        "scope": "my-api/testing",
         "project": "my-api"
     })
 
-    # 3. Record a decision
-    await handle_tool_call("ledger_record", {
-        "tool_used": "pytest",
-        "reasoning": "Better fixtures and less boilerplate",
-        "context": "Choosing test framework",
-        "tags": ["testing"]
+    # 4. End the daily session
+    await handle_tool_call("cognex_end_session", {
+        "summary": "Set up project testing structure"
     })
 
-    # 4. End session
-    await handle_tool_call("cognex_end_session", {
-        "summary": "Set up project structure",
-        "key_decisions": ["Use pytest"],
-        "tools_used": ["memory_add", "ledger_record"],
-        "input_tokens": 5000,
-        "output_tokens": 3000
+    # 5. At the end of the week, close the arc
+    # (In reality, you need the arc_id returned from arc_start)
+    await handle_tool_call("arc_close", {
+        "arc_id": "arc_123456"
     })
 
 asyncio.run(main())
@@ -73,9 +74,9 @@ asyncio.run(main())
 
 ---
 
-## Trust Engine
+## Trust Engine & Audit
 
-### Check and Record Tool Trust
+### Check Trust and Verify Logs
 
 ```python
 import asyncio
@@ -97,32 +98,60 @@ async def main():
         "reason": "Trusted operation"
     })
 
-    # Get trust summary
-    result = await handle_tool_call("trust_summary")
-    print("Trust summary:", result)
+    # Verify the cryptographically signed audit log chain
+    result = await handle_tool_call("audit_verify_chain", {
+        "limit": 100
+    })
+    print("Audit verified:", result)
 
 asyncio.run(main())
 ```
 
 ---
 
-## Teleport (State Transfer)
+## Peer-to-Peer Sync
 
-### Export and Import Agent State
+### Push and Pull State Across Machines
 
 ```python
 import asyncio
-import json
 from cognex_mcp.tools import handle_tool_call
 
 async def main():
-    # Export full state
+    # Push your local changes to a remote machine running the TCP sync server
+    result = await handle_tool_call("sync_push", {
+        "peer_host": "192.168.1.100",
+        "peer_port": 7474
+    })
+    print("Pushed:", result)
+
+    # Pull changes from the remote machine and merge them locally
+    result = await handle_tool_call("sync_pull", {
+        "peer_host": "192.168.1.100",
+        "peer_port": 7474
+    })
+    print("Pulled & Merged:", result)
+
+asyncio.run(main())
+```
+
+---
+
+## State Transfer
+
+### Export and Import Agent State via Bundles
+
+```python
+import asyncio
+from cognex_mcp.tools import handle_tool_call
+
+async def main():
+    # Export full state to an Ed25519-signed bundle
     bundle = await handle_tool_call("teleport_create_bundle", {
         "source_host": "dev-machine",
         "target_host": "production"
     })
 
-    # Save to file
     with open("bundle.json", "w") as f:
         f.write(bundle)
 
@@ -140,93 +169,30 @@ asyncio.run(main())
 
 ---
 
-## Swarm Mode
+## State Units (Cognitive State)
 
-### Compile Intent into Multi-Agent Plan
+### Checkout and Commit Units
 
 ```python
 import asyncio
 from cognex_mcp.tools import handle_tool_call
 
 async def main():
-    result = await handle_tool_call("swarm_compile_intent", {
-        "intent": "Build a REST API with authentication, user CRUD, and rate limiting",
+    # Checkout the full structured state for a project
+    state = await handle_tool_call("unit_checkout", {
         "project": "my-api"
     })
-    print("Plan:", result)
+    print("Current Project State:", state)
 
-asyncio.run(main())
-```
-
----
-
-## Memory Decay
-
-### Clean Up Old Memories
-
-```python
-import asyncio
-from cognex_mcp.tools import handle_tool_call
-
-async def main():
-    # Age all memories by 5% (default factor)
-    result = await handle_tool_call("memory_decay", {
-        "factor": 0.95
+    # Commit a new progress state unit
+    result = await handle_tool_call("unit_commit", {
+        "content": "Finished implementing the Auth module",
+        "rationale": "All tests are passing and JWTs are secure",
+        "unit_type": "progress",
+        "scope": "my-api/auth",
+        "project": "my-api"
     })
-    print("Decayed:", result)
+    print("Committed:", result)
 
 asyncio.run(main())
-```
-
----
-
-## Cognex Report
-
-### Get Health Statistics
-
-```python
-import asyncio
-from cognex_mcp.tools import handle_tool_call
-
-async def main():
-    result = await handle_tool_call("cognex_report")
-    print(result)
-
-asyncio.run(main())
-```
-
----
-
-## Using Cognex Programmatically (Without MCP)
-
-You can also use the core cognex engine directly:
-
-```python
-import sys
-sys.path.insert(0, 'src')
-
-from cognex import CognexEngine
-
-engine = CognexEngine()
-
-# Start session
-engine.start_session("session-001", project="my-api")
-
-# Add memory
-engine.add_memory(
-    content="Use pytest for testing",
-    memory_type="preference",
-    project="my-api"
-)
-
-# Get context
-context = engine.get_context(query="testing", project="my-api")
-print(context)
-
-# End session
-engine.end_session(
-    summary="Set up testing",
-    key_decisions=("Use pytest",),
-    tools_used=("add_memory",)
-)
 ```

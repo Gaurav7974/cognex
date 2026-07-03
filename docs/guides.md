@@ -5,43 +5,53 @@ The AI will call the right tools automatically.
 
 ---
 
-## Scenario 1 — Starting a session
+## Scenario 1 — Starting a session arc
+
+Paste at the start of a new week or sprint:
+
+```bash
+Start a new session arc for project "my-app".
+What do we need to know before we begin this week?
+```
+
+---
+
+## Scenario 2 — Starting a daily session
 
 Paste at the start of every coding session:
 
 ```bash
 Start a new session for project "my-app".
 Load all relevant memories and context.
-What do we need to know before we begin?
 ```
 
 ---
 
-## Scenario 2 — Ending a session
+## Scenario 3 — Ending a session
 
 Paste when done for the day:
 
 ```bash
 We are done for today. Please:
-1. Save any important decisions we made
+1. Save any important decisions we made as State Units
 2. Save any preferences or patterns you noticed
 3. End the session with a summary
 ```
 
 ---
 
-## Scenario 3 — Continuing next day
+## Scenario 4 — Continuing next day
 
 Paste at the start of next session:
 
 ```bash
 I am back. Project is "my-app".
-Summarize what we did last time and what is left to do.
+Get the context for the current session arc. Summarize what we did last time.
 ```
 
 ---
 
-## Scenario 4 — Saving a preference
+## Scenario 5 — Saving a preference
 
 ```bash
 Remember that I always use type hints in Python.
@@ -51,13 +61,9 @@ Remember that I always use type hints in Python.
 Remember that I prefer pytest over unittest.
 ```
 
-```bash
-Remember that this project uses PostgreSQL not MySQL.
-```
-
 ---
 
-## Scenario 5 — Tracking a decision
+## Scenario 6 — Tracking a decision
 
 ```bash
 We just decided to use FastAPI over Flask.
@@ -67,7 +73,7 @@ Please record this decision.
 
 ---
 
-## Scenario 6 — Revisiting a past decision
+## Scenario 7 — Revisiting a past decision
 
 ```bash
 Why did we choose FastAPI for this project?
@@ -76,59 +82,47 @@ Check if we have any past decisions about this.
 
 ---
 
-## Scenario 7 — Exporting your brain
+## Scenario 8 — Syncing with another machine
+
+**On your first machine:**
+```bash
+Start the cognex sync server.
+(Run `python -m cognex_sync.server` in your terminal)
+```
+
+**On your second machine (or your teammate's):**
+```bash
+Please pull the latest cognex state from 192.168.1.100.
+Merge any incoming decisions and memories.
+```
+
+---
+
+## Scenario 9 — Exporting your state
+
+If you can't sync over TCP, you can export a bundle:
 
 ```bash
-Export everything — my memories, decisions, trust records
-for project "my-app" into a portable bundle.
+Export everything — my state units, decisions, trust records
+for project "my-app" into a portable state transfer bundle.
 ```
 
 Save the output JSON somewhere safe.
 
 ---
 
-## Scenario 8 — Importing on a new machine
+## Scenario 10 — Importing your state
 
 ```bash
-I have a Cognex bundle from my other machine.
+I have a Cognex state bundle from my other machine.
 Please restore everything from it.
-```
-
-Then paste the bundle JSON:
-
-```bash
-{
-  "bundle_id": "...",
-  "version": "1.0",
-  "memory_ids": [...],
-  "trust_records": [...],
-  ...
-}
-```
-
----
-
-## Scenario 9 — Sharing context with a teammate
-
-**On your machine:**
-
-```bash
-Create a teleport bundle for project "my-app"
-that my teammate can use to get up to speed.
-```
-
-**Teammate pastes on their machine:**
-
-```bash
-My teammate shared this project context bundle with me.
-Please load it so I have full context on the project.
 ```
 
 Then paste the bundle JSON.
 
 ---
 
-## Scenario 10 — Trust management
+## Scenario 11 — Trust management
 
 ```bash
 From now on, always ask me before running any delete,
@@ -137,7 +131,7 @@ remove, or drop commands. Record this as a trust rule.
 
 ---
 
-## Scenario 11 — Searching memory
+## Scenario 12 — Searching memory
 
 ```bash
 What do you remember about my database preferences?
@@ -146,25 +140,25 @@ Search your memory for anything related to databases.
 
 ---
 
-## Scenario 12 — Health check
+## Scenario 13 — Health check
 
 ```bash
 Give me a full report on what you have stored in Cognex.
-How many memories, sessions, decisions?
+Are there any tampered audit logs?
 ```
 
 ---
 
-## Scenario 13 — Cleaning up old memories
+## Scenario 14 — Cleaning up old memories
 
 ```bash
-Clean up old or irrelevant memories.
+Consolidate my older episodic memories into semantic clusters.
 Keep only what is important.
 ```
 
 ---
 
-## Scenario 14 — Multi-tool shared memory
+## Scenario 15 — Multi-tool shared memory
 
 Both Claude Code and OpenCode on the same machine share
 the same Cognex database automatically. Whatever one AI
@@ -176,13 +170,15 @@ stores, the other can read.
 
 | You want to... | Copy-paste this |
 |----------------|-----------------|
+| Start arc | `Start a new session arc for "my-project"` |
 | Start session | `Start a new session for "my-project"` |
 | End session | `Save context and end session` |
 | Remember something | `Remember that [fact/preference]` |
 | Track a decision | `Record this decision: [decision]` |
 | Find past decision | `Why did we choose [X]?` |
-| Export brain | `Export my Cognex bundle for "my-project"` |
-| Import brain | `Load this bundle: [paste JSON]` |
+| Sync state | `Pull the latest cognex state from [IP]` |
+| Export state | `Export my state bundle for "my-project"` |
+| Import state | `Load this bundle: [paste JSON]` |
 | Search memory | `What do you remember about [X]?` |
 | Health check | `Give me a Cognex report` |
-| Clean up | `Clean up old memories` |
+| Clean up | `Consolidate my old memories` |
