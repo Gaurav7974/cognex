@@ -32,5 +32,5 @@ jobs:
       - name: Verify imports
         run: |
           python -c "from cognex import CognexEngine"
-          python -c "from cognex.units import CognitiveUnitStore"
+          python -c "from cognex.units import StateUnitStore"
           python -c "from cognex_mcp.tools import list_all_tools"
