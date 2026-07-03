@@ -49,7 +49,7 @@ def test_decay_uniqueness_modifiers(temp_dbs):
                 else:
                     vec[1] = 1.0
                 blob = struct.pack('384f', *vec)
-                conn.execute('INSERT INTO memory_embeddings (memory_id, embedding, model_name, created_at) VALUES (?, ?, ?, ?)', (f'm{i}', blob, 'mock-model', datetime.now(timezone.utc).isoformat()))
+                conn.execute('INSERT OR REPLACE INTO memory_embeddings (memory_id, embedding, model_name, created_at) VALUES (?, ?, ?, ?)', (f'm{i}', blob, 'mock-model', datetime.now(timezone.utc).isoformat()))
             conn.commit()
         modifiers = OutcomeFeedback.compute_uniqueness_modifiers(store)
         assert len(modifiers) == 10
