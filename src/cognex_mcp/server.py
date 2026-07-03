@@ -306,6 +306,12 @@ def main() -> None:
         action="store_true",
         help="Show cognex status (memories, decisions, trust records, AI tools)",
     )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"cognex {importlib.metadata.version('cognex')}",
+        help="Show version number and exit",
+    )
 
     args = parser.parse_args()
 
