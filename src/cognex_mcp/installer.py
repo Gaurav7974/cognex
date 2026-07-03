@@ -193,9 +193,27 @@ Cognex MCP is connected. Use it automatically:
                     print(f"  Injected Cognex instructions into {fname}")
 
 
+import sys
+import time
+
+def simulate_progress():
+    width = 30
+    total = 100
+    for i in range(total + 1):
+        filled_len = int(width * i // total)
+        bar = '#' * filled_len + '-' * (width - filled_len)
+        percent = f"{i}%"
+        # \r brings the cursor to the start of the single line to overwrite it
+        sys.stdout.write(f"\r[..] Installing Cognex MCP [{bar}] {percent:>4}")
+        sys.stdout.flush()
+        time.sleep(0.015)
+    sys.stdout.write(f"\r[OK] Cognex MCP Installed  [{'#' * width}] 100%\n\n")
+    sys.stdout.flush()
+
 def run_install(platform: str | None = None, dry_run: bool = False) -> None:
     print("Cognex MCP Installer")
     print("=" * 40)
+    simulate_progress()
 
     if dry_run:
         print("DRY RUN - no changes will be made\n")
