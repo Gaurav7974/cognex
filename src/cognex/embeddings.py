@@ -1,8 +1,3 @@
-"""Local embedding engine wrapper for semantic similarity.
-
-This module provides offline text embedding capabilities using sentence-transformers.
-If sentence-transformers is not installed, it degrades gracefully with AVAILABLE = False.
-"""
 
 from __future__ import annotations
 
@@ -22,7 +17,6 @@ except ImportError:
 
 
 class EmbeddingEngine:
-    """Wrapper around sentence-transformers for local text embeddings."""
 
     AVAILABLE = AVAILABLE
     _model: SentenceTransformer | None = None
@@ -41,14 +35,12 @@ class EmbeddingEngine:
 
     @classmethod
     def embed(cls, text: str) -> list[float]:
-        """Generate a 384-dimensional normalized embedding vector for the text."""
         model = cls._get_model()
         vector = model.encode(text).tolist()
         return cls._normalize(vector)
 
     @classmethod
     def embed_batch(cls, texts: list[str]) -> list[list[float]]:
-        """Generate normalized embedding vectors for a batch of texts."""
         if not texts:
             return []
         model = cls._get_model()
@@ -57,7 +49,6 @@ class EmbeddingEngine:
 
     @classmethod
     def _normalize(cls, vec: list[float]) -> list[float]:
-        """L2 normalize a vector."""
         sq_sum = sum(x * x for x in vec)
         norm = math.sqrt(sq_sum)
         if norm < 1e-9:

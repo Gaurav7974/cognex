@@ -1,6 +1,3 @@
-"""
-Core cognex tools - session management and reporting.
-"""
 
 from typing import Any
 
@@ -12,7 +9,6 @@ async def cognex_start_session(
     session_id: str,
     project: str = "",
 ) -> dict[str, Any]:
-    """Start a new session in the cognex engine."""
     if not session_id:
         raise ValueError("session_id is required")
 
@@ -60,7 +56,6 @@ async def cognex_end_session(
     input_tokens: int = 0,
     output_tokens: int = 0,
 ) -> dict[str, Any]:
-    """End the current session with summary and metrics."""
     ctx = CognexContext.get_instance()
 
     snapshot = ctx.engine.end_session(
@@ -99,7 +94,6 @@ async def cognex_process_transcript(
     project: str | None = None,
     context: str = "",
 ) -> dict[str, Any]:
-    """Extract memories from a conversation transcript."""
     ctx = CognexContext.get_instance()
 
     result = await run_in_thread(
@@ -120,7 +114,6 @@ async def cognex_process_transcript(
 
 
 async def cognex_report() -> dict[str, Any]:
-    """Get cognex health and statistics report."""
     ctx = CognexContext.get_instance()
     report = ctx.engine.report()
 

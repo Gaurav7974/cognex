@@ -1,22 +1,3 @@
-"""Extracts structured memories from raw conversation transcripts.
-
-Changes (P1.4)
---------------
-Each extracted MemoryEntry now carries a ``context`` field that includes:
-
-- The **pattern name** that triggered the extraction (e.g. ``"pref:prefer"``,
-  ``"dec:chose"``, ``"lesson:failed"``).
-- The number of **distinct patterns that fired** (``patterns_fired``) so that
-  downstream consumers can use pattern count as a confidence proxy — an
-  extraction triggered by multiple independent patterns is more reliable than
-  one triggered by a single speculative regex.
-- The **relevance_score** is seeded from confidence: high-confidence extractions
-  start with a score of 0.9 while single-pattern extractions start at 0.7.
-
-Extractors are built around small, typed pattern lists.  Each entry is a
-3-tuple: ``(regex, label, confidence_weight)`` where ``confidence_weight``
-is a float in [0.5, 1.0] expressing how reliable this specific pattern is.
-"""
 
 from __future__ import annotations
 
@@ -38,9 +19,7 @@ class ExtractionResult:
         return tuple(m.id for m in self.memories)
 
 
-# ---------------------------------------------------------------------------
 # Pattern definitions — (regex, label, confidence_weight)
-# ---------------------------------------------------------------------------
 
 _PREFERENCE_PATTERNS: list[tuple[str, str, float]] = [
     (r"(?:prefer|like to use|always use|don't use|avoid|never use)\s+(?:the\s+)?(\w+)", "pref:prefer", 0.85),
@@ -79,12 +58,6 @@ _MAX_TRANSCRIPT_CHARS = 50_000
 
 
 class MemoryExtractor:
-    """Extracts structured memories from conversation text.
-
-    Uses pattern matching as the base layer.  Each extracted MemoryEntry
-    carries a ``context`` annotation identifying the firing pattern(s) and
-    a ``relevance_score`` seeded from pattern confidence.
-    """
 
     def extract(
         self,
@@ -93,17 +66,6 @@ class MemoryExtractor:
         project: str = "",
         context: str = "",
     ) -> ExtractionResult:
-        """Extract all memories from a conversation transcript.
-
-        Args:
-            transcript: Raw text to scan.
-            session_id: Session identifier for provenance.
-            project: Project name to attach to extracted memories.
-            context: Optional extra context string.
-
-        Returns:
-            ExtractionResult with all found memories and pattern statistics.
-        """
         if len(transcript) > _MAX_TRANSCRIPT_CHARS:
             transcript = transcript[:_MAX_TRANSCRIPT_CHARS]
 
@@ -139,11 +101,6 @@ class MemoryExtractor:
         base_context: str,
         pattern_list: list[tuple[str, str, float]],
     ) -> tuple[list[MemoryEntry], dict[str, int]]:
-        """Generic extractor for a single pattern list.
-
-        Returns (memories, patterns_fired_counts).
-        """
-        # Map: content → list of (label, confidence_weight) pairs that matched it.
         hit_map: dict[str, list[tuple[str, float]]] = {}
 
         for pattern, label, weight in pattern_list:
@@ -153,7 +110,6 @@ class MemoryExtractor:
                     continue
                 hit_map.setdefault(content, []).append((label, weight))
 
-        # Infer MemoryType from the label prefix of the first hit.
         _type_prefix_map = {
             "pref":   MemoryType.PREFERENCE,
             "dec":    MemoryType.DECISION,
@@ -174,13 +130,10 @@ class MemoryExtractor:
             mem_type = _type_prefix_map.get(prefix, MemoryType.FACT)
             mem_scope = _scope_map.get(mem_type, MemoryScope.PRIVATE)
 
-            # Aggregate confidence: average weight of all firing patterns,
-            # scaled by sqrt(n) to reward multi-pattern corroboration.
             avg_weight = sum(w for _, w in hits) / len(hits)
             corroboration = min(1.0, avg_weight + 0.05 * (len(hits) - 1) ** 0.5)
             relevance = round(max(0.5, min(1.0, corroboration)), 2)
 
-            # Build pattern annotation for the context field.
             label_str = ", ".join(lbl for lbl, _ in hits)
             pattern_annotation = f"[patterns={label_str}] "
             ctx_text = (
@@ -206,21 +159,4 @@ class MemoryExtractor:
 
         return memories, fired_counts
 
-    def extract_manual(
-        self,
-        content: str,
-        memory_type: MemoryType = MemoryType.FACT,
-        scope: MemoryScope = MemoryScope.PRIVATE,
-        project: str = "",
-        tags: tuple[str, ...] = (),
-        context: str = "",
-    ) -> MemoryEntry:
-        """Manually create a memory entry for explicit agent statements."""
-        return MemoryEntry(
-            type=memory_type,
-            scope=scope,
-            content=content,
-            context=context,
-            project=project,
-            tags=tags,
-        )
+

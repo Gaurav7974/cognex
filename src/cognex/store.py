@@ -1,23 +1,3 @@
-"""SQLite-backed persistent memory store.
-
-Architecture notes
-------------------
-* Uses the shared ``_pool.ConnectionPool`` for all database access.
-  Every thread gets its own connection, reused across calls.
-* Tags are stored in TWO places for correctness and backwards-compat:
-  - ``memories.tags`` (JSON string) — kept for serialisation (teleport).
-  - ``memory_tags`` junction table — used for all queries (index-backed).
-* Deduplication is content-hash based: same content, same project → single
-  entry.  On collision, ``save()`` silently returns the existing memory.
-* FTS5 triggers keep the full-text index in sync automatically.
-  ``save_many_bulk()`` disables triggers during bulk load and rebuilds the
-  index once, reducing O(n) trigger overhead to O(1).
-* ``decay_all()`` is paginated (1 000 rows per page) so it never holds a
-  full-table write lock long enough to block concurrent reads.
-* Semantic search (``search_semantic()``) is provided as a brute-force
-  cosine-similarity scan over stored embeddings.  It degrades gracefully
-  when the optional ``sentence-transformers`` package is absent.
-"""
 
 from __future__ import annotations
 
@@ -25,11 +5,13 @@ import hashlib
 import json
 import logging
 import os
+import re
 import sqlite3
 import struct
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 from ._pool import ConnectionPool, execute_with_retry
 from .embeddings import EmbeddingEngine
@@ -38,17 +20,10 @@ from .models import MemoryEntry, MemoryScope, MemoryType, SessionSnapshot
 
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
-# Page size for paginated operations
-# ---------------------------------------------------------------------------
 _DECAY_PAGE_SIZE = 1_000
 
 
 class MemoryStore:
-    """Persistent storage for memories and session snapshots.
-
-    Uses SQLite — zero dependencies, single file, runs everywhere.
-    """
 
     def __init__(
         self,
@@ -64,18 +39,14 @@ class MemoryStore:
         self._pool = ConnectionPool(self.db_path, pool_size=pool_size)
         self._init_db()
 
-    # ── Internal ──────────────────────────────────────────────────────────
 
     def _connect(self):
-        """Return a context manager that yields a thread-local connection."""
         return self._pool.get_connection()
 
     def close(self) -> None:
-        """Close all connections.  Required on Windows to release file locks."""
         self._pool.close_all()
 
     def _init_db(self) -> None:
-        """Create baseline tables, FTS5 index, and run pending migrations."""
         with self._connect() as conn:
             conn.executescript("""
                 CREATE TABLE IF NOT EXISTS memories (
@@ -117,7 +88,7 @@ class MemoryStore:
                 CREATE INDEX IF NOT EXISTS idx_sessions_started  ON sessions(started_at DESC);
             """)
 
-            # FTS5 full-text search index (graceful no-op if not compiled in).
+
             try:
                 conn.execute("""
                     CREATE VIRTUAL TABLE IF NOT EXISTS memories_fts
@@ -128,7 +99,7 @@ class MemoryStore:
                     )
                 """)
 
-                # Backfill FTS from existing rows (only if index is empty).
+
                 fts_count = conn.execute(
                     "SELECT COUNT(*) FROM memories_fts"
                 ).fetchone()[0]
@@ -140,7 +111,7 @@ class MemoryStore:
                         FROM   memories
                     """)
 
-                # Per-row triggers to keep FTS in sync on every write.
+
                 conn.execute("""
                     CREATE TRIGGER IF NOT EXISTS memories_fts_insert
                     AFTER INSERT ON memories BEGIN
@@ -165,22 +136,13 @@ class MemoryStore:
                     END
                 """)
             except Exception:
-                # FTS5 not compiled into this SQLite build — search degrades
-                # to LIKE queries silently.
                 pass
 
-            # Apply any pending schema migrations (v10-v15, etc.).
             run_migrations(conn)
             conn.commit()
 
-    # ── Tag junction-table helpers ─────────────────────────────────────────
 
     def _save_tags(self, conn: sqlite3.Connection, memory_id: str, tags: tuple) -> None:
-        """Insert tag rows into the junction table for *memory_id*.
-
-        Skips gracefully if the table doesn't exist yet (pre-v11 databases
-        that haven't been migrated yet).
-        """
         if not tags:
             return
         try:
@@ -189,11 +151,9 @@ class MemoryStore:
                 [(memory_id, t) for t in tags],
             )
         except sqlite3.OperationalError:
-            # memory_tags table doesn't exist — migration not yet applied.
             pass
 
     def _delete_tags(self, conn: sqlite3.Connection, memory_id: str) -> None:
-        """Remove all junction-table tag rows for *memory_id*."""
         try:
             conn.execute(
                 "DELETE FROM memory_tags WHERE memory_id = ?", (memory_id,)
@@ -202,7 +162,6 @@ class MemoryStore:
             pass
 
     def _save_embedding(self, conn: sqlite3.Connection, memory_id: str, content: str) -> None:
-        """Compute and store the embedding for a memory if the engine is available."""
         if not EmbeddingEngine.AVAILABLE:
             return
         try:
@@ -225,7 +184,6 @@ class MemoryStore:
             logger.error("Failed to save embedding for memory %s: %s", memory_id, e)
 
     def _save_embeddings_bulk(self, conn: sqlite3.Connection, to_insert: list[tuple]) -> None:
-        """Compute and store embeddings for newly inserted memories in bulk."""
         if not to_insert or not EmbeddingEngine.AVAILABLE:
             return
         try:
@@ -249,23 +207,98 @@ class MemoryStore:
         except Exception as e:
             logger.error("Failed to save embeddings in bulk: %s", e)
 
-    # ── Memory CRUD ───────────────────────────────────────────────────────
+    # ------------------------------------------------------------------
+    # Large-memory support: gists + chunking
+    # ------------------------------------------------------------------
+
+    _CHUNK_THRESHOLD = 1500
+    _CHUNK_MIN_WORDS = 200
+    _CHUNK_MAX_WORDS = 400
+    _CHUNK_OVERLAP = 0.15
+    _GIST_MAX = 120
+
+    @staticmethod
+    def _make_gist(content: str) -> str:
+        if not content:
+            return ""
+        first_sentence = re.split(r"(?<=[.!?])\s+|\n", content.strip(), maxsplit=1)[0]
+        gist = first_sentence if first_sentence else content.strip()
+        if len(gist) > MemoryStore._GIST_MAX:
+            return gist[: MemoryStore._GIST_MAX - 1] + "\u2026"
+        return gist
+
+    @staticmethod
+    def _chunk_content(content: str) -> list[tuple[int, str]]:
+        if len(content) <= MemoryStore._CHUNK_THRESHOLD:
+            return []
+        import re as _re
+        sentences = [s for s in _re.split(r"(?<=[.!?])\s+|\n+", content) if s.strip()]
+        if not sentences:
+            return []
+        chunks: list[tuple[int, str]] = []
+        idx = 0
+        i = 0
+        n = len(sentences)
+        while i < n:
+            words: list[str] = []
+            j = i
+            while j < n:
+                sent_words = sentences[j].split()
+                if len(words) + len(sent_words) > MemoryStore._CHUNK_MAX_WORDS and words:
+                    break
+                words.extend(sent_words)
+                j += 1
+                if len(words) >= MemoryStore._CHUNK_MIN_WORDS:
+                    break
+            chunk_text = " ".join(words)
+            chunks.append((idx, chunk_text))
+            idx += 1
+            overlap = max(1, int(len(words) * MemoryStore._CHUNK_OVERLAP))
+            carry = words[-overlap:]
+            i = j
+            if i < n:
+                next_words: list[str] = list(carry)
+                while i < n and len(next_words) < MemoryStore._CHUNK_MIN_WORDS:
+                    sent_words = sentences[i].split()
+                    next_words.extend(sent_words)
+                    i += 1
+                if len(next_words) >= MemoryStore._CHUNK_MIN_WORDS:
+                    chunks.append((idx, " ".join(next_words)))
+                    idx += 1
+        return chunks
+
+    def _save_chunks(self, conn: sqlite3.Connection, memory_id: str, content: str) -> None:
+        try:
+            conn.execute("DELETE FROM memory_chunks WHERE memory_id = ?", (memory_id,))
+        except sqlite3.OperationalError:
+            return
+        chunks = self._chunk_content(content)
+        if not chunks:
+            return
+        rows = [(uuid.uuid4().hex[:12], memory_id, ci, text) for ci, text in chunks]
+        try:
+            conn.executemany(
+                "INSERT INTO memory_chunks (chunk_id, memory_id, chunk_index, text) "
+                "VALUES (?, ?, ?, ?)",
+                rows,
+            )
+        except sqlite3.OperationalError:
+            pass
+
+    def _delete_chunks(self, conn: sqlite3.Connection, memory_id: str) -> None:
+        try:
+            conn.execute("DELETE FROM memory_chunks WHERE memory_id = ?", (memory_id,))
+        except sqlite3.OperationalError:
+            pass
+
+    def _chunks_fts5_available(self, conn: sqlite3.Connection) -> bool:
+        try:
+            conn.execute("SELECT 1 FROM memory_chunks_fts LIMIT 1")
+            return True
+        except sqlite3.OperationalError:
+            return False
 
     def save(self, memory: MemoryEntry, session_id: str = "") -> MemoryEntry:
-        """Save or update a memory entry.
-
-        Deduplicates by content_hash.  If identical content already exists
-        for the same project, returns the existing memory without inserting
-        a duplicate.
-
-        Args:
-            memory: The MemoryEntry to persist.
-            session_id: Optional current session ID, used to record this
-                access in ``memory_access_log`` for outcome feedback.
-
-        Returns:
-            The persisted MemoryEntry (may be an existing deduplicated one).
-        """
         content_hash = hashlib.sha256(memory.content.encode()).hexdigest()[:16]
 
         with self._connect() as conn:
@@ -286,8 +319,9 @@ class MemoryStore:
                 """
                 INSERT INTO memories
                 (id, type, scope, content, context, relevance_score,
-                 created_at, last_accessed, access_count, project, tags, content_hash)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 created_at, last_accessed, access_count, project, tags,
+                 content_hash, gist)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     memory.id,
@@ -302,9 +336,11 @@ class MemoryStore:
                     memory.project,
                     json.dumps(list(memory.tags)),
                     content_hash,
+                    self._make_gist(memory.content),
                 ),
             )
             self._save_tags(conn, memory.id, memory.tags)
+            self._save_chunks(conn, memory.id, memory.content)
             self._save_embedding(conn, memory.id, memory.content)
             if session_id:
                 self._log_access(conn, session_id, memory.id)
@@ -313,7 +349,6 @@ class MemoryStore:
         return memory
 
     def save_many(self, memories: list[MemoryEntry], session_id: str = "") -> int:
-        """Bulk save with deduplication.  Returns count of newly inserted rows."""
         if not memories:
             return 0
 
@@ -350,6 +385,7 @@ class MemoryStore:
                     m.project,
                     json.dumps(list(m.tags)),
                     content_hash,
+                    self._make_gist(m.content),
                 ))
                 for tag in m.tags:
                     tag_rows.append((m.id, tag))
@@ -359,8 +395,9 @@ class MemoryStore:
                     """
                     INSERT INTO memories
                     (id, type, scope, content, context, relevance_score,
-                     created_at, last_accessed, access_count, project, tags, content_hash)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     created_at, last_accessed, access_count, project, tags,
+                     content_hash, gist)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     to_insert,
                 )
@@ -372,22 +409,14 @@ class MemoryStore:
                         )
                     except sqlite3.OperationalError:
                         pass  # memory_tags not yet migrated
+                for item in to_insert:
+                    self._save_chunks(conn, item[0], item[3])
                 self._save_embeddings_bulk(conn, to_insert)
                 conn.commit()
 
         return len(to_insert)
 
     def save_many_bulk(self, memories: list[MemoryEntry]) -> int:
-        """Bulk save optimised for large imports (e.g. teleport rehydration).
-
-        Disables the per-row FTS5 INSERT trigger for the duration of the
-        batch, then issues a single ``rebuild`` command to refresh the
-        entire FTS5 index.  This reduces the overhead of N trigger firings
-        to a single O(n log n) index rebuild, which is dramatically faster
-        for imports of hundreds or thousands of memories.
-
-        Falls back to ``save_many()`` when FTS5 is not available.
-        """
         if not memories:
             return 0
 
@@ -397,12 +426,17 @@ class MemoryStore:
             if not fts_available:
                 return self.save_many(memories)
 
-            # Drop the FTS triggers for this bulk operation.
+
             conn.execute("DROP TRIGGER IF EXISTS memories_fts_insert")
             conn.execute("DROP TRIGGER IF EXISTS memories_fts_update")
             conn.execute("DROP TRIGGER IF EXISTS memories_fts_delete")
+            chunks_fts = self._chunks_fts5_available(conn)
+            if chunks_fts:
+                conn.execute("DROP TRIGGER IF EXISTS chunks_fts_insert")
+                conn.execute("DROP TRIGGER IF EXISTS chunks_fts_update")
+                conn.execute("DROP TRIGGER IF EXISTS chunks_fts_delete")
 
-            # Perform bulk insert (same dedup logic as save_many).
+
             projects = list({m.project for m in memories})
             placeholders = ",".join("?" * len(projects))
             existing_hashes: set[str] = set()
@@ -433,6 +467,7 @@ class MemoryStore:
                     m.project,
                     json.dumps(list(m.tags)),
                     content_hash,
+                    self._make_gist(m.content),
                 ))
                 for tag in m.tags:
                     tag_rows.append((m.id, tag))
@@ -442,8 +477,9 @@ class MemoryStore:
                     """
                     INSERT INTO memories
                     (id, type, scope, content, context, relevance_score,
-                     created_at, last_accessed, access_count, project, tags, content_hash)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     created_at, last_accessed, access_count, project, tags,
+                     content_hash, gist)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     to_insert,
                 )
@@ -455,20 +491,29 @@ class MemoryStore:
                         )
                     except sqlite3.OperationalError:
                         pass
+                for item in to_insert:
+                    self._save_chunks(conn, item[0], item[3])
 
                 self._save_embeddings_bulk(conn, to_insert)
 
-                # Rebuild the FTS5 index in a single pass.
+
                 try:
                     conn.execute(
                         "INSERT INTO memories_fts(memories_fts) VALUES('rebuild')"
                     )
                 except Exception:
                     pass
+                if chunks_fts:
+                    try:
+                        conn.execute(
+                            "INSERT INTO memory_chunks_fts(memory_chunks_fts) VALUES('rebuild')"
+                        )
+                    except Exception:
+                        pass
 
                 conn.commit()
 
-            # Re-create the FTS triggers.
+
             try:
                 conn.execute("""
                     CREATE TRIGGER IF NOT EXISTS memories_fts_insert
@@ -495,17 +540,35 @@ class MemoryStore:
                 """)
             except Exception:
                 pass
+            if chunks_fts:
+                try:
+                    conn.execute("""
+                        CREATE TRIGGER IF NOT EXISTS chunks_fts_insert
+                        AFTER INSERT ON memory_chunks BEGIN
+                            INSERT INTO memory_chunks_fts(rowid, text)
+                            VALUES (new.rowid, new.text);
+                        END
+                    """)
+                    conn.execute("""
+                        CREATE TRIGGER IF NOT EXISTS chunks_fts_delete
+                        AFTER DELETE ON memory_chunks BEGIN
+                            DELETE FROM memory_chunks_fts WHERE rowid = old.rowid;
+                        END
+                    """)
+                    conn.execute("""
+                        CREATE TRIGGER IF NOT EXISTS chunks_fts_update
+                        AFTER UPDATE ON memory_chunks BEGIN
+                            DELETE FROM memory_chunks_fts WHERE rowid = old.rowid;
+                            INSERT INTO memory_chunks_fts(rowid, text)
+                            VALUES (new.rowid, new.text);
+                        END
+                    """)
+                except Exception:
+                    pass
 
         return len(to_insert)
 
     def get(self, memory_id: str, session_id: str = "") -> MemoryEntry | None:
-        """Fetch a single memory by ID and touch it (access boosts relevance).
-
-        Args:
-            memory_id: The memory's UUID string.
-            session_id: Optional current session, used to record access in
-                ``memory_access_log`` for outcome-conditioned feedback.
-        """
         with self._connect() as conn:
             row = conn.execute(
                 "SELECT * FROM memories WHERE id = ?", (memory_id,)
@@ -516,7 +579,6 @@ class MemoryStore:
         entry = self._row_to_memory(row)
         touched = entry.touch()
         # Persist the touch (relevance boost + access_count++) without
-        # going through save() to avoid redundant hash checks.
         with self._connect() as conn:
             conn.execute(
                 """
@@ -533,7 +595,7 @@ class MemoryStore:
                     memory_id,
                 ),
             )
-            # Log access for outcome feedback (v13 table).
+
             if session_id:
                 self._log_access(conn, session_id, memory_id)
             conn.commit()
@@ -543,7 +605,6 @@ class MemoryStore:
     def _log_access(
         self, conn: sqlite3.Connection, session_id: str, memory_id: str
     ) -> None:
-        """Record that *memory_id* was accessed in *session_id*."""
         try:
             conn.execute(
                 """
@@ -561,7 +622,6 @@ class MemoryStore:
             pass  # Table not yet created (pre-v13 database).
 
     def delete(self, memory_id: str) -> bool:
-        """Delete a memory and its junction-table tags.  Returns True if found."""
         with self._connect() as conn:
             self._delete_tags(conn, memory_id)
             cur = conn.execute("DELETE FROM memories WHERE id = ?", (memory_id,))
@@ -569,14 +629,11 @@ class MemoryStore:
         return cur.rowcount > 0
 
     def count(self) -> int:
-        """Total number of memories in the store."""
         with self._connect() as conn:
             return conn.execute("SELECT COUNT(*) FROM memories").fetchone()[0]
 
-    # ── Relevance adjustments (used by outcome feedback) ──────────────────
 
     def boost_relevance(self, memory_id: str, delta: float = 0.05) -> None:
-        """Increase relevance_score by *delta*, capped at 2.0."""
         with self._connect() as conn:
             conn.execute(
                 """
@@ -589,7 +646,6 @@ class MemoryStore:
             conn.commit()
 
     def penalize_relevance(self, memory_id: str, delta: float = 0.03) -> None:
-        """Decrease relevance_score by *delta*, floored at 0.01."""
         with self._connect() as conn:
             conn.execute(
                 """
@@ -601,10 +657,8 @@ class MemoryStore:
             )
             conn.commit()
 
-    # ── Search & Retrieval ────────────────────────────────────────────────
 
     def _fts5_available(self, conn: sqlite3.Connection) -> bool:
-        """Return True if the FTS5 virtual table is present and queryable."""
         try:
             conn.execute("SELECT 1 FROM memories_fts LIMIT 1")
             return True
@@ -612,7 +666,6 @@ class MemoryStore:
             return False
 
     def _tags_table_available(self, conn: sqlite3.Connection) -> bool:
-        """Return True if the memory_tags junction table exists (post-v11)."""
         try:
             conn.execute("SELECT 1 FROM memory_tags LIMIT 1")
             return True
@@ -631,25 +684,16 @@ class MemoryStore:
         boost_project: str = "",
         recency_days: int = 0,
     ) -> list[MemoryEntry]:
-        """Find memories matching criteria, ordered by relevance.
-
-        Uses FTS5 BM25 ranking when available, falls back to LIKE search.
-
-        Args:
-            query: Free-text search query.
-            memory_type: Filter to a specific MemoryType.
-            project: Filter to a specific project.
-            scope: Filter to a specific MemoryScope.
-            tags: Require all listed tags (junction-table query when available).
-            limit: Maximum results to return.
-            min_relevance: Minimum relevance_score threshold.
-            boost_project: When non-empty, rows from this project are
-                sorted before rows from other projects (SQL-layer boost).
-            recency_days: When > 0, memories created within this many days
-                are sorted before older ones (SQL-layer boost).
-        """
         with self._connect() as conn:
             if query and self._fts5_available(conn):
+                if self._chunks_fts5_available(conn):
+                    try:
+                        return self._search_chunks_fts5(
+                            conn, query, memory_type, project, scope, tags,
+                            limit, min_relevance, boost_project, recency_days,
+                        )
+                    except sqlite3.OperationalError:
+                        pass
                 return self._search_fts5(
                     conn, query, memory_type, project, scope, tags,
                     limit, min_relevance, boost_project, recency_days,
@@ -660,11 +704,12 @@ class MemoryStore:
             )
 
     def get_search_type(self, query: str = "") -> str:
-        """Return ``'fts5_bm25'`` or ``'like_fallback'`` for diagnostic use."""
         if not query:
             return "like_fallback"
         with self._connect() as conn:
-            return "fts5_bm25" if self._fts5_available(conn) else "like_fallback"
+            if not self._fts5_available(conn):
+                return "like_fallback"
+            return "fts5_chunks" if self._chunks_fts5_available(conn) else "fts5_bm25"
 
     def _build_tag_condition(
         self,
@@ -672,16 +717,10 @@ class MemoryStore:
         tags: tuple[str, ...],
         params: list,
     ) -> str:
-        """Return a SQL fragment for tag filtering.
-
-        Uses the junction-table EXISTS pattern when available (index-backed),
-        falls back to JSON LIKE for compatibility with pre-v11 databases.
-        """
         if not tags:
             return ""
 
         if self._tags_table_available(conn):
-            # One EXISTS sub-query per tag (AND semantics — memory must have ALL tags).
             conditions = []
             for tag in tags:
                 conditions.append(
@@ -691,7 +730,6 @@ class MemoryStore:
                 params.append(tag)
             return " AND ".join(conditions)
         else:
-            # Legacy: JSON LIKE fallback.
             conditions = []
             for tag in tags:
                 conditions.append("m.tags LIKE ? COLLATE NOCASE")
@@ -699,13 +737,111 @@ class MemoryStore:
             return " AND ".join(conditions)
 
     def _escape_fts5_query(self, query: str) -> str:
-        """Escape FTS5 special characters and build an OR-prefix query."""
         for char in ['"', "'", "(", ")", "*", "-", "+", ":", "^", "{", "}", "[", "]"]:
             query = query.replace(char, " ")
         words = query.split()
         if not words:
             return '""'
         return " OR ".join(f"{w}*" for w in words if w)
+
+    def _search_chunks_fts5(
+        self,
+        conn: sqlite3.Connection,
+        query: str,
+        memory_type: MemoryType | None,
+        project: str,
+        scope: MemoryScope | None,
+        tags: tuple[str, ...],
+        limit: int,
+        min_relevance: float,
+        boost_project: str,
+        recency_days: int,
+    ) -> list[MemoryEntry]:
+        conditions: list[str] = []
+        params: list = []
+
+        if memory_type:
+            conditions.append("m.type = ?")
+            params.append(memory_type.value)
+        if project:
+            conditions.append("m.project = ?")
+            params.append(project)
+        if scope:
+            conditions.append("m.scope = ?")
+            params.append(scope.value)
+        if min_relevance > 0:
+            conditions.append("m.relevance_score >= ?")
+            params.append(min_relevance)
+        if tags:
+            tag_cond = self._build_tag_condition(conn, tags, params)
+            if tag_cond:
+                conditions.append(tag_cond)
+
+        where = " AND ".join(conditions) if conditions else "1=1"
+
+        project_boost = ""
+        project_boost_params: list = []
+        if boost_project:
+            project_boost = (
+                "CASE WHEN m.project = ? THEN 1 ELSE 0 END AS proj_match,"
+            )
+            project_boost_params = [boost_project]
+
+        recency_boost = ""
+        recency_boost_params: list = []
+        if recency_days > 0:
+            recency_boost = (
+                "CASE WHEN julianday('now') - julianday(m.created_at) <= ? "
+                "THEN 1 ELSE 0 END AS is_recent,"
+            )
+            recency_boost_params = [recency_days]
+
+        order_by_extra = ""
+        if boost_project and recency_days > 0:
+            order_by_extra = "proj_match DESC, is_recent DESC,"
+        elif boost_project:
+            order_by_extra = "proj_match DESC,"
+        elif recency_days > 0:
+            order_by_extra = "is_recent DESC,"
+
+        fts_query = self._escape_fts5_query(query)
+
+        # Unified search: hit the full-content index AND the chunk index,
+        # dedup by parent memory id keeping the best score.  Short (un-
+        # chunked) memories live only in memories_fts; long memories live
+        # in both.
+        sql = f"""
+            SELECT m.*,
+                   MAX(s.score) AS search_score,
+                   {project_boost}
+                   {recency_boost}
+                   0 AS _dummy
+            FROM (
+                SELECT m.id AS mid, -bm25(memories_fts) AS score
+                FROM   memories_fts
+                JOIN   memories m ON memories_fts.rowid = m.rowid
+                WHERE  memories_fts MATCH ? AND {where}
+                UNION ALL
+                SELECT c.memory_id AS mid, -bm25(memory_chunks_fts) AS score
+                FROM   memory_chunks_fts
+                JOIN   memory_chunks c ON memory_chunks_fts.rowid = c.rowid
+                JOIN   memories m ON c.memory_id = m.id
+                WHERE  memory_chunks_fts MATCH ? AND {where}
+            ) s
+            JOIN   memories m ON m.id = s.mid
+            GROUP BY m.id
+            ORDER BY {order_by_extra} search_score DESC
+            LIMIT  ?
+        """
+        all_params = (
+            [fts_query] + params
+            + [fts_query] + params
+            + project_boost_params
+            + recency_boost_params
+            + [limit]
+        )
+        rows = conn.execute(sql, all_params).fetchall()
+        return [self._row_to_memory(r) for r in rows]
 
     def _search_fts5(
         self,
@@ -720,7 +856,6 @@ class MemoryStore:
         boost_project: str,
         recency_days: int,
     ) -> list[MemoryEntry]:
-        """FTS5 BM25 ranked search with optional SQL-layer boosting."""
         try:
             conditions: list[str] = []
             params: list = []
@@ -744,7 +879,6 @@ class MemoryStore:
 
             where = " AND ".join(conditions) if conditions else "1=1"
 
-            # SQL-layer project affinity boost (computed column, zero planner cost).
             project_boost = ""
             project_boost_params: list = []
             if boost_project:
@@ -753,7 +887,6 @@ class MemoryStore:
                 )
                 project_boost_params = [boost_project]
 
-            # SQL-layer recency boost.
             recency_boost = ""
             recency_boost_params: list = []
             if recency_days > 0:
@@ -814,7 +947,6 @@ class MemoryStore:
         boost_project: str,
         recency_days: int,
     ) -> list[MemoryEntry]:
-        """LIKE-based fallback search."""
         conditions: list[str] = []
         params: list = []
 
@@ -853,42 +985,20 @@ class MemoryStore:
         return [self._row_to_memory(r) for r in rows]
 
     def get_recent(self, limit: int = 10) -> list[MemoryEntry]:
-        """Most recently created memories."""
         return self.search(limit=limit)
 
     def get_by_project(self, project: str, limit: int = 50) -> list[MemoryEntry]:
-        """All memories for a specific project."""
         return self.search(project=project, limit=limit)
 
     def get_by_type(self, mtype: MemoryType, limit: int = 50) -> list[MemoryEntry]:
-        """All memories of a specific type."""
         return self.search(memory_type=mtype, limit=limit)
 
-    # ── Decay ─────────────────────────────────────────────────────────────
 
     def decay_all(
         self,
         factor: float = 0.95,
         modifiers: dict[str, float] | None = None,
     ) -> int:
-        """Age all memories in cursor-paginated batches of 1 000 rows.
-
-        Batching ensures the write lock is released between pages, allowing
-        concurrent reads (and other writes) to proceed during decay.
-
-        Args:
-            factor: Multiplicative decay applied to every memory's
-                ``relevance_score``.  Values between 0 and 1 cause scores to
-                decrease; 0.95 means each memory loses 5% relevance per cycle.
-            modifiers: Optional dict mapping ``memory_id`` → per-memory
-                modifier (from ``feedback.compute_uniqueness_modifiers``).
-                The effective decay for entry ``i`` is
-                ``factor * modifiers.get(id_i, 1.0)``.
-                When ``None`` or empty, uniform decay is applied.
-
-        Returns:
-            Total count of memories deleted because their score fell below 0.01.
-        """
         total_deleted = 0
         last_id = ""
 
@@ -906,9 +1016,7 @@ class MemoryStore:
         last_id: str,
         modifiers: dict[str, float] | None,
     ) -> tuple[int, str | None]:
-        """Apply decay to one page of memories, return (deleted, next_cursor)."""
         with self._connect() as conn:
-            # Fetch one page of IDs.
             rows = conn.execute(
                 "SELECT id, relevance_score FROM memories WHERE id > ? "
                 "ORDER BY id LIMIT ?",
@@ -921,7 +1029,6 @@ class MemoryStore:
             next_cursor = rows[-1]["id"]
 
             if modifiers:
-                # Per-memory decay via individual UPDATEs inside a savepoint.
                 conn.execute("SAVEPOINT decay_page")
                 for row in rows:
                     mid = row["id"]
@@ -936,7 +1043,6 @@ class MemoryStore:
                     )
                 conn.execute("RELEASE SAVEPOINT decay_page")
             else:
-                # Uniform decay: single UPDATE for the page.
                 ids = [r["id"] for r in rows]
                 placeholders = ",".join("?" * len(ids))
                 conn.execute(
@@ -948,7 +1054,6 @@ class MemoryStore:
                     [factor] + ids,
                 )
 
-            # Delete faded-out memories from this page.
             ids = [r["id"] for r in rows]
             placeholders = ",".join("?" * len(ids))
             cur = conn.execute(
@@ -961,10 +1066,8 @@ class MemoryStore:
 
         return deleted, next_cursor
 
-    # ── Semantic search ────────────────────────────────────────────────────
 
     def save_embedding(self, memory_id: str, embedding: list[float], model_name: str) -> None:
-        """Persist a float vector as a packed binary blob in ``memory_embeddings``."""
         blob = struct.pack(f"{len(embedding)}f", *embedding)
         with self._connect() as conn:
             try:
@@ -981,7 +1084,6 @@ class MemoryStore:
                 pass  # Table not yet created (pre-v12 database).
 
     def get_embedding(self, memory_id: str) -> list[float] | None:
-        """Load the stored float vector for *memory_id*, or None if absent."""
         with self._connect() as conn:
             try:
                 row = conn.execute(
@@ -1002,28 +1104,6 @@ class MemoryStore:
         limit: int = 20,
         project: str = "",
     ) -> list[tuple[float, MemoryEntry]]:
-        """Brute-force cosine-similarity search over stored embeddings.
-
-        Loads all embeddings from the database, computes dot-product
-        similarity (vectors are L2-normalised at embedding time), and
-        returns the top-*limit* entries ordered by similarity.
-
-        This is O(n) in the number of stored embeddings.  For databases
-        with more than ~50 000 memories, an approximate-nearest-neighbour
-        index (hnswlib, faiss, etc.) should be layered on top.  For the
-        typical Cognex use case (hundreds to low thousands of memories),
-        brute force is fast enough: 10 000 dot-products takes ~2 ms in
-        Python with list arithmetic.
-
-        Args:
-            query: Either a query string (will be embedded locally) or a
-                pre-normalised float vector.
-            limit: Maximum number of results.
-            project: Optional project filter applied before similarity ranking.
-
-        Returns:
-            List of (similarity_score, MemoryEntry) tuples, highest first.
-        """
         if isinstance(query, str):
             if not EmbeddingEngine.AVAILABLE:
                 return []
@@ -1080,7 +1160,6 @@ class MemoryStore:
 
         return results
 
-    # ── Session Snapshots ─────────────────────────────────────────────────
 
     def save_session(self, session: SessionSnapshot) -> SessionSnapshot:
         with self._connect() as conn:
@@ -1133,7 +1212,6 @@ class MemoryStore:
                 ).fetchall()
         return [self._session_row_to_snapshot(r) for r in rows]
 
-    # ── Helpers ───────────────────────────────────────────────────────────
 
     @staticmethod
     def _session_row_to_snapshot(row: sqlite3.Row) -> SessionSnapshot:
@@ -1154,6 +1232,14 @@ class MemoryStore:
         )
 
     @staticmethod
+    def _safe_get_row(row: sqlite3.Row, key: str, default: Any = None) -> Any:
+        try:
+            val = row[key]
+            return val if val is not None else default
+        except (IndexError, KeyError):
+            return default
+
+    @staticmethod
     def _row_to_memory(row: sqlite3.Row) -> MemoryEntry:
         from datetime import datetime as _dt
 
@@ -1172,4 +1258,5 @@ class MemoryStore:
             access_count=row["access_count"],
             project=row["project"] or "",
             tags=tuple(json.loads(row["tags"])),
+            gist=MemoryStore._safe_get_row(row, "gist", ""),
         )

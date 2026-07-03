@@ -48,8 +48,10 @@ Thumbs.db
 *.tar.gz
 *.whl
 
-# OpenCode agent internals
+# AI agent internals
 .sisyphus/
+.commandcode/
+.plans/
 
 # Ruff cache
 .ruff_cache/
@@ -66,9 +68,6 @@ test_results.txt
 
 # Internal context files (not for public)
 CONTEXT.md
-project_context.md
-REMOVED_TOOL_ANALYSIS.md
-REMOVED_TOOL_REFERENCE.txt
 
 # Benchmark results
 evaluate/results/

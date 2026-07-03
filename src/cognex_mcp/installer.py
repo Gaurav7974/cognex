@@ -1,4 +1,3 @@
-"""Auto-installer for Cognex MCP across all AI coding tools."""
 
 import datetime
 import json
@@ -8,7 +7,6 @@ from pathlib import Path
 
 
 def detect_command() -> str:
-    """Detect whether to use uvx or direct command."""
     if shutil.which("uvx"):
         return "uvx"
     return "cognex"
@@ -91,7 +89,6 @@ PLATFORMS = {
 
 
 def detect_installed_platforms() -> list[str]:
-    """Find which AI tools are actually installed."""
     found = []
     for name, config in PLATFORMS.items():
         for path in config["paths"]:
@@ -102,7 +99,6 @@ def detect_installed_platforms() -> list[str]:
 
 
 def write_config(platform: str, dry_run: bool = False) -> bool:
-    """Write Cognex config for a platform. Returns True if successful."""
     config = PLATFORMS[platform]
     cmd = detect_command()
 
@@ -113,7 +109,6 @@ def write_config(platform: str, dry_run: bool = False) -> bool:
 
     for path in config["paths"]:
         if path.parent.exists():
-            # Read existing config
             existing: dict = {}
             if path.exists():
                 try:
@@ -121,7 +116,6 @@ def write_config(platform: str, dry_run: bool = False) -> bool:
                 except Exception:
                     existing = {}
 
-                # Create .bak copy before modifying
                 if not dry_run:
                     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
                     bak_path = Path(str(path) + f".bak.{timestamp}")
@@ -130,7 +124,6 @@ def write_config(platform: str, dry_run: bool = False) -> bool:
                     except Exception:
                         pass  # Backup creation is non-critical
 
-            # Merge cognex in
             fmt = config["format"]
             if fmt == "mcp_servers":
                 existing.setdefault("mcpServers", {})["cognex"] = cognex_entry
@@ -149,7 +142,6 @@ def write_config(platform: str, dry_run: bool = False) -> bool:
 
             if dry_run:
                 print(f"  [dry-run] Would write to {path}")
-                # Show JSON diff of the change
                 if fmt == "mcp_servers" or fmt == "claude_json":
                     diff_obj = {"mcpServers": {"cognex": cognex_entry}}
                 elif fmt == "opencode":
@@ -179,8 +171,7 @@ def write_config(platform: str, dry_run: bool = False) -> bool:
 
 
 def inject_agents_md(dry_run: bool = False) -> None:
-    """Inject Cognex instructions into AGENTS.md or CLAUDE.md if present."""
-    instruction = """<!-- cognex-agents v0.1.8 -->
+    instruction = """<!-- cognex-agents -->
 ## Cognex Memory (Auto-injected)
 Cognex MCP is connected. Use it automatically:
 - Session start: call cognex_start_session with project name
@@ -203,7 +194,6 @@ Cognex MCP is connected. Use it automatically:
 
 
 def run_install(platform: str | None = None, dry_run: bool = False) -> None:
-    """Main install function."""
     print("Cognex MCP Installer")
     print("=" * 40)
 
@@ -234,7 +224,6 @@ def run_install(platform: str | None = None, dry_run: bool = False) -> None:
         else:
             failed.append(p)
 
-    # Inject AGENTS.md
     inject_agents_md(dry_run=dry_run)
 
     print("\n" + "=" * 40)

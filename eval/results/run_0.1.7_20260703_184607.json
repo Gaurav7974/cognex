@@ -1,0 +1,310 @@
+{
+  "provenance": {
+    "dataset_version": "v1",
+    "cognex_version": "0.1.7",
+    "git_sha": "2d6f3c35086f27c55a54c222afc8571a41fbdac8",
+    "tokenizer": "approx (chars/4)",
+    "random_seed": 42
+  },
+  "timestamp": "2026-07-03T13:16:06.290825",
+  "suite_run": "efficiency",
+  "corpus_scale": 500,
+  "quick_mode": true,
+  "efficiency": {
+    "summary": {
+      "avg_tokens": {
+        "naive": 288953,
+        "single_stage_ids": 0,
+        "single_stage_snippets": 165,
+        "single_stage_full": 165,
+        "two_stage_gold_ideal": 184,
+        "two_stage_top1_realistic": 182
+      },
+      "latency_sec": {
+        "median": 0.0011,
+        "p95": 0.0018
+      },
+      "handoff_manifest": {
+        "status": "measured",
+        "token_size": 333
+      }
+    },
+    "cases": [
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 179,
+        "single_stage_full_tokens": 179,
+        "two_stage_gold_tokens": 199,
+        "two_stage_top1_tokens": 197,
+        "latency_sec": 0.0011473999911686406,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_001"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 170,
+        "single_stage_full_tokens": 170,
+        "two_stage_gold_tokens": 190,
+        "two_stage_top1_tokens": 189,
+        "latency_sec": 0.0011375999893061817,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_002"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 166,
+        "single_stage_full_tokens": 166,
+        "two_stage_gold_tokens": 185,
+        "two_stage_top1_tokens": 180,
+        "latency_sec": 0.0011065999860875309,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_003"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 171,
+        "single_stage_full_tokens": 171,
+        "two_stage_gold_tokens": 190,
+        "two_stage_top1_tokens": 190,
+        "latency_sec": 0.0008933000062825158,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_004"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 123,
+        "single_stage_full_tokens": 123,
+        "two_stage_gold_tokens": 138,
+        "two_stage_top1_tokens": 138,
+        "latency_sec": 0.0008295000006910414,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_005"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 171,
+        "single_stage_full_tokens": 171,
+        "two_stage_gold_tokens": 193,
+        "two_stage_top1_tokens": 192,
+        "latency_sec": 0.0010297000117134303,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_006"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 158,
+        "single_stage_full_tokens": 158,
+        "two_stage_gold_tokens": 175,
+        "two_stage_top1_tokens": 175,
+        "latency_sec": 0.0009439999994356185,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_007"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 181,
+        "single_stage_full_tokens": 181,
+        "two_stage_gold_tokens": 202,
+        "two_stage_top1_tokens": 202,
+        "latency_sec": 0.0013965999969514087,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_008"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 176,
+        "single_stage_full_tokens": 176,
+        "two_stage_gold_tokens": 194,
+        "two_stage_top1_tokens": 186,
+        "latency_sec": 0.0012925000046379864,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_009"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 172,
+        "single_stage_full_tokens": 172,
+        "two_stage_gold_tokens": 195,
+        "two_stage_top1_tokens": 189,
+        "latency_sec": 0.0010546999983489513,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_010"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 167,
+        "single_stage_full_tokens": 167,
+        "two_stage_gold_tokens": 187,
+        "two_stage_top1_tokens": 183,
+        "latency_sec": 0.001059800008079037,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_011"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 171,
+        "single_stage_full_tokens": 171,
+        "two_stage_gold_tokens": 192,
+        "two_stage_top1_tokens": 193,
+        "latency_sec": 0.0010572000028332695,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_012"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 132,
+        "single_stage_full_tokens": 132,
+        "two_stage_gold_tokens": 150,
+        "two_stage_top1_tokens": 151,
+        "latency_sec": 0.0009764999995240942,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_013"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 178,
+        "single_stage_full_tokens": 178,
+        "two_stage_gold_tokens": 198,
+        "two_stage_top1_tokens": 199,
+        "latency_sec": 0.0009163000067928806,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_014"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 133,
+        "single_stage_full_tokens": 133,
+        "two_stage_gold_tokens": 151,
+        "two_stage_top1_tokens": 151,
+        "latency_sec": 0.0010725999891292304,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_015"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 180,
+        "single_stage_full_tokens": 180,
+        "two_stage_gold_tokens": 199,
+        "two_stage_top1_tokens": 199,
+        "latency_sec": 0.0017785999953048304,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_016"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 169,
+        "single_stage_full_tokens": 169,
+        "two_stage_gold_tokens": 188,
+        "two_stage_top1_tokens": 179,
+        "latency_sec": 0.0012488000065786764,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_017"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 183,
+        "single_stage_full_tokens": 183,
+        "two_stage_gold_tokens": 203,
+        "two_stage_top1_tokens": 203,
+        "latency_sec": 0.0019589000003179535,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_018"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 178,
+        "single_stage_full_tokens": 178,
+        "two_stage_gold_tokens": 198,
+        "two_stage_top1_tokens": 198,
+        "latency_sec": 0.001408399999490939,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_019"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 174,
+        "single_stage_full_tokens": 174,
+        "two_stage_gold_tokens": 194,
+        "two_stage_top1_tokens": 183,
+        "latency_sec": 0.0010959000064758584,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_020"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 174,
+        "single_stage_full_tokens": 174,
+        "two_stage_gold_tokens": 193,
+        "two_stage_top1_tokens": 190,
+        "latency_sec": 0.001160400002845563,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_021"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 167,
+        "single_stage_full_tokens": 167,
+        "two_stage_gold_tokens": 186,
+        "two_stage_top1_tokens": 184,
+        "latency_sec": 0.0018103000038536265,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_022"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 172,
+        "single_stage_full_tokens": 172,
+        "two_stage_gold_tokens": 194,
+        "two_stage_top1_tokens": 183,
+        "latency_sec": 0.0010193000052822754,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_023"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 157,
+        "single_stage_full_tokens": 157,
+        "two_stage_gold_tokens": 176,
+        "two_stage_top1_tokens": 173,
+        "latency_sec": 0.0012049999932060018,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_024"
+      },
+      {
+        "naive_tokens": 288953,
+        "single_stage_ids_tokens": 0,
+        "single_stage_snippets_tokens": 133,
+        "single_stage_full_tokens": 133,
+        "two_stage_gold_tokens": 154,
+        "two_stage_top1_tokens": 152,
+        "latency_sec": 0.001129999989643693,
+        "tokenizer_type": "approx (chars/4)",
+        "case_id": "case_025"
+      }
+    ]
+  }
+}

@@ -1,17 +1,7 @@
-"""Trust Gradient Engine — learns from every permission decision.
-
-Migration from bare sqlite3.connect()
---------------------------------------
-Previous implementation opened a new ``sqlite3.connect()`` on every call
-without WAL mode, busy timeout, or connection reuse.  This module now uses
-the shared ``_pool.ConnectionPool`` for the same connection quality (WAL
-mode, 10-second busy timeout, 32 MB cache) as every other cognex module.
-"""
 
 from __future__ import annotations
 
 import enum
-import json
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -30,7 +20,6 @@ class TrustLevel(enum.Enum):
 
 @dataclass(frozen=True)
 class TrustRecord:
-    """Trust profile for a single tool-in-context."""
     tool_name:        str
     context:          str         = ""
     project:          str         = ""
@@ -44,7 +33,6 @@ class TrustRecord:
     total_operations: int         = 0
     safe_operations:  int         = 0
 
-    # ── State transitions ─────────────────────────────────────────────
 
     def record_approval(self) -> TrustRecord:
         new_approval = self.approval_count + 1
@@ -75,7 +63,7 @@ class TrustRecord:
 
     def record_violation(self) -> TrustRecord:
         new_violation = self.violation_count + 1
-        new_level = TrustLevel.BLOCKED  # Any violation immediately blocks.
+        new_level = self._compute_level(self.approval_count, self.denial_count, new_violation)
         return TrustRecord(
             tool_name=self.tool_name, context=self.context, project=self.project,
             trust_level=new_level, approval_count=self.approval_count,
@@ -99,7 +87,6 @@ class TrustRecord:
             return TrustLevel.OBSERVED
         return TrustLevel.OBSERVED if approvals >= 3 else TrustLevel.UNKNOWN
 
-    # ── Properties ────────────────────────────────────────────────────
 
     @property
     def requires_approval(self) -> bool:
@@ -114,7 +101,6 @@ class TrustRecord:
         penalty = self.violation_count * 0.2
         return max(0.0, min(1.0, ratio - penalty))
 
-    # ── Serialisation ─────────────────────────────────────────────────
 
     def as_dict(self) -> dict:
         return {
@@ -152,7 +138,6 @@ class TrustRecord:
 
 @dataclass(frozen=True)
 class PermissionDecision:
-    """A single permission event — what was asked, what was decided."""
     id:                   str        = field(default_factory=lambda: uuid.uuid4().hex[:12])
     tool_name:            str        = ""
     operation:            str        = ""
@@ -173,17 +158,7 @@ class PermissionDecision:
         }
 
 
-class TrustGradientEngine:
-    """Learns trust from every permission interaction.
-
-    Usage::
-
-        engine = TrustGradientEngine()
-        needs = engine.requires_approval("BashTool", project="api")
-        engine.record_approval("BashTool", project="api")
-        engine.record_denial("BashTool", operation="rm -rf /", project="api")
-        engine.record_violation("BashTool", project="api")
-    """
+class TrustEngine:
 
     def __init__(self, db_path: str | Path | None = None) -> None:
         self.db_path = Path(db_path) if db_path else Path.home() / ".cognex.db" / "cognex.db"
@@ -227,7 +202,6 @@ class TrustGradientEngine:
                 CREATE INDEX IF NOT EXISTS idx_decisions_timestamp ON permission_decisions(timestamp DESC);
             """)
 
-    # ── Core API ──────────────────────────────────────────────────────────
 
     def requires_approval(
         self, tool_name: str, operation: str = "", project: str = ""
@@ -289,7 +263,6 @@ class TrustGradientEngine:
         self._update_trust(tool_name, context, project, lambda r: r.record_violation())
         return decision
 
-    # ── Queries ───────────────────────────────────────────────────────────
 
     def get_recent_decisions(
         self, limit: int = 20, project: str = ""
@@ -351,7 +324,6 @@ class TrustGradientEngine:
             return 0.5
         return sum(1 for d in decisions if d.approved) / len(decisions)
 
-    # ── Internal ──────────────────────────────────────────────────────────
 
     def _save_decision(self, decision: PermissionDecision) -> None:
         with self._pool.get_connection() as conn:

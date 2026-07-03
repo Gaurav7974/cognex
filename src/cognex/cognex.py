@@ -1,4 +1,3 @@
-"""Main orchestrator — ties memory store, extractor, and retriever together."""
 
 from __future__ import annotations
 
@@ -15,7 +14,6 @@ from .retriever import MemoryRetriever
 
 @dataclass
 class CognexReport:
-    """Summary of the cognex engine's current state."""
 
     total_memories: int
     memories_by_type: dict[str, int]
@@ -43,17 +41,6 @@ class CognexReport:
 
 
 class CognexEngine:
-    """The persistent memory layer for an AI agent.
-
-    Usage:
-        engine = CognexEngine()
-        # Start a session
-        engine.start_session("session-abc", project="my-api")
-        # Process conversation
-        engine.process_transcript("I prefer pytest over unittest...", project="my-api")
-        # Get context for next session
-        memories = engine.get_context("my-api")
-    """
 
     def __init__(self, db_path: str | Path | None = None, pool_size: int | None = None):
         self.store = MemoryStore(db_path=db_path, pool_size=pool_size)
@@ -64,24 +51,16 @@ class CognexEngine:
         self._current_project: str = ""
 
     def get_current_session(self) -> str | None:
-        """Get the session_id of the most recently started active session.
-        
-        Returns None if no active sessions.
-        Thread-safe via _sessions_lock.
-        """
         with self._sessions_lock:
             if not self._sessions:
                 return None
-            # Return the most recently started active session
             for session_id in reversed(list(self._sessions.keys())):
                 if self._sessions[session_id].get("active", False):
                     return session_id
             return None
 
-    # ── Session Lifecycle ─────────────────────────────────────
 
     def start_session(self, session_id: str, project: str = "") -> list[MemoryEntry]:
-        """Start a new session. Returns relevant memories to inject."""
         with self._sessions_lock:
             self._sessions[session_id] = {
                 "session_id": session_id,
@@ -91,7 +70,6 @@ class CognexEngine:
             }
         self._current_project = project
 
-        # Session arc integration (P3.2)
         from .arcs import SessionArcManager
         try:
             SessionArcManager.get_or_create_arc(session_id, project, self.store)
@@ -109,7 +87,6 @@ class CognexEngine:
         input_tokens: int = 0,
         output_tokens: int = 0,
     ) -> SessionSnapshot:
-        """End the current session. Saves snapshot and extracts memories."""
         current_session_id = self.get_current_session()
         session = SessionSnapshot(
             session_id=current_session_id or "unknown",
@@ -123,7 +100,6 @@ class CognexEngine:
         )
         self.store.save_session(session)
 
-        # Session arc integration (P3.2): update arc last_session_at
         if current_session_id and self._current_project:
             from .arcs import SessionArcManager
             try:
@@ -131,14 +107,12 @@ class CognexEngine:
             except Exception as e:
                 logger.error("Failed to update session arc on end_session: %s", e)
 
-        # Mark session as inactive
         if current_session_id:
             with self._sessions_lock:
                 if current_session_id in self._sessions:
                     self._sessions[current_session_id]["active"] = False
         return session
 
-    # ── Memory Operations ─────────────────────────────────────
 
     def process_transcript(
         self,
@@ -147,7 +121,6 @@ class CognexEngine:
         project: str | None = None,
         context: str = "",
     ) -> ExtractionResult:
-        """Process a conversation transcript and extract memories."""
         sid = session_id or self.get_current_session() or ""
         proj = project or self._current_project or ""
         result = self.extractor.extract(
@@ -169,21 +142,19 @@ class CognexEngine:
         tags: tuple[str, ...] = (),
         context: str = "",
     ) -> MemoryEntry:
-        """Manually add a memory entry."""
-        entry = self.extractor.extract_manual(
-            content=content,
-            memory_type=memory_type,
+        entry = MemoryEntry(
+            type=memory_type,
             scope=scope,
+            content=content,
+            context=context,
             project=project or self._current_project,
             tags=tags,
-            context=context,
         )
         return self.store.save(entry)
 
     def get_context(
         self, query: str = "", project: str = "", limit: int = 10
     ) -> list[MemoryEntry]:
-        """Get relevant memories for the current context."""
         proj = project or self._current_project
         session_id = self.get_current_session() or ""
         if query:
@@ -195,27 +166,19 @@ class CognexEngine:
         )
 
     def find_similar_decisions(self, situation: str) -> list[MemoryEntry]:
-        """Find past decisions similar to current situation."""
         return self.retriever.find_similar_decisions(
             situation,
             project=self._current_project,
         )
 
-    # ── Maintenance ───────────────────────────────────────────
 
     def decay_memories(self, factor: float = 0.95) -> int:
-        """Age all memories. Faded ones are auto-deleted."""
         from .feedback import OutcomeFeedback
         modifiers = OutcomeFeedback.compute_uniqueness_modifiers(self.store)
         return self.store.decay_all(factor, modifiers=modifiers)
 
     def report(self) -> CognexReport:
-        """Get a summary of the cognex engine's state.
-
-        All queries run in a single transaction for consistent snapshot.
-        """
         with self.store._connect() as conn:
-            # The _connect() context manager already ensures transaction isolation
             try:
                 total = self.store.count()
                 by_type: dict[str, int] = {}
@@ -226,7 +189,6 @@ class CognexEngine:
 
                 sessions = self.store.get_sessions(limit=9999)
 
-                # Top projects
                 project_counts: dict[str, int] = {}
                 for mt in MemoryType:
                     for mem in self.store.search(memory_type=mt, limit=9999):

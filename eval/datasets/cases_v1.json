@@ -1,0 +1,1502 @@
+[
+  {
+    "case_id": "case_001",
+    "query": "What database and port does gold-project-001 use?",
+    "gold_ids": [
+      "mem_gold_001"
+    ],
+    "distractor_ids": [
+      "mem_dist_001_near_dup",
+      "mem_dist_001_wrong_proj",
+      "mem_dist_001_superseded",
+      "mem_dist_001_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_002",
+    "query": "What is the internal API endpoint for gold-project-002?",
+    "gold_ids": [
+      "mem_gold_002"
+    ],
+    "distractor_ids": [
+      "mem_dist_002_near_dup",
+      "mem_dist_002_wrong_proj",
+      "mem_dist_002_superseded",
+      "mem_dist_002_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_003",
+    "query": "Which technology does gold-project-003 use for token hashing?",
+    "gold_ids": [
+      "mem_gold_003"
+    ],
+    "distractor_ids": [
+      "mem_dist_003_near_dup",
+      "mem_dist_003_wrong_proj",
+      "mem_dist_003_superseded",
+      "mem_dist_003_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_004",
+    "query": "Which configuration file loads environment variables for gold-project-004?",
+    "gold_ids": [
+      "mem_gold_004"
+    ],
+    "distractor_ids": [
+      "mem_dist_004_near_dup",
+      "mem_dist_004_wrong_proj",
+      "mem_dist_004_superseded",
+      "mem_dist_004_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_005",
+    "query": "What validation library is used by gold-project-005?",
+    "gold_ids": [
+      "mem_gold_005"
+    ],
+    "distractor_ids": [
+      "mem_dist_005_near_dup",
+      "mem_dist_005_wrong_proj",
+      "mem_dist_005_superseded",
+      "mem_dist_005_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_006",
+    "query": "What origins are allowed by CORS in gold-project-006?",
+    "gold_ids": [
+      "mem_gold_006"
+    ],
+    "distractor_ids": [
+      "mem_dist_006_near_dup",
+      "mem_dist_006_wrong_proj",
+      "mem_dist_006_superseded",
+      "mem_dist_006_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_007",
+    "query": "Which database index does the Redis cache use for gold-project-007?",
+    "gold_ids": [
+      "mem_gold_007"
+    ],
+    "distractor_ids": [
+      "mem_dist_007_near_dup",
+      "mem_dist_007_wrong_proj",
+      "mem_dist_007_superseded",
+      "mem_dist_007_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_008",
+    "query": "What python formatting and linting tools are preferred in gold-project-008?",
+    "gold_ids": [
+      "mem_gold_008"
+    ],
+    "distractor_ids": [
+      "mem_dist_008_near_dup",
+      "mem_dist_008_wrong_proj",
+      "mem_dist_008_superseded",
+      "mem_dist_008_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_009",
+    "query": "What token validation preference is set for requests in gold-project-009?",
+    "gold_ids": [
+      "mem_gold_009"
+    ],
+    "distractor_ids": [
+      "mem_dist_009_near_dup",
+      "mem_dist_009_wrong_proj",
+      "mem_dist_009_superseded",
+      "mem_dist_009_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_010",
+    "query": "What merge strategy does the user prefer for gold-project-010 pull requests?",
+    "gold_ids": [
+      "mem_gold_010"
+    ],
+    "distractor_ids": [
+      "mem_dist_010_near_dup",
+      "mem_dist_010_wrong_proj",
+      "mem_dist_010_superseded",
+      "mem_dist_010_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_011",
+    "query": "What SQLAlchemy query style is preferred in gold-project-011?",
+    "gold_ids": [
+      "mem_gold_011"
+    ],
+    "distractor_ids": [
+      "mem_dist_011_near_dup",
+      "mem_dist_011_wrong_proj",
+      "mem_dist_011_superseded",
+      "mem_dist_011_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_012",
+    "query": "What CSS styling preference is set for frontend components in gold-project-012?",
+    "gold_ids": [
+      "mem_gold_012"
+    ],
+    "distractor_ids": [
+      "mem_dist_012_near_dup",
+      "mem_dist_012_wrong_proj",
+      "mem_dist_012_superseded",
+      "mem_dist_012_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_013",
+    "query": "Where should the OpenAPI documentation be enabled in gold-project-013?",
+    "gold_ids": [
+      "mem_gold_013"
+    ],
+    "distractor_ids": [
+      "mem_dist_013_near_dup",
+      "mem_dist_013_wrong_proj",
+      "mem_dist_013_superseded",
+      "mem_dist_013_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_014",
+    "query": "What pagination strategy is preferred in gold-project-014?",
+    "gold_ids": [
+      "mem_gold_014"
+    ],
+    "distractor_ids": [
+      "mem_dist_014_near_dup",
+      "mem_dist_014_wrong_proj",
+      "mem_dist_014_superseded",
+      "mem_dist_014_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_015",
+    "query": "What is the typing annotation requirement in gold-project-015?",
+    "gold_ids": [
+      "mem_gold_015"
+    ],
+    "distractor_ids": [
+      "mem_dist_015_near_dup",
+      "mem_dist_015_wrong_proj",
+      "mem_dist_015_superseded",
+      "mem_dist_015_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_016",
+    "query": "What architectural pattern is used for database access in gold-project-016?",
+    "gold_ids": [
+      "mem_gold_016"
+    ],
+    "distractor_ids": [
+      "mem_dist_016_near_dup",
+      "mem_dist_016_wrong_proj",
+      "mem_dist_016_superseded",
+      "mem_dist_016_kw_trap"
+    ],
+    "category": "distractor_pattern",
+    "notes": "Evaluation case for type pattern"
+  },
+  {
+    "case_id": "case_017",
+    "query": "What naming casing is preferred for API response JSON in gold-project-017?",
+    "gold_ids": [
+      "mem_gold_017"
+    ],
+    "distractor_ids": [
+      "mem_dist_017_near_dup",
+      "mem_dist_017_wrong_proj",
+      "mem_dist_017_superseded",
+      "mem_dist_017_kw_trap"
+    ],
+    "category": "distractor_pattern",
+    "notes": "Evaluation case for type pattern"
+  },
+  {
+    "case_id": "case_018",
+    "query": "What exception class should be raised for API errors in gold-project-018?",
+    "gold_ids": [
+      "mem_gold_018"
+    ],
+    "distractor_ids": [
+      "mem_dist_018_near_dup",
+      "mem_dist_018_wrong_proj",
+      "mem_dist_018_superseded",
+      "mem_dist_018_kw_trap"
+    ],
+    "category": "distractor_pattern",
+    "notes": "Evaluation case for type pattern"
+  },
+  {
+    "case_id": "case_019",
+    "query": "How are concurrent database writes handled in gold-project-019?",
+    "gold_ids": [
+      "mem_gold_019"
+    ],
+    "distractor_ids": [
+      "mem_dist_019_near_dup",
+      "mem_dist_019_wrong_proj",
+      "mem_dist_019_superseded",
+      "mem_dist_019_kw_trap"
+    ],
+    "category": "distractor_pattern",
+    "notes": "Evaluation case for type pattern"
+  },
+  {
+    "case_id": "case_020",
+    "query": "How should external HTTP requests be handled in gold-project-020 test suites?",
+    "gold_ids": [
+      "mem_gold_020"
+    ],
+    "distractor_ids": [
+      "mem_dist_020_near_dup",
+      "mem_dist_020_wrong_proj",
+      "mem_dist_020_superseded",
+      "mem_dist_020_kw_trap"
+    ],
+    "category": "distractor_pattern",
+    "notes": "Evaluation case for type pattern"
+  },
+  {
+    "case_id": "case_021",
+    "query": "How are log statements correlated for requests in gold-project-021?",
+    "gold_ids": [
+      "mem_gold_021"
+    ],
+    "distractor_ids": [
+      "mem_dist_021_near_dup",
+      "mem_dist_021_wrong_proj",
+      "mem_dist_021_superseded",
+      "mem_dist_021_kw_trap"
+    ],
+    "category": "distractor_pattern",
+    "notes": "Evaluation case for type pattern"
+  },
+  {
+    "case_id": "case_022",
+    "query": "What dependency injection style is preferred in gold-project-022?",
+    "gold_ids": [
+      "mem_gold_022"
+    ],
+    "distractor_ids": [
+      "mem_dist_022_near_dup",
+      "mem_dist_022_wrong_proj",
+      "mem_dist_022_superseded",
+      "mem_dist_022_kw_trap"
+    ],
+    "category": "distractor_pattern",
+    "notes": "Evaluation case for type pattern"
+  },
+  {
+    "case_id": "case_023",
+    "query": "What commit message style is required for gold-project-023?",
+    "gold_ids": [
+      "mem_gold_023"
+    ],
+    "distractor_ids": [
+      "mem_dist_023_near_dup",
+      "mem_dist_023_wrong_proj",
+      "mem_dist_023_superseded",
+      "mem_dist_023_kw_trap"
+    ],
+    "category": "distractor_pattern",
+    "notes": "Evaluation case for type pattern"
+  },
+  {
+    "case_id": "case_024",
+    "query": "What port does the gold-project-024 development server run on?",
+    "gold_ids": [
+      "mem_gold_024"
+    ],
+    "distractor_ids": [
+      "mem_dist_024_near_dup",
+      "mem_dist_024_wrong_proj",
+      "mem_dist_024_superseded",
+      "mem_dist_024_kw_trap"
+    ],
+    "category": "distractor_context",
+    "notes": "Evaluation case for type context"
+  },
+  {
+    "case_id": "case_025",
+    "query": "How does gold-project-025 authenticate to the database?",
+    "gold_ids": [
+      "mem_gold_025"
+    ],
+    "distractor_ids": [
+      "mem_dist_025_near_dup",
+      "mem_dist_025_wrong_proj",
+      "mem_dist_025_superseded",
+      "mem_dist_025_kw_trap"
+    ],
+    "category": "distractor_context",
+    "notes": "Evaluation case for type context"
+  },
+  {
+    "case_id": "case_026",
+    "query": "What payment provider environment is integrated with gold-project-026?",
+    "gold_ids": [
+      "mem_gold_026"
+    ],
+    "distractor_ids": [
+      "mem_dist_026_near_dup",
+      "mem_dist_026_wrong_proj",
+      "mem_dist_026_superseded",
+      "mem_dist_026_kw_trap"
+    ],
+    "category": "distractor_context",
+    "notes": "Evaluation case for type context"
+  },
+  {
+    "case_id": "case_027",
+    "query": "How do we prevent connection leaks in gold-project-027's database operations?",
+    "gold_ids": [
+      "mem_gold_027"
+    ],
+    "distractor_ids": [
+      "mem_dist_027_near_dup",
+      "mem_dist_027_wrong_proj",
+      "mem_dist_027_superseded",
+      "mem_dist_027_kw_trap"
+    ],
+    "category": "distractor_lesson",
+    "notes": "Evaluation case for type lesson"
+  },
+  {
+    "case_id": "case_028",
+    "query": "What middleware ordering lesson was learned in gold-project-028 setup?",
+    "gold_ids": [
+      "mem_gold_028"
+    ],
+    "distractor_ids": [
+      "mem_dist_028_near_dup",
+      "mem_dist_028_wrong_proj",
+      "mem_dist_028_superseded",
+      "mem_dist_028_kw_trap"
+    ],
+    "category": "distractor_lesson",
+    "notes": "Evaluation case for type lesson"
+  },
+  {
+    "case_id": "case_029",
+    "query": "Which Pydantic validator should be used for cross-field checks in gold-project-029?",
+    "gold_ids": [
+      "mem_gold_029"
+    ],
+    "distractor_ids": [
+      "mem_dist_029_near_dup",
+      "mem_dist_029_wrong_proj",
+      "mem_dist_029_superseded",
+      "mem_dist_029_kw_trap"
+    ],
+    "category": "distractor_lesson",
+    "notes": "Evaluation case for type lesson"
+  },
+  {
+    "case_id": "case_030",
+    "query": "What database and port does gold-project-030 use?",
+    "gold_ids": [
+      "mem_gold_030"
+    ],
+    "distractor_ids": [
+      "mem_dist_030_near_dup",
+      "mem_dist_030_wrong_proj",
+      "mem_dist_030_superseded",
+      "mem_dist_030_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_031",
+    "query": "What is the internal API endpoint for gold-project-031?",
+    "gold_ids": [
+      "mem_gold_031"
+    ],
+    "distractor_ids": [
+      "mem_dist_031_near_dup",
+      "mem_dist_031_wrong_proj",
+      "mem_dist_031_superseded",
+      "mem_dist_031_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_032",
+    "query": "Which technology does gold-project-032 use for token hashing?",
+    "gold_ids": [
+      "mem_gold_032"
+    ],
+    "distractor_ids": [
+      "mem_dist_032_near_dup",
+      "mem_dist_032_wrong_proj",
+      "mem_dist_032_superseded",
+      "mem_dist_032_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_033",
+    "query": "Which configuration file loads environment variables for gold-project-033?",
+    "gold_ids": [
+      "mem_gold_033"
+    ],
+    "distractor_ids": [
+      "mem_dist_033_near_dup",
+      "mem_dist_033_wrong_proj",
+      "mem_dist_033_superseded",
+      "mem_dist_033_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_034",
+    "query": "What validation library is used by gold-project-034?",
+    "gold_ids": [
+      "mem_gold_034"
+    ],
+    "distractor_ids": [
+      "mem_dist_034_near_dup",
+      "mem_dist_034_wrong_proj",
+      "mem_dist_034_superseded",
+      "mem_dist_034_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_035",
+    "query": "What origins are allowed by CORS in gold-project-035?",
+    "gold_ids": [
+      "mem_gold_035"
+    ],
+    "distractor_ids": [
+      "mem_dist_035_near_dup",
+      "mem_dist_035_wrong_proj",
+      "mem_dist_035_superseded",
+      "mem_dist_035_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_036",
+    "query": "Which database index does the Redis cache use for gold-project-036?",
+    "gold_ids": [
+      "mem_gold_036"
+    ],
+    "distractor_ids": [
+      "mem_dist_036_near_dup",
+      "mem_dist_036_wrong_proj",
+      "mem_dist_036_superseded",
+      "mem_dist_036_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_037",
+    "query": "What python formatting and linting tools are preferred in gold-project-037?",
+    "gold_ids": [
+      "mem_gold_037"
+    ],
+    "distractor_ids": [
+      "mem_dist_037_near_dup",
+      "mem_dist_037_wrong_proj",
+      "mem_dist_037_superseded",
+      "mem_dist_037_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_038",
+    "query": "What token validation preference is set for requests in gold-project-038?",
+    "gold_ids": [
+      "mem_gold_038"
+    ],
+    "distractor_ids": [
+      "mem_dist_038_near_dup",
+      "mem_dist_038_wrong_proj",
+      "mem_dist_038_superseded",
+      "mem_dist_038_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_039",
+    "query": "What merge strategy does the user prefer for gold-project-039 pull requests?",
+    "gold_ids": [
+      "mem_gold_039"
+    ],
+    "distractor_ids": [
+      "mem_dist_039_near_dup",
+      "mem_dist_039_wrong_proj",
+      "mem_dist_039_superseded",
+      "mem_dist_039_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_040",
+    "query": "What SQLAlchemy query style is preferred in gold-project-040?",
+    "gold_ids": [
+      "mem_gold_040"
+    ],
+    "distractor_ids": [
+      "mem_dist_040_near_dup",
+      "mem_dist_040_wrong_proj",
+      "mem_dist_040_superseded",
+      "mem_dist_040_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_041",
+    "query": "What services are defined in the deployment file main.py for gold-project-041?",
+    "gold_ids": [
+      "mem_gold_041"
+    ],
+    "distractor_ids": [
+      "mem_dist_041_near_dup",
+      "mem_dist_041_wrong_proj",
+      "mem_dist_041_superseded",
+      "mem_dist_041_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_042",
+    "query": "How are metrics and logging set up in gold-project-042?",
+    "gold_ids": [
+      "mem_gold_042"
+    ],
+    "distractor_ids": [
+      "mem_dist_042_near_dup",
+      "mem_dist_042_wrong_proj",
+      "mem_dist_042_superseded",
+      "mem_dist_042_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_043",
+    "query": "What queue broker and task types are configured in gold-project-043?",
+    "gold_ids": [
+      "mem_gold_043"
+    ],
+    "distractor_ids": [
+      "mem_dist_043_near_dup",
+      "mem_dist_043_wrong_proj",
+      "mem_dist_043_superseded",
+      "mem_dist_043_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_044",
+    "query": "What renewal interval and host are used for gold-project-044 SSL certificates?",
+    "gold_ids": [
+      "mem_gold_044"
+    ],
+    "distractor_ids": [
+      "mem_dist_044_near_dup",
+      "mem_dist_044_wrong_proj",
+      "mem_dist_044_superseded",
+      "mem_dist_044_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_045",
+    "query": "How is version management handled for gold-project-045?",
+    "gold_ids": [
+      "mem_gold_045"
+    ],
+    "distractor_ids": [
+      "mem_dist_045_near_dup",
+      "mem_dist_045_wrong_proj",
+      "mem_dist_045_superseded",
+      "mem_dist_045_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_046",
+    "query": "What testing framework and styles are preferred for unit tests in gold-project-046?",
+    "gold_ids": [
+      "mem_gold_046"
+    ],
+    "distractor_ids": [
+      "mem_dist_046_near_dup",
+      "mem_dist_046_wrong_proj",
+      "mem_dist_046_superseded",
+      "mem_dist_046_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_047",
+    "query": "What format and tracking requirements apply to API errors in gold-project-047?",
+    "gold_ids": [
+      "mem_gold_047"
+    ],
+    "distractor_ids": [
+      "mem_dist_047_near_dup",
+      "mem_dist_047_wrong_proj",
+      "mem_dist_047_superseded",
+      "mem_dist_047_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_048",
+    "query": "How should secret parameters and credentials be stored in gold-project-048?",
+    "gold_ids": [
+      "mem_gold_048"
+    ],
+    "distractor_ids": [
+      "mem_dist_048_near_dup",
+      "mem_dist_048_wrong_proj",
+      "mem_dist_048_superseded",
+      "mem_dist_048_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_049",
+    "query": "What caching strategy and TTL policies are preferred in gold-project-049?",
+    "gold_ids": [
+      "mem_gold_049"
+    ],
+    "distractor_ids": [
+      "mem_dist_049_near_dup",
+      "mem_dist_049_wrong_proj",
+      "mem_dist_049_superseded",
+      "mem_dist_049_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_050",
+    "query": "What database was chosen for gold-project-050 and what alternatives were rejected?",
+    "gold_ids": [
+      "mem_gold_050"
+    ],
+    "distractor_ids": [
+      "mem_dist_050_near_dup",
+      "mem_dist_050_wrong_proj",
+      "mem_dist_050_superseded",
+      "mem_dist_050_kw_trap"
+    ],
+    "category": "distractor_decision",
+    "notes": "Evaluation case for type decision"
+  },
+  {
+    "case_id": "case_051",
+    "query": "Why was OAuth2 PKCE chosen for gold-project-051 over alternatives?",
+    "gold_ids": [
+      "mem_gold_051"
+    ],
+    "distractor_ids": [
+      "mem_dist_051_near_dup",
+      "mem_dist_051_wrong_proj",
+      "mem_dist_051_superseded",
+      "mem_dist_051_kw_trap"
+    ],
+    "category": "distractor_decision",
+    "notes": "Evaluation case for type decision"
+  },
+  {
+    "case_id": "case_052",
+    "query": "Which ORM was chosen for gold-project-052 and why?",
+    "gold_ids": [
+      "mem_gold_052"
+    ],
+    "distractor_ids": [
+      "mem_dist_052_near_dup",
+      "mem_dist_052_wrong_proj",
+      "mem_dist_052_superseded",
+      "mem_dist_052_kw_trap"
+    ],
+    "category": "distractor_decision",
+    "notes": "Evaluation case for type decision"
+  },
+  {
+    "case_id": "case_053",
+    "query": "What broker did we select for gold-project-053 task queues?",
+    "gold_ids": [
+      "mem_gold_053"
+    ],
+    "distractor_ids": [
+      "mem_dist_053_near_dup",
+      "mem_dist_053_wrong_proj",
+      "mem_dist_053_superseded",
+      "mem_dist_053_kw_trap"
+    ],
+    "category": "distractor_decision",
+    "notes": "Evaluation case for type decision"
+  },
+  {
+    "case_id": "case_054",
+    "query": "Why was FastAPI selected as the web framework for gold-project-054?",
+    "gold_ids": [
+      "mem_gold_054"
+    ],
+    "distractor_ids": [
+      "mem_dist_054_near_dup",
+      "mem_dist_054_wrong_proj",
+      "mem_dist_054_superseded",
+      "mem_dist_054_kw_trap"
+    ],
+    "category": "distractor_decision",
+    "notes": "Evaluation case for type decision"
+  },
+  {
+    "case_id": "case_055",
+    "query": "Which mock library was chosen for gold-project-055 testing?",
+    "gold_ids": [
+      "mem_gold_055"
+    ],
+    "distractor_ids": [
+      "mem_dist_055_near_dup",
+      "mem_dist_055_wrong_proj",
+      "mem_dist_055_superseded",
+      "mem_dist_055_kw_trap"
+    ],
+    "category": "distractor_decision",
+    "notes": "Evaluation case for type decision"
+  },
+  {
+    "case_id": "case_056",
+    "query": "What hosting environment was chosen for containerized services in gold-project-056?",
+    "gold_ids": [
+      "mem_gold_056"
+    ],
+    "distractor_ids": [
+      "mem_dist_056_near_dup",
+      "mem_dist_056_wrong_proj",
+      "mem_dist_056_superseded",
+      "mem_dist_056_kw_trap"
+    ],
+    "category": "distractor_decision",
+    "notes": "Evaluation case for type decision"
+  },
+  {
+    "case_id": "case_057",
+    "query": "What CI/CD platform was selected for gold-project-057 development?",
+    "gold_ids": [
+      "mem_gold_057"
+    ],
+    "distractor_ids": [
+      "mem_dist_057_near_dup",
+      "mem_dist_057_wrong_proj",
+      "mem_dist_057_superseded",
+      "mem_dist_057_kw_trap"
+    ],
+    "category": "distractor_decision",
+    "notes": "Evaluation case for type decision"
+  },
+  {
+    "case_id": "case_058",
+    "query": "Why was Elasticsearch chosen for log indexing in gold-project-058?",
+    "gold_ids": [
+      "mem_gold_058"
+    ],
+    "distractor_ids": [
+      "mem_dist_058_near_dup",
+      "mem_dist_058_wrong_proj",
+      "mem_dist_058_superseded",
+      "mem_dist_058_kw_trap"
+    ],
+    "category": "distractor_decision",
+    "notes": "Evaluation case for type decision"
+  },
+  {
+    "case_id": "case_059",
+    "query": "What encryption algorithm was chosen for database fields in gold-project-059?",
+    "gold_ids": [
+      "mem_gold_059"
+    ],
+    "distractor_ids": [
+      "mem_dist_059_near_dup",
+      "mem_dist_059_wrong_proj",
+      "mem_dist_059_superseded",
+      "mem_dist_059_kw_trap"
+    ],
+    "category": "distractor_decision",
+    "notes": "Evaluation case for type decision"
+  },
+  {
+    "case_id": "case_060",
+    "query": "Which cache database was chosen for gold-project-060?",
+    "gold_ids": [
+      "mem_gold_060"
+    ],
+    "distractor_ids": [
+      "mem_dist_060_near_dup",
+      "mem_dist_060_wrong_proj",
+      "mem_dist_060_superseded",
+      "mem_dist_060_kw_trap"
+    ],
+    "category": "distractor_decision",
+    "notes": "Evaluation case for type decision"
+  },
+  {
+    "case_id": "case_061",
+    "query": "How are CORS policies enforced in gold-project-061?",
+    "gold_ids": [
+      "mem_gold_061"
+    ],
+    "distractor_ids": [
+      "mem_dist_061_near_dup",
+      "mem_dist_061_wrong_proj",
+      "mem_dist_061_superseded",
+      "mem_dist_061_kw_trap"
+    ],
+    "category": "distractor_decision",
+    "notes": "Evaluation case for type decision"
+  },
+  {
+    "case_id": "case_062",
+    "query": "What validation flow and HTTP error code are used for incoming requests in gold-project-062?",
+    "gold_ids": [
+      "mem_gold_062"
+    ],
+    "distractor_ids": [
+      "mem_dist_062_near_dup",
+      "mem_dist_062_wrong_proj",
+      "mem_dist_062_superseded",
+      "mem_dist_062_kw_trap"
+    ],
+    "category": "distractor_pattern",
+    "notes": "Evaluation case for type pattern"
+  },
+  {
+    "case_id": "case_063",
+    "query": "How are protected routes secured and what error is returned in gold-project-063?",
+    "gold_ids": [
+      "mem_gold_063"
+    ],
+    "distractor_ids": [
+      "mem_dist_063_near_dup",
+      "mem_dist_063_wrong_proj",
+      "mem_dist_063_superseded",
+      "mem_dist_063_kw_trap"
+    ],
+    "category": "distractor_pattern",
+    "notes": "Evaluation case for type pattern"
+  },
+  {
+    "case_id": "case_064",
+    "query": "What checks are executed on the `/healthz` endpoint in gold-project-064?",
+    "gold_ids": [
+      "mem_gold_064"
+    ],
+    "distractor_ids": [
+      "mem_dist_064_near_dup",
+      "mem_dist_064_wrong_proj",
+      "mem_dist_064_superseded",
+      "mem_dist_064_kw_trap"
+    ],
+    "category": "distractor_pattern",
+    "notes": "Evaluation case for type pattern"
+  },
+  {
+    "case_id": "case_065",
+    "query": "Why should ORM models not be exposed directly on gold-project-065 API endpoints?",
+    "gold_ids": [
+      "mem_gold_065"
+    ],
+    "distractor_ids": [
+      "mem_dist_065_near_dup",
+      "mem_dist_065_wrong_proj",
+      "mem_dist_065_superseded",
+      "mem_dist_065_kw_trap"
+    ],
+    "category": "distractor_pattern",
+    "notes": "Evaluation case for type pattern"
+  },
+  {
+    "case_id": "case_066",
+    "query": "What region and network restrictions apply to the gold-project-066 staging server?",
+    "gold_ids": [
+      "mem_gold_066"
+    ],
+    "distractor_ids": [
+      "mem_dist_066_near_dup",
+      "mem_dist_066_wrong_proj",
+      "mem_dist_066_superseded",
+      "mem_dist_066_kw_trap"
+    ],
+    "category": "distractor_context",
+    "notes": "Evaluation case for type context"
+  },
+  {
+    "case_id": "case_067",
+    "query": "Where and how are CI pipelines executed for gold-project-067?",
+    "gold_ids": [
+      "mem_gold_067"
+    ],
+    "distractor_ids": [
+      "mem_dist_067_near_dup",
+      "mem_dist_067_wrong_proj",
+      "mem_dist_067_superseded",
+      "mem_dist_067_kw_trap"
+    ],
+    "category": "distractor_context",
+    "notes": "Evaluation case for type context"
+  },
+  {
+    "case_id": "case_068",
+    "query": "How does gold-project-068 connect to the legacy billing service?",
+    "gold_ids": [
+      "mem_gold_068"
+    ],
+    "distractor_ids": [
+      "mem_dist_068_near_dup",
+      "mem_dist_068_wrong_proj",
+      "mem_dist_068_superseded",
+      "mem_dist_068_kw_trap"
+    ],
+    "category": "distractor_context",
+    "notes": "Evaluation case for type context"
+  },
+  {
+    "case_id": "case_069",
+    "query": "What happens if sync route handlers spawn background tasks in gold-project-069?",
+    "gold_ids": [
+      "mem_gold_069"
+    ],
+    "distractor_ids": [
+      "mem_dist_069_near_dup",
+      "mem_dist_069_wrong_proj",
+      "mem_dist_069_superseded",
+      "mem_dist_069_kw_trap"
+    ],
+    "category": "distractor_lesson",
+    "notes": "Evaluation case for type lesson"
+  },
+  {
+    "case_id": "case_070",
+    "query": "Why is caching full ORM models in Redis discouraged in gold-project-070?",
+    "gold_ids": [
+      "mem_gold_070"
+    ],
+    "distractor_ids": [
+      "mem_dist_070_near_dup",
+      "mem_dist_070_wrong_proj",
+      "mem_dist_070_superseded",
+      "mem_dist_070_kw_trap"
+    ],
+    "category": "distractor_lesson",
+    "notes": "Evaluation case for type lesson"
+  },
+  {
+    "case_id": "case_071",
+    "query": "What database indexing issue caused performance spikes in gold-project-071?",
+    "gold_ids": [
+      "mem_gold_071"
+    ],
+    "distractor_ids": [
+      "mem_dist_071_near_dup",
+      "mem_dist_071_wrong_proj",
+      "mem_dist_071_superseded",
+      "mem_dist_071_kw_trap"
+    ],
+    "category": "distractor_lesson",
+    "notes": "Evaluation case for type lesson"
+  },
+  {
+    "case_id": "case_072",
+    "query": "What services are defined in the deployment file schema.sql for gold-project-072?",
+    "gold_ids": [
+      "mem_gold_072"
+    ],
+    "distractor_ids": [
+      "mem_dist_072_near_dup",
+      "mem_dist_072_wrong_proj",
+      "mem_dist_072_superseded",
+      "mem_dist_072_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_073",
+    "query": "How are metrics and logging set up in gold-project-073?",
+    "gold_ids": [
+      "mem_gold_073"
+    ],
+    "distractor_ids": [
+      "mem_dist_073_near_dup",
+      "mem_dist_073_wrong_proj",
+      "mem_dist_073_superseded",
+      "mem_dist_073_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_074",
+    "query": "What queue broker and task types are configured in gold-project-074?",
+    "gold_ids": [
+      "mem_gold_074"
+    ],
+    "distractor_ids": [
+      "mem_dist_074_near_dup",
+      "mem_dist_074_wrong_proj",
+      "mem_dist_074_superseded",
+      "mem_dist_074_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_075",
+    "query": "What renewal interval and host are used for gold-project-075 SSL certificates?",
+    "gold_ids": [
+      "mem_gold_075"
+    ],
+    "distractor_ids": [
+      "mem_dist_075_near_dup",
+      "mem_dist_075_wrong_proj",
+      "mem_dist_075_superseded",
+      "mem_dist_075_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_076",
+    "query": "How is version management handled for gold-project-076?",
+    "gold_ids": [
+      "mem_gold_076"
+    ],
+    "distractor_ids": [
+      "mem_dist_076_near_dup",
+      "mem_dist_076_wrong_proj",
+      "mem_dist_076_superseded",
+      "mem_dist_076_kw_trap"
+    ],
+    "category": "distractor_fact",
+    "notes": "Evaluation case for type fact"
+  },
+  {
+    "case_id": "case_077",
+    "query": "What testing framework and styles are preferred for unit tests in gold-project-077?",
+    "gold_ids": [
+      "mem_gold_077"
+    ],
+    "distractor_ids": [
+      "mem_dist_077_near_dup",
+      "mem_dist_077_wrong_proj",
+      "mem_dist_077_superseded",
+      "mem_dist_077_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_078",
+    "query": "What format and tracking requirements apply to API errors in gold-project-078?",
+    "gold_ids": [
+      "mem_gold_078"
+    ],
+    "distractor_ids": [
+      "mem_dist_078_near_dup",
+      "mem_dist_078_wrong_proj",
+      "mem_dist_078_superseded",
+      "mem_dist_078_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_079",
+    "query": "How should secret parameters and credentials be stored in gold-project-079?",
+    "gold_ids": [
+      "mem_gold_079"
+    ],
+    "distractor_ids": [
+      "mem_dist_079_near_dup",
+      "mem_dist_079_wrong_proj",
+      "mem_dist_079_superseded",
+      "mem_dist_079_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_080",
+    "query": "What caching strategy and TTL policies are preferred in gold-project-080?",
+    "gold_ids": [
+      "mem_gold_080"
+    ],
+    "distractor_ids": [
+      "mem_dist_080_near_dup",
+      "mem_dist_080_wrong_proj",
+      "mem_dist_080_superseded",
+      "mem_dist_080_kw_trap"
+    ],
+    "category": "distractor_preference",
+    "notes": "Evaluation case for type preference"
+  },
+  {
+    "case_id": "case_081",
+    "query": "What is the secure encryption token key for gold-project-081?",
+    "gold_ids": [
+      "mem_gold_081"
+    ],
+    "distractor_ids": [
+      "mem_dist_081_near_dup",
+      "mem_dist_081_wrong_proj",
+      "mem_dist_081_superseded",
+      "mem_dist_081_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-081"
+  },
+  {
+    "case_id": "case_082",
+    "query": "What is the secure encryption token key for gold-project-082?",
+    "gold_ids": [
+      "mem_gold_082"
+    ],
+    "distractor_ids": [
+      "mem_dist_082_near_dup",
+      "mem_dist_082_wrong_proj",
+      "mem_dist_082_superseded",
+      "mem_dist_082_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-082"
+  },
+  {
+    "case_id": "case_083",
+    "query": "What is the secure encryption token key for gold-project-083?",
+    "gold_ids": [
+      "mem_gold_083"
+    ],
+    "distractor_ids": [
+      "mem_dist_083_near_dup",
+      "mem_dist_083_wrong_proj",
+      "mem_dist_083_superseded",
+      "mem_dist_083_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-083"
+  },
+  {
+    "case_id": "case_084",
+    "query": "What is the secure encryption token key for gold-project-084?",
+    "gold_ids": [
+      "mem_gold_084"
+    ],
+    "distractor_ids": [
+      "mem_dist_084_near_dup",
+      "mem_dist_084_wrong_proj",
+      "mem_dist_084_superseded",
+      "mem_dist_084_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-084"
+  },
+  {
+    "case_id": "case_085",
+    "query": "What is the secure encryption token key for gold-project-085?",
+    "gold_ids": [
+      "mem_gold_085"
+    ],
+    "distractor_ids": [
+      "mem_dist_085_near_dup",
+      "mem_dist_085_wrong_proj",
+      "mem_dist_085_superseded",
+      "mem_dist_085_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-085"
+  },
+  {
+    "case_id": "case_086",
+    "query": "What is the secure encryption token key for gold-project-086?",
+    "gold_ids": [
+      "mem_gold_086"
+    ],
+    "distractor_ids": [
+      "mem_dist_086_near_dup",
+      "mem_dist_086_wrong_proj",
+      "mem_dist_086_superseded",
+      "mem_dist_086_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-086"
+  },
+  {
+    "case_id": "case_087",
+    "query": "What is the secure encryption token key for gold-project-087?",
+    "gold_ids": [
+      "mem_gold_087"
+    ],
+    "distractor_ids": [
+      "mem_dist_087_near_dup",
+      "mem_dist_087_wrong_proj",
+      "mem_dist_087_superseded",
+      "mem_dist_087_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-087"
+  },
+  {
+    "case_id": "case_088",
+    "query": "What is the secure encryption token key for gold-project-088?",
+    "gold_ids": [
+      "mem_gold_088"
+    ],
+    "distractor_ids": [
+      "mem_dist_088_near_dup",
+      "mem_dist_088_wrong_proj",
+      "mem_dist_088_superseded",
+      "mem_dist_088_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-088"
+  },
+  {
+    "case_id": "case_089",
+    "query": "What is the secure encryption token key for gold-project-089?",
+    "gold_ids": [
+      "mem_gold_089"
+    ],
+    "distractor_ids": [
+      "mem_dist_089_near_dup",
+      "mem_dist_089_wrong_proj",
+      "mem_dist_089_superseded",
+      "mem_dist_089_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-089"
+  },
+  {
+    "case_id": "case_090",
+    "query": "What is the secure encryption token key for gold-project-090?",
+    "gold_ids": [
+      "mem_gold_090"
+    ],
+    "distractor_ids": [
+      "mem_dist_090_near_dup",
+      "mem_dist_090_wrong_proj",
+      "mem_dist_090_superseded",
+      "mem_dist_090_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-090"
+  },
+  {
+    "case_id": "case_091",
+    "query": "What is the secure encryption token key for gold-project-091?",
+    "gold_ids": [
+      "mem_gold_091"
+    ],
+    "distractor_ids": [
+      "mem_dist_091_near_dup",
+      "mem_dist_091_wrong_proj",
+      "mem_dist_091_superseded",
+      "mem_dist_091_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-091"
+  },
+  {
+    "case_id": "case_092",
+    "query": "What is the secure encryption token key for gold-project-092?",
+    "gold_ids": [
+      "mem_gold_092"
+    ],
+    "distractor_ids": [
+      "mem_dist_092_near_dup",
+      "mem_dist_092_wrong_proj",
+      "mem_dist_092_superseded",
+      "mem_dist_092_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-092"
+  },
+  {
+    "case_id": "case_093",
+    "query": "What is the secure encryption token key for gold-project-093?",
+    "gold_ids": [
+      "mem_gold_093"
+    ],
+    "distractor_ids": [
+      "mem_dist_093_near_dup",
+      "mem_dist_093_wrong_proj",
+      "mem_dist_093_superseded",
+      "mem_dist_093_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-093"
+  },
+  {
+    "case_id": "case_094",
+    "query": "What is the secure encryption token key for gold-project-094?",
+    "gold_ids": [
+      "mem_gold_094"
+    ],
+    "distractor_ids": [
+      "mem_dist_094_near_dup",
+      "mem_dist_094_wrong_proj",
+      "mem_dist_094_superseded",
+      "mem_dist_094_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-094"
+  },
+  {
+    "case_id": "case_095",
+    "query": "What is the secure encryption token key for gold-project-095?",
+    "gold_ids": [
+      "mem_gold_095"
+    ],
+    "distractor_ids": [
+      "mem_dist_095_near_dup",
+      "mem_dist_095_wrong_proj",
+      "mem_dist_095_superseded",
+      "mem_dist_095_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-095"
+  },
+  {
+    "case_id": "case_096",
+    "query": "What is the secure encryption token key for gold-project-096?",
+    "gold_ids": [
+      "mem_gold_096"
+    ],
+    "distractor_ids": [
+      "mem_dist_096_near_dup",
+      "mem_dist_096_wrong_proj",
+      "mem_dist_096_superseded",
+      "mem_dist_096_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-096"
+  },
+  {
+    "case_id": "case_097",
+    "query": "What is the secure encryption token key for gold-project-097?",
+    "gold_ids": [
+      "mem_gold_097"
+    ],
+    "distractor_ids": [
+      "mem_dist_097_near_dup",
+      "mem_dist_097_wrong_proj",
+      "mem_dist_097_superseded",
+      "mem_dist_097_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-097"
+  },
+  {
+    "case_id": "case_098",
+    "query": "What is the secure encryption token key for gold-project-098?",
+    "gold_ids": [
+      "mem_gold_098"
+    ],
+    "distractor_ids": [
+      "mem_dist_098_near_dup",
+      "mem_dist_098_wrong_proj",
+      "mem_dist_098_superseded",
+      "mem_dist_098_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-098"
+  },
+  {
+    "case_id": "case_099",
+    "query": "What is the secure encryption token key for gold-project-099?",
+    "gold_ids": [
+      "mem_gold_099"
+    ],
+    "distractor_ids": [
+      "mem_dist_099_near_dup",
+      "mem_dist_099_wrong_proj",
+      "mem_dist_099_superseded",
+      "mem_dist_099_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-099"
+  },
+  {
+    "case_id": "case_100",
+    "query": "What is the secure encryption token key for gold-project-100?",
+    "gold_ids": [
+      "mem_gold_100"
+    ],
+    "distractor_ids": [
+      "mem_dist_100_near_dup",
+      "mem_dist_100_wrong_proj",
+      "mem_dist_100_superseded",
+      "mem_dist_100_kw_trap"
+    ],
+    "category": "long_form_needle",
+    "notes": "Needle-in-a-haystack verification for project gold-project-100"
+  }
+]

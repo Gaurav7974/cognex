@@ -3,21 +3,16 @@ import logging
 import shutil
 import sys
 from pathlib import Path
-
-src_path = Path(__file__).resolve().parents[3] / "src"
+src_path = Path(__file__).resolve().parents[3] / 'src'
 sys.path.insert(0, str(src_path))
-
 from cognex_mcp.context import CognexContext
 from cognex_mcp.logger import TEST_LOGGER
 import cognex_mcp.tools.core_tools as core_tools
 import cognex_mcp.tools.ledger_tools as ledger_tools
 import cognex_mcp.tools.memory_tools as memory_tools
 import cognex_mcp.tools.trust_tools as trust_tools
-
-
-TEST_DIR = Path(__file__).parent / ".test_mcp"
+TEST_DIR = Path(__file__).parent / '.test_mcp'
 TEST_DIR.mkdir(exist_ok=True)
-
 
 def cleanup_test_dir():
     if TEST_DIR.exists():
@@ -27,173 +22,80 @@ def cleanup_test_dir():
             pass
     TEST_DIR.mkdir(exist_ok=True)
 
-
 async def test_memory_tools():
-    db_path = str(TEST_DIR / "test.db")
+    db_path = str(TEST_DIR / 'test.db')
     cleanup_test_dir()
-
     CognexContext.reset_instance()
     CognexContext.get_instance(db_path=db_path)
-
-    result = await memory_tools.memory_add(
-        content="Test memory: Python is great",
-        memory_type="fact",
-        project="test-project",
-        tags=["python", "test"],
-    )
-    assert "id" in result
-
-    result = await memory_tools.memory_search(
-        query="Python",
-        project="test-project",
-        limit=10,
-    )
-    assert "count" in result
-
-    await memory_tools.memory_get_context(
-        query="Python",
-        project="test-project",
-    )
-
+    result = await memory_tools.memory_add(content='Test memory: Python is great', memory_type='fact', project='test-project', tags=['python', 'test'])
+    assert 'id' in result
+    result = await memory_tools.memory_search(query='Python', project='test-project', limit=10)
+    assert 'count' in result
+    await memory_tools.memory_get_context(query='Python', project='test-project')
     await memory_tools.memory_decay(factor=0.95)
-
     CognexContext.reset_instance()
     cleanup_test_dir()
-
 
 async def test_core_tools():
-    db_path = str(TEST_DIR / "test_core.db")
+    db_path = str(TEST_DIR / 'test_core.db')
     cleanup_test_dir()
-
     CognexContext.reset_instance()
     CognexContext.get_instance(db_path=db_path)
-
-    result = await core_tools.cognex_start_session(
-        session_id="test-session-123",
-        project="test-project",
-    )
-    assert result["session_id"] == "test-session-123"
-
+    result = await core_tools.cognex_start_session(session_id='test-session-123', project='test-project')
+    assert result['session_id'] == 'test-session-123'
     result = await core_tools.cognex_report()
-    assert "total_memories" in result
-
+    assert 'total_memories' in result
     CognexContext.reset_instance()
     cleanup_test_dir()
-
 
 async def test_trust_tools():
-    db_path = str(TEST_DIR / "test_trust.db")
+    db_path = str(TEST_DIR / 'test_trust.db')
     cleanup_test_dir()
-
     CognexContext.reset_instance()
     CognexContext.get_instance(db_path=db_path)
-
-    result = await trust_tools.trust_check(
-        tool_name="BashTool",
-        project="test-project",
-    )
-    assert "requires_approval" in result
-
-    result = await trust_tools.trust_record(
-        action="approval",
-        tool_name="BashTool",
-        project="test-project",
-        reason="Test approval",
-    )
-    assert "id" in result
-
-    result = await trust_tools.trust_get(
-        tool_name="BashTool",
-        project="test-project",
-    )
-    assert result["approval_count"] == 1
-
-    await trust_tools.trust_summary(project="test-project")
-
+    result = await trust_tools.trust_check(tool_name='BashTool', project='test-project')
+    assert 'requires_approval' in result
+    result = await trust_tools.trust_record(action='approval', tool_name='BashTool', project='test-project', reason='Test approval')
+    assert 'id' in result
+    result = await trust_tools.trust_get(tool_name='BashTool', project='test-project')
+    assert result['approval_count'] == 1
+    await trust_tools.trust_summary(project='test-project')
     CognexContext.reset_instance()
     cleanup_test_dir()
-
 
 async def test_ledger_tools():
-    db_path = str(TEST_DIR / "test_ledger.db")
+    db_path = str(TEST_DIR / 'test_ledger.db')
     cleanup_test_dir()
-
     CognexContext.reset_instance()
     CognexContext.get_instance(db_path=db_path)
-
-    result = await ledger_tools.ledger_record(
-        tool_used="EditTool",
-        alternatives=["ReadTool", "BashTool"],
-        reasoning="Best for this task",
-        project="test-project",
-    )
-    assert "decision_id" in result
-    decision_id = result["decision_id"]
-
-    await ledger_tools.ledger_outcome(
-        decision_id=decision_id,
-        outcome="Successfully edited file",
-        success=True,
-    )
-
-    await ledger_tools.ledger_find_similar(
-        query="edit file",
-        project="test-project",
-        limit=5,
-    )
-
+    result = await ledger_tools.ledger_record(tool_used='EditTool', alternatives=['ReadTool', 'BashTool'], reasoning='Best for this task', project='test-project')
+    assert 'decision_id' in result
+    decision_id = result['decision_id']
+    await ledger_tools.ledger_outcome(decision_id=decision_id, outcome='Successfully edited file', success=True)
+    await ledger_tools.ledger_find_similar(query='edit file', project='test-project', limit=5)
     CognexContext.reset_instance()
     cleanup_test_dir()
 
-
 async def test_all_tools_registered():
-    # Verify that all expected tools are registered
-    # by checking against the tool registry
     from cognex_mcp.tools.registry import TOOL_DEFINITIONS
-
-    expected_tool_names = [
-        "cognex_start_session",
-        "cognex_end_session",
-        "cognex_process_transcript",
-        "cognex_report",
-        "memory_add",
-        "memory_search",
-        "memory_get_context",
-        "memory_decay",
-        "trust_check",
-        "trust_record",
-        "trust_get",
-        "trust_summary",
-        "ledger_record",
-        "ledger_outcome",
-        "ledger_find_similar",
-        "teleport_create_bundle",
-        "teleport_rehydrate",
-        "swarm_compile_intent",
-    ]
-
-    registered_tool_names = [tool["name"] for tool in TOOL_DEFINITIONS]
-
+    expected_tool_names = ['cognex_start_session', 'cognex_end_session', 'cognex_process_transcript', 'cognex_report', 'memory_add', 'recall', 'memory_decay', 'trust_check', 'trust_record', 'trust_query', 'trust_manage', 'ledger_record', 'ledger_outcome', 'teleport_create_bundle', 'teleport_rehydrate', 'handoff_create', 'integrity_verify', 'swarm_compile_intent']
+    registered_tool_names = [tool['name'] for tool in TOOL_DEFINITIONS]
     for tool_name in expected_tool_names:
-        assert tool_name in registered_tool_names, f"Missing tool: {tool_name}"
-
+        assert tool_name in registered_tool_names, f'Missing tool: {tool_name}'
 
 async def main():
     try:
-        TEST_LOGGER.info("Starting MCP Server Tests")
+        TEST_LOGGER.info('Starting MCP Server Tests')
         await test_all_tools_registered()
         await test_memory_tools()
         await test_core_tools()
         await test_trust_tools()
         await test_ledger_tools()
-        TEST_LOGGER.info("✓ All tests passed successfully")
+        TEST_LOGGER.info('✓ All tests passed successfully')
     except Exception as e:
-        TEST_LOGGER.error(f"✗ Test failed with error: {e}")
+        TEST_LOGGER.error(f'✗ Test failed with error: {e}')
         import traceback
-
         traceback.print_exc()
         sys.exit(1)
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     asyncio.run(main())

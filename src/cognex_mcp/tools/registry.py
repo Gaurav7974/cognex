@@ -793,6 +793,200 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
 ]
 
 
+_RETIRED_TOOL_NAMES = {
+    "audit_verify",
+    "unit_export_snapshot",
+    "memory_search",
+    "memory_get_context",
+    "unit_search",
+    "unit_get_relevant",
+    "ledger_find_similar",
+    "trust_get",
+    "trust_summary",
+    "chp_transfer",
+    "chp_project",
+}
+
+_STATE_TOOL_DEFINITIONS: list[dict[str, Any]] = [
+    {
+        "name": "trust_query",
+        "description": "Consolidated trust query for checking approval posture or retrieving trust summaries.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "tool_name": {"type": "string"},
+                "operation": {"type": "string"},
+                "project": {"type": "string"},
+                "mode": {"type": "string", "enum": ["check", "get", "summary"], "default": "check"},
+            },
+        },
+    },
+    {
+        "name": "trust_manage",
+        "description": "Consolidated trust mutation for recording approvals, denials, and violations.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "action": {"type": "string", "enum": ["approval", "denial", "violation"]},
+                "tool_name": {"type": "string"},
+                "operation": {"type": "string"},
+                "context": {"type": "string"},
+                "project": {"type": "string"},
+                "reason": {"type": "string"},
+            },
+            "required": ["action", "tool_name"],
+        },
+    },
+    {
+        "name": "recall",
+        "description": "Consolidated retrieval across memories, cognitive units, and decisions with compact or full detail.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string"},
+                "kind": {"type": "string", "enum": ["all", "memory", "unit", "decision"], "default": "all"},
+                "detail": {"type": "string", "enum": ["compact", "full"], "default": "compact"},
+                "filters": {"type": "object"},
+                "limit": {"type": "integer", "default": 10},
+            },
+        },
+    },
+    {
+        "name": "provenance_trace",
+        "description": "Trace origins or impacts through the provenance DAG using compact id/gist nodes.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "node_or_ref_id": {"type": "string"},
+                "direction": {"type": "string", "enum": ["origins", "impacts"], "default": "origins"},
+                "depth": {"type": "integer", "default": 3},
+            },
+            "required": ["node_or_ref_id"],
+        },
+    },
+    {
+        "name": "provenance_link",
+        "description": "Explicitly link two provenance nodes or source row refs with a typed edge.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "from_ref": {"type": "string"},
+                "to_ref": {"type": "string"},
+                "edge_type": {
+                    "type": "string",
+                    "enum": [
+                        "derived_from",
+                        "supported_by",
+                        "constrained_by",
+                        "rejected_because",
+                        "supersedes",
+                        "answers",
+                        "transferred_from",
+                    ],
+                },
+                "rationale": {"type": "string"},
+            },
+            "required": ["from_ref", "to_ref", "edge_type"],
+        },
+    },
+    {
+        "name": "question_raise",
+        "description": "Record an explicit open question for a project or scope.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "content": {"type": "string"},
+                "project": {"type": "string"},
+                "scope": {"type": "string"},
+            },
+            "required": ["content"],
+        },
+    },
+    {
+        "name": "question_resolve",
+        "description": "Resolve an open question and connect it to an answer reference in provenance.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "question_id": {"type": "string"},
+                "answer_ref": {"type": "string"},
+            },
+            "required": ["question_id", "answer_ref"],
+        },
+    },
+    {
+        "name": "integrity_verify",
+        "description": "Compute and Ed25519-sign the current project Merkle root, optionally checking selected refs.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "project": {"type": "string"},
+                "ref_ids": {"type": "array", "items": {"type": "string"}},
+            },
+            "required": ["project"],
+        },
+    },
+    {
+        "name": "handoff_create",
+        "description": "Create the default signed manifest handoff with compact ids, gists, open questions, counterfactuals, and Merkle root.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "project": {"type": "string"},
+                "goal_stack": {"type": "array", "items": {"type": "string"}},
+                "in_flight_ops": {"type": "array", "items": {"type": "string"}},
+                "notes": {"type": "string"},
+                "prior_baseline": {"type": "string"},
+            },
+            "required": ["project", "goal_stack"],
+        },
+    },
+    {
+        "name": "handoff_resume",
+        "description": "Verify a signed handoff manifest and return a compact resume briefing.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"manifest_json": {"type": "string"}},
+            "required": ["manifest_json"],
+        },
+    },
+    {
+        "name": "reconcile_resolve",
+        "description": "Resolve a recorded reconciliation conflict with a rationale and audit event.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "conflict_id": {"type": "string"},
+                "resolution": {"type": "string", "enum": ["keep_local", "accept_incoming", "merge"]},
+                "rationale": {"type": "string"},
+            },
+            "required": ["conflict_id", "resolution", "rationale"],
+        },
+    },
+    {
+        "name": "note_reasoning",
+        "description": "Low-friction write-ahead reasoning note that records a decision, assumption, rejection, constraint, or question.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "kind": {
+                    "type": "string",
+                    "enum": ["decision", "assumption", "rejection", "constraint", "question"],
+                },
+                "content": {"type": "string"},
+                "refs": {"type": "array", "items": {"type": "string"}},
+                "project": {"type": "string"},
+            },
+            "required": ["kind", "content"],
+        },
+    },
+]
+
+TOOL_DEFINITIONS = [
+    tool for tool in TOOL_DEFINITIONS if tool["name"] not in _RETIRED_TOOL_NAMES
+] + _STATE_TOOL_DEFINITIONS
+
+
 def list_all_tools() -> list[types.Tool]:
     """Return all available MCP tools.
 

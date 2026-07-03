@@ -1,6 +1,3 @@
-"""
-Swarm tools - intent compilation and swarm planning.
-"""
 
 from typing import Any
 
@@ -11,7 +8,6 @@ async def swarm_compile_intent(
     intent: str,
     project: str | None = None,
 ) -> dict[str, Any]:
-    """Compile natural language intent into a swarm plan."""
     ctx = CognexContext.get_instance()
 
     plan = ctx.swarm.compile(intent=intent, project=project or "")

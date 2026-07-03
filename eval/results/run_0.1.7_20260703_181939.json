@@ -1,0 +1,615 @@
+{
+  "provenance": {
+    "dataset_version": "v1",
+    "cognex_version": "0.1.7",
+    "git_sha": "2d6f3c35086f27c55a54c222afc8571a41fbdac8",
+    "tokenizer": "approx (chars/4)",
+    "random_seed": 42
+  },
+  "timestamp": "2026-07-03T12:49:38.873034",
+  "suite_run": "retrieval",
+  "corpus_scale": 500,
+  "quick_mode": true,
+  "retrieval": {
+    "summary": {
+      "overall": {
+        "Recall@1": 0.0,
+        "Recall@3": 0.0,
+        "Recall@5": 0.0,
+        "MRR": 0.0026666666666666666,
+        "Failure_Rate": 0.04
+      },
+      "by_category": {
+        "distractor_preference": {
+          "count": 8,
+          "Recall@5": 0.0,
+          "MRR": 0.0
+        },
+        "distractor_pattern": {
+          "count": 8,
+          "Recall@5": 0.0,
+          "MRR": 0.008333333333333333
+        },
+        "distractor_context": {
+          "count": 2,
+          "Recall@5": 0.0,
+          "MRR": 0.0
+        },
+        "distractor_fact": {
+          "count": 7,
+          "Recall@5": 0.0,
+          "MRR": 0.0
+        }
+      },
+      "by_length_class": {
+        "short": {
+          "count": 25,
+          "Recall@5": 0.0,
+          "MRR": 0.0026666666666666666
+        }
+      }
+    },
+    "cases": [
+      {
+        "case_id": "case_001",
+        "category": "distractor_fact",
+        "length_class": "short",
+        "query": "What database and port does gold-project-001 use?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_002",
+        "category": "distractor_fact",
+        "length_class": "short",
+        "query": "What is the internal API endpoint for gold-project-002?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_003",
+        "category": "distractor_fact",
+        "length_class": "short",
+        "query": "Which technology does gold-project-003 use for token hashing?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          20,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": 20,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_004",
+        "category": "distractor_fact",
+        "length_class": "short",
+        "query": "Which configuration file loads environment variables for gold-project-004?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_005",
+        "category": "distractor_fact",
+        "length_class": "short",
+        "query": "What validation library is used by gold-project-005?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_006",
+        "category": "distractor_fact",
+        "length_class": "short",
+        "query": "What origins are allowed by CORS in gold-project-006?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_007",
+        "category": "distractor_fact",
+        "length_class": "short",
+        "query": "Which database index does the Redis cache use for gold-project-007?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_008",
+        "category": "distractor_preference",
+        "length_class": "short",
+        "query": "What python formatting and linting tools are preferred in gold-project-008?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_009",
+        "category": "distractor_preference",
+        "length_class": "short",
+        "query": "What token validation preference is set for requests in gold-project-009?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_010",
+        "category": "distractor_preference",
+        "length_class": "short",
+        "query": "What merge strategy does the user prefer for gold-project-010 pull requests?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_011",
+        "category": "distractor_preference",
+        "length_class": "short",
+        "query": "What SQLAlchemy query style is preferred in gold-project-011?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          7,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": 7,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_012",
+        "category": "distractor_preference",
+        "length_class": "short",
+        "query": "What CSS styling preference is set for frontend components in gold-project-012?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_013",
+        "category": "distractor_preference",
+        "length_class": "short",
+        "query": "Where should the OpenAPI documentation be enabled in gold-project-013?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_014",
+        "category": "distractor_preference",
+        "length_class": "short",
+        "query": "What pagination strategy is preferred in gold-project-014?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_015",
+        "category": "distractor_preference",
+        "length_class": "short",
+        "query": "What is the typing annotation requirement in gold-project-015?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_016",
+        "category": "distractor_pattern",
+        "length_class": "short",
+        "query": "What architectural pattern is used for database access in gold-project-016?",
+        "gold_ranks": [
+          15
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": 15,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.06666666666666667,
+        "failed": false
+      },
+      {
+        "case_id": "case_017",
+        "category": "distractor_pattern",
+        "length_class": "short",
+        "query": "What naming casing is preferred for API response JSON in gold-project-017?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          20
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": 20,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_018",
+        "category": "distractor_pattern",
+        "length_class": "short",
+        "query": "What exception class should be raised for API errors in gold-project-018?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_019",
+        "category": "distractor_pattern",
+        "length_class": "short",
+        "query": "How are concurrent database writes handled in gold-project-019?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_020",
+        "category": "distractor_pattern",
+        "length_class": "short",
+        "query": "How should external HTTP requests be handled in gold-project-020 test suites?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_021",
+        "category": "distractor_pattern",
+        "length_class": "short",
+        "query": "How are log statements correlated for requests in gold-project-021?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_022",
+        "category": "distractor_pattern",
+        "length_class": "short",
+        "query": "What dependency injection style is preferred in gold-project-022?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          3,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": 3,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": true
+      },
+      {
+        "case_id": "case_023",
+        "category": "distractor_pattern",
+        "length_class": "short",
+        "query": "What commit message style is required for gold-project-023?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_024",
+        "category": "distractor_context",
+        "length_class": "short",
+        "query": "What port does the gold-project-024 development server run on?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": -1,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      },
+      {
+        "case_id": "case_025",
+        "category": "distractor_context",
+        "length_class": "short",
+        "query": "How does gold-project-025 authenticate to the database?",
+        "gold_ranks": [
+          -1
+        ],
+        "distractor_ranks": [
+          -1,
+          14,
+          -1,
+          -1
+        ],
+        "best_gold_rank": -1,
+        "best_dist_rank": 14,
+        "R@1": 0,
+        "R@3": 0,
+        "R@5": 0,
+        "MRR": 0.0,
+        "failed": false
+      }
+    ],
+    "regression_tests": {
+      "tiers": {
+        "status": "skipped",
+        "reason": "Feature pending: Archived (tier 3) exclusion is not implemented in search query yet."
+      },
+      "supersedence": {
+        "status": "skipped",
+        "reason": "Feature pending: 'superseded_by' column not found in database schema."
+      }
+    }
+  }
+}

@@ -1,26 +1,3 @@
-"""Append-only audit log with tamper-evident hash chain.
-
-Design
-------
-Each audit log entry contains:
-
-1. **Per-entry checksum** — SHA-256 over
-   ``log_id:event_type:session_id:payload_json:prev_checksum`` (first 32 hex
-   chars).  This ties every entry to its predecessor.
-
-2. **prev_checksum** — the checksum of the immediately preceding entry,
-   chronologically.  The first entry ever uses the sentinel ``"GENESIS"``.
-
-3. **Chain verification** (``verify_chain()``) — fetches entries in
-   chronological order and walks the chain, re-computing each checksum and
-   confirming that ``prev_checksum`` matches the previous entry's checksum.
-   A missing or modified entry breaks every subsequent link, making
-   selective-deletion attacks detectable.
-
-The log is intentionally **append-only**: the ``append()`` method is the
-only write path and it never updates or deletes rows.  The underlying
-SQLite table has no ``DELETE`` permission in the application layer.
-"""
 
 from __future__ import annotations
 
@@ -41,11 +18,6 @@ _GENESIS = "GENESIS"
 
 
 def _safe_get(row, key: str, default=None):
-    """sqlite3.Row does not support .get(); this shim provides that behaviour.
-
-    Also handles pre-migration rows where the column may not exist at all
-    (e.g., prev_checksum before migration v10 was applied).
-    """
     try:
         val = row[key]
         return val if val is not None else default
@@ -54,11 +26,6 @@ def _safe_get(row, key: str, default=None):
 
 
 class AuditLog:
-    """Append-only, hash-chained audit log.
-
-    Every event type (session_start, unit_commit, outcome_feedback, …) is
-    recorded here for a tamper-evident history of all system events.
-    """
 
     def __init__(self, db_path: str | Path | None = None) -> None:
         if db_path is None:
@@ -73,7 +40,6 @@ class AuditLog:
         import threading
         self._append_lock = threading.Lock()
 
-    # ── Write ─────────────────────────────────────────────────────────────
 
     def append(
         self,
@@ -83,15 +49,6 @@ class AuditLog:
         agent_id: str | None = None,
         payload: dict | None = None,
     ) -> str:
-        """Append a new entry to the audit log.
-
-        The entry's checksum is computed over its own fields **plus** the
-        checksum of the previous entry, forming a tamper-evident chain.
-
-        Returns:
-            The ``log_id`` of the new entry, or ``""`` on failure (audit
-            errors are non-fatal — the system continues operating).
-        """
         log_id = uuid4().hex[:16]
         payload = payload or {}
         created_at = datetime.now(timezone.utc).isoformat()
@@ -137,17 +94,10 @@ class AuditLog:
 
         return log_id
 
-    # ── Read ──────────────────────────────────────────────────────────────
 
     def get_recent(
         self, project: str | None = None, limit: int = 50
     ) -> list[dict]:
-        """Return recent audit log entries (newest first).
-
-        Args:
-            project: Optional project filter.
-            limit: Maximum rows to return.
-        """
         with self._pool.get_connection() as conn:
             if project:
                 rows = conn.execute(
@@ -188,13 +138,8 @@ class AuditLog:
             for r in rows
         ]
 
-    # ── Verification ──────────────────────────────────────────────────────
 
     def verify_integrity(self, log_id: str) -> dict:
-        """Verify the checksum of a single audit log entry.
-
-        Returns a dict with ``valid`` (bool) plus diagnostic fields.
-        """
         with self._pool.get_connection() as conn:
             row = conn.execute(
                 """
@@ -237,26 +182,6 @@ class AuditLog:
     def verify_chain(
         self, project: str | None = None, limit: int = 200
     ) -> dict:
-        """Walk the hash chain and verify every link.
-
-        Fetches up to *limit* entries in chronological (oldest-first) order
-        and re-computes each entry's checksum, confirming that:
-
-        1. The computed checksum matches the stored checksum.
-        2. The entry's ``prev_checksum`` matches the previous entry's
-           stored checksum (or ``"GENESIS"`` for the first entry).
-
-        Any discrepancy indicates tampering (deletion or modification of a
-        log entry).
-
-        Returns:
-            Dict with keys:
-            - ``valid`` (bool) — True iff the entire scanned chain is intact.
-            - ``entries_checked`` (int) — Number of entries verified.
-            - ``first_broken_at`` (str | None) — ``log_id`` of the first
-              broken link, or ``None`` if the chain is valid.
-            - ``broken_entries`` (list[str]) — All broken ``log_id`` values.
-        """
         with self._pool.get_connection() as conn:
             if project:
                 rows = conn.execute(
@@ -289,7 +214,6 @@ class AuditLog:
             log_id = row["log_id"]
             prev_checksum = _safe_get(row, "prev_checksum", _GENESIS) or _GENESIS
 
-            # Verify chain link.
             if prev_checksum != expected_prev:
                 broken.append(log_id)
                 logger.warning(
@@ -298,7 +222,6 @@ class AuditLog:
                 )
                 # Don't abort — continue to find all breaks.
 
-            # Verify the entry's own checksum.
             payload = json.loads(row["payload"])
             checksum_input = (
                 f"{row['log_id']}:{row['event_type']}:{row['session_id'] or ''}:"
@@ -321,8 +244,6 @@ class AuditLog:
             "broken_entries": broken,
         }
 
-    # ── Lifecycle ─────────────────────────────────────────────────────────
 
     def close(self) -> None:
-        """Close all pooled database connections."""
         self._pool.close_all()

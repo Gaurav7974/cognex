@@ -1,4 +1,3 @@
-"""Sync tools - exposes MCP tools for P2P cognex synchronization."""
 
 from typing import Any
 import logging
@@ -12,7 +11,6 @@ async def sync_push(
     peer_host: str,
     peer_port: int = 7474,
 ) -> dict[str, Any]:
-    """Push local cognex changes (memories, decisions, cognitive units) to a peer."""
     if not peer_host:
         raise ValueError("peer_host is required")
 
@@ -25,7 +23,6 @@ async def sync_pull(
     peer_host: str,
     peer_port: int = 7474,
 ) -> dict[str, Any]:
-    """Pull remote cognex changes (memories, decisions, cognitive units) from a peer and merge them."""
     if not peer_host:
         raise ValueError("peer_host is required")
 

@@ -1,4 +1,3 @@
-"""Teleport Protocol — serialize, transfer, and rehydrate agent state."""
 
 from __future__ import annotations
 
@@ -12,7 +11,6 @@ from typing import Optional
 
 logger = logging.getLogger("teleport")
 
-# Try to import cryptography for Ed25519 signing
 try:
     from cryptography.hazmat.primitives import serialization
     from cryptography.hazmat.primitives.asymmetric import ed25519
@@ -23,30 +21,24 @@ try:
 except ImportError:
     CRYPTO_AVAILABLE = False
 
-from .chp import CHPProtocol
+from .chp import ChannelProtocol
 
 
-# Key file location — stored in the user's home directory so keys persist
-# across projects and are not accidentally committed to source control.
 def _get_key_dir() -> Path:
-    """Return the directory that holds Ed25519 signing keys."""
     key_dir = Path.home() / ".cognex.db" / "keys"
     key_dir.mkdir(parents=True, exist_ok=True)
     return key_dir
 
 
 def _get_key_path() -> Path:
-    """Return path to the private signing key (raw 32-byte Ed25519)."""
     return _get_key_dir() / "signing_key.pem"
 
 
 def _get_public_key_path() -> Path:
-    """Return path to the corresponding public key (OpenSSH format)."""
     return _get_key_dir() / "signing_key.pub"
 
 
 def generate_keypair() -> tuple[bytes, bytes]:
-    """Generate Ed25519 keypair. Returns (private_key_raw_32bytes, public_key_ssh)."""
     if not CRYPTO_AVAILABLE:
         raise RuntimeError(
             "cryptography library not installed. Run: pip install cryptography"
@@ -55,14 +47,12 @@ def generate_keypair() -> tuple[bytes, bytes]:
     private_key = ed25519.Ed25519PrivateKey.generate()
     public_key = private_key.public_key()
 
-    # Private key as raw 32 bytes
     private_raw = private_key.private_bytes(
         encoding=serialization.Encoding.Raw,
         format=serialization.PrivateFormat.Raw,
         encryption_algorithm=serialization.NoEncryption(),
     )
 
-    # Public key as OpenSSH format for easy verification
     public_ssh = public_key.public_bytes(
         encoding=serialization.Encoding.OpenSSH,
         format=serialization.PublicFormat.OpenSSH,
@@ -72,15 +62,6 @@ def generate_keypair() -> tuple[bytes, bytes]:
 
 
 def get_or_create_keys() -> tuple[bytes, bytes]:
-    """Get existing keys or generate new ones.
-
-    On first call, generates a fresh Ed25519 keypair, writes the private
-    key to ``~/.cognex.db/keys/signing_key.pem`` (mode 0o600) and the public
-    key to ``signing_key.pub`` (mode 0o644).
-
-    Returns:
-        (private_key_raw_32bytes, public_key_ssh_bytes)
-    """
     key_path = _get_key_path()
     pub_path = _get_public_key_path()
 
@@ -92,7 +73,6 @@ def get_or_create_keys() -> tuple[bytes, bytes]:
             encoding=serialization.Encoding.OpenSSH,
             format=serialization.PublicFormat.OpenSSH,
         )
-        # Write public key if it was lost (e.g., manual deletion).
         if not pub_path.exists():
             pub_path.write_bytes(public_pem)
             try:
@@ -101,7 +81,6 @@ def get_or_create_keys() -> tuple[bytes, bytes]:
                 pass
         return private_bytes, public_pem
 
-    # Generate new keypair.
     private_raw, public_pem = generate_keypair()
     key_path.write_bytes(private_raw)
     pub_path.write_bytes(public_pem)
@@ -114,31 +93,17 @@ def get_or_create_keys() -> tuple[bytes, bytes]:
 
 
 def get_key_fingerprint(public_key_pem: bytes) -> str:
-    """Return a short (16 hex char) stable fingerprint of a public key.
-
-    Embedded in TeleportBundles so that a receiving machine can warn
-    when the bundle was signed with a different key than its local key.
-    """
     import hashlib
     return hashlib.sha256(public_key_pem).hexdigest()[:16]
 
 
 def export_public_key() -> str:
-    """Return the local public key as a base64 string for easy sharing."""
     _, public_pem = get_or_create_keys()
     import base64
     return base64.b64encode(public_pem).decode()
 
 
 def rotate_keys() -> tuple[bytes, bytes]:
-    """Generate a new keypair, archiving the old private key.
-
-    The old private key is renamed to
-    ``signing_key.pem.bak.<timestamp>`` before the new key is written.
-
-    Returns:
-        (new_private_key_raw, new_public_key_pem)
-    """
     key_path = _get_key_path()
     if key_path.exists():
         ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -162,7 +127,6 @@ def rotate_keys() -> tuple[bytes, bytes]:
 
 
 def sign_bundle(content: str, private_key_pem: bytes) -> bytes:
-    """Sign bundle content with Ed25519."""
     if not CRYPTO_AVAILABLE:
         raise RuntimeError("cryptography library not installed")
 
@@ -171,7 +135,6 @@ def sign_bundle(content: str, private_key_pem: bytes) -> bytes:
 
 
 def verify_signature(content: str, signature: bytes, public_key_pem: bytes) -> bool:
-    """Verify Ed25519 signature."""
     if not CRYPTO_AVAILABLE:
         return False
 
@@ -185,27 +148,13 @@ def verify_signature(content: str, signature: bytes, public_key_pem: bytes) -> b
 
 
 def verify_bundle(
-    bundle: TeleportBundle, public_key_pem: Optional[bytes] = None
+    bundle: StateBundle, public_key_pem: Optional[bytes] = None
 ) -> bool:
-    """Verify a teleport bundle's integrity.
-
-    Args:
-        bundle: The TeleportBundle to verify
-        public_key_pem: Optional public key (if None, loads from default location)
-
-    Returns:
-        True if signature is valid, False otherwise
-    """
     return bundle.verify(public_key_pem)
 
 
 @dataclass(frozen=True)
-class TeleportBundle:
-    """A portable snapshot of an agent's complete working state.
-
-    Version 2.0: Now includes full memory and decision content for
-    cross-machine transfer (not just IDs which only work locally).
-    """
+class StateBundle:
 
     bundle_id: str = field(default_factory=lambda: uuid.uuid4().hex[:16])
     version: str = "2.0"
@@ -213,43 +162,33 @@ class TeleportBundle:
     source_host: str = ""
     target_host: str = ""
 
-    # Core state
     session_id: str = ""
     project: str = ""
     session_summary: str = ""
 
-    # Full memory content (v2.0) - replaces memory_ids
-    memories: tuple[dict, ...] = ()  # Serialized MemoryEntry objects
+    memories: tuple[dict, ...] = ()
 
-    # Legacy field for backward compatibility
     memory_ids: tuple[str, ...] = ()
 
-    # Trust state
     trust_records: tuple[dict, ...] = ()
 
-    # Full decision content (v2.0) - replaces decision_ids
-    decisions: tuple[dict, ...] = ()  # Serialized DecisionEntry objects
+    decisions: tuple[dict, ...] = ()
 
-    # Legacy field for backward compatibility
     decision_ids: tuple[str, ...] = ()
 
-    # Context
     workspace_context: str = ""
     pending_tasks: tuple[str, ...] = ()
     last_action: str = ""
 
-    # Metadata
     model_name:  str            = ""
     tool_claims: tuple[str, ...] = ()
-    signature:   str            = ""  # Ed25519 hex or sha256 fallback
-    key_fingerprint: str        = ""  # Fingerprint of signing key for cross-machine validation
+    signature:   str            = ""
+    key_fingerprint: str        = ""
 
-    # Cognitive Units (v3.0) — for CHP handoff protocol
     cognitive_units: tuple[dict, ...] = ()
-    chp_projections: tuple[dict, ...] = ()
+    state_projections: tuple[dict, ...] = ()
 
     def serialize(self) -> str:
-        """Serialize to JSON for transfer."""
         return json.dumps(
             {
                 "bundle_id": self.bundle_id,
@@ -260,10 +199,8 @@ class TeleportBundle:
                 "session_id": self.session_id,
                 "project": self.project,
                 "session_summary": self.session_summary,
-                # v2.0: Full content
                 "memories": list(self.memories),
                 "decisions": list(self.decisions),
-                # Legacy fields (for backward compat)
                 "memory_ids": list(self.memory_ids),
                 "decision_ids": list(self.decision_ids),
                 "trust_records": list(self.trust_records),
@@ -274,14 +211,13 @@ class TeleportBundle:
                 "tool_claims":       list(self.tool_claims),
                 "signature":         self.signature,
                 "key_fingerprint":   self.key_fingerprint,
-                # v3.0: Cognitive Units
                 "cognitive_units":   list(self.cognitive_units),
             },
             indent=2,
         )
 
     @classmethod
-    def deserialize(cls, data: str) -> TeleportBundle:
+    def deserialize(cls, data: str) -> StateBundle:
         d = json.loads(data)
         return cls(
             bundle_id=d["bundle_id"],
@@ -292,10 +228,8 @@ class TeleportBundle:
             session_id=d.get("session_id", ""),
             project=d.get("project", ""),
             session_summary=d.get("session_summary", ""),
-            # v2.0: Full content
             memories=tuple(d.get("memories", [])),
             decisions=tuple(d.get("decisions", [])),
-            # Legacy fields
             memory_ids=tuple(d.get("memory_ids", [])),
             decision_ids=tuple(d.get("decision_ids", [])),
             trust_records=tuple(d.get("trust_records", [])),
@@ -306,12 +240,10 @@ class TeleportBundle:
             tool_claims=tuple(d.get("tool_claims", [])),
             signature=d.get("signature", ""),
             key_fingerprint=d.get("key_fingerprint", ""),
-            # v3.0: Cognitive Units
             cognitive_units=tuple(d.get("cognitive_units", [])),
         )
 
     def _canonical_payload(self) -> str:
-        """Create canonical string for signing (excludes signature field)."""
         return (
             f"{self.bundle_id}:{self.version}:{self.created_at.isoformat()}:"
             f"{self.source_host}:{self.target_host}:{self.session_id}:"
@@ -323,8 +255,7 @@ class TeleportBundle:
             f"{self.last_action}:{self.model_name}:{self.tool_claims!r}"
         )
 
-    def sign(self) -> TeleportBundle:
-        """Sign the bundle with Ed25519, embedding the key fingerprint."""
+    def sign(self) -> StateBundle:
         if not CRYPTO_AVAILABLE:
             import hashlib
             payload = self._canonical_payload()
@@ -343,9 +274,8 @@ class TeleportBundle:
             sig = hashlib.sha256(payload.encode()).hexdigest()[:16]
             return self._copy_with_signature(sig, "")
 
-    def _copy_with_signature(self, signature: str, key_fingerprint: str = "") -> TeleportBundle:
-        """Create a copy with signature and key_fingerprint set."""
-        return TeleportBundle(
+    def _copy_with_signature(self, signature: str, key_fingerprint: str = "") -> StateBundle:
+        return StateBundle(
             bundle_id=self.bundle_id,
             version=self.version,
             created_at=self.created_at,
@@ -366,20 +296,19 @@ class TeleportBundle:
             tool_claims=self.tool_claims,
             signature=signature,
             key_fingerprint=key_fingerprint,
+            cognitive_units=self.cognitive_units,
+            state_projections=self.state_projections,
         )
 
     def verify(self, public_key_pem: Optional[bytes] = None) -> bool:
-        """Verify the bundle hasn't been tampered with."""
         if not self.signature:
             return False
 
-        # Ed25519 signature (128 hex chars)
         if len(self.signature) == 128 and CRYPTO_AVAILABLE:
             try:
                 if public_key_pem is None:
                     _, public_pem = get_or_create_keys()
                     public_key_pem = public_pem
-                # Warn if fingerprints mismatch (key rotation, cross-machine).
                 if self.key_fingerprint:
                     local_fp = get_key_fingerprint(public_key_pem)
                     if local_fp != self.key_fingerprint:
@@ -395,7 +324,6 @@ class TeleportBundle:
             except Exception:
                 return False
 
-        # Fallback: check if old SHA256 signature matches (16 hex chars)
         if len(self.signature) == 16:
             import hashlib
 
@@ -412,28 +340,11 @@ class TeleportBundle:
         return p
 
     @classmethod
-    def load_from_file(cls, path: str | Path) -> TeleportBundle:
+    def load_from_file(cls, path: str | Path) -> StateBundle:
         return cls.deserialize(Path(path).read_text())
 
 
-class TeleportProtocol:
-    """Creates and validates teleport bundles.
-
-    Usage:
-        protocol = TeleportProtocol()
-        # Create a bundle from current state
-        bundle = protocol.create_bundle(
-            engine=engine,
-            source_host="laptop",
-            target_host="production-server",
-        )
-        # Save and transfer (in real use, send over network)
-        bundle.save_to_file("teleport.json")
-        # On target machine:
-        received = TeleportBundle.load_from_file("teleport.json")
-        if received.verify():
-            state = protocol.rehydrate(received, engine)
-    """
+class StateTransfer:
 
     def create_bundle(
         self,
@@ -444,23 +355,10 @@ class TeleportProtocol:
         last_action: str = "",
         model_name: str = "",
         tool_claims: tuple[str, ...] = (),
-        trust_engine=None,  # Optional TrustGradientEngine
+        trust_engine=None,  # Optional TrustEngine
         decision_ledger=None,  # Optional DecisionLedger
-        unit_store=None,  # Optional CognitiveUnitStore
-    ) -> TeleportBundle:
-        """Create a teleport bundle from an engine's current state.
-
-        Args:
-            engine: The CognexEngine instance
-            source_host: Source host identifier
-            target_host: Target host identifier
-            pending_tasks: Pending task descriptions
-            last_action: Last action performed
-            model_name: Model name
-            tool_claims: Tool claims
-            trust_engine: Optional TrustGradientEngine for trust record export
-            decision_ledger: Optional DecisionLedger for decision export
-        """
+        unit_store=None,  # Optional StateUnitStore
+    ) -> StateBundle:
         # v2.0: Serialize full memory content (not just IDs)
         all_memories = engine.store.search(limit=9999)
         memories = tuple(m.as_dict() for m in all_memories)
@@ -474,29 +372,25 @@ class TeleportProtocol:
             decisions = tuple(d.as_dict() for d in all_decisions)
             decision_ids = tuple(d.id for d in all_decisions)
 
-        # Gather trust records from the provided trust engine
         trust_records = ()
         if trust_engine is not None:
             trust_summary = trust_engine.get_trust_summary()
             trust_records = tuple(r.as_dict() for r in trust_summary)
 
-        # v3.0: Gather cognitive units for CHP handoff
         cognitive_units = ()
-        chp_projections = ()
+        state_projections = ()
         if unit_store is not None:
             project = engine.current_project or ""
             units = unit_store.get_bundle(project, scope=None)
             cognitive_units = tuple(u.as_dict() for u in units)
 
-            # CHP Enhancement: Create holographic projections for advanced handoff
-            chp = CHPProtocol()
-            chp_projections = tuple(chp.holographic_project(u) for u in units)
+            chp = ChannelProtocol()
+            state_projections = tuple(chp.generate_state_view(u) for u in units)
 
-        # Gather session info
         session_id = engine.current_session or ""
         project = engine.current_project or ""
 
-        bundle = TeleportBundle(
+        bundle = StateBundle(
             source_host=source_host,
             target_host=target_host,
             session_id=session_id,
@@ -513,28 +407,18 @@ class TeleportProtocol:
             model_name=model_name,
             tool_claims=tool_claims,
             cognitive_units=cognitive_units,
-            chp_projections=chp_projections,
+            state_projections=state_projections,
         )
         return bundle.sign()
 
     def rehydrate(
         self,
-        bundle: TeleportBundle,
+        bundle: StateBundle,
         engine,
         trust_engine=None,
         decision_ledger=None,
         unit_store=None,
     ) -> dict:
-        """Rehydrate an engine from a teleport bundle.
-
-        Args:
-            bundle: The TeleportBundle to restore from
-            engine: The CognexEngine instance
-            trust_engine: Optional TrustGradientEngine instance for trust restoration
-            decision_ledger: Optional DecisionLedger for decision restoration
-
-        Returns a report of what was restored.
-        """
         if not bundle.verify():
             return {"status": "failed", "reason": "Bundle signature invalid"}
 
@@ -543,7 +427,6 @@ class TeleportProtocol:
         trust_restored = False
         decisions_restored = 0
 
-        # Restore session context
         if bundle.session_id:
             try:
                 engine.start_session(bundle.session_id, project=bundle.project)
@@ -580,7 +463,6 @@ class TeleportProtocol:
                 except Exception:
                     pass
 
-        # Restore trust records using the provided trust engine
         if bundle.trust_records and trust_engine is not None:
             from cognex.trust import TrustRecord
 
@@ -588,17 +470,14 @@ class TeleportProtocol:
             rejected = 0
             for tr in bundle.trust_records:
                 try:
-                    # Restore the full TrustRecord from serialized dict
                     record = TrustRecord.from_dict(tr)
 
-                    # Security cap: reject malicious injection attempts
                     approval_count = getattr(record, "approval_count", 0)
                     violation_count = getattr(record, "violation_count", 0)
                     if approval_count > 500 or violation_count > 100:
                         rejected += 1
                         continue
 
-                    # Use the trust engine's internal update to restore the record
                     trust_engine._update_trust(
                         record.tool_name,
                         record.context,
@@ -615,27 +494,25 @@ class TeleportProtocol:
                     f"Rejected {rejected} trust records due to suspicious counts"
                 )
 
-        # v3.0: Restore cognitive units for CHP handoff
-        cognitive_units_restored = 0
+        units_restored = 0
         if bundle.cognitive_units and unit_store is not None:
-            from cognex.models import CognitiveUnit
+            from cognex.models import StateUnit
 
             for cu_dict in bundle.cognitive_units:
                 try:
-                    unit = CognitiveUnit.from_dict(cu_dict)
+                    unit = StateUnit.from_dict(cu_dict)
                     unit_store.save(unit)
-                    cognitive_units_restored += 1
+                    units_restored += 1
                 except Exception:
                     pass
 
-        # CHP Enhancement: Process holographic projections for advanced handoff validation
-        chp_validated = 0
-        if bundle.chp_projections:
-            chp = CHPProtocol()
-            for projection in bundle.chp_projections:
-                # Validate projection integrity (simplified for demo)
+
+        projections_validated = 0
+        if bundle.state_projections:
+            chp = ChannelProtocol()
+            for projection in bundle.state_projections:
                 if "unit_id" in projection:
-                    chp_validated += 1
+                    projections_validated += 1
 
         return {
             "status": "success",
@@ -644,10 +521,8 @@ class TeleportProtocol:
             "decisions_restored": decisions_restored,
             "sessions_restored": sessions_restored,
             "trust_restored": trust_restored,
-            "cognitive_units_restored": cognitive_units_restored,
-            "chp_projections_validated": chp_validated,
+            "units_restored": units_restored,
+            "chp_projections_validated": projections_validated,
             "bundle_id": bundle.bundle_id,
         }
 
-    def close(self) -> None:
-        pass

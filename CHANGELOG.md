@@ -6,6 +6,21 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Cognitive state replication architecture across phases 2-6: explicit epistemic state on cognitive units, open questions, signed Merkle integrity roots, compact manifest handoff/resume, reconciliation conflict tracking, and low-friction `note_reasoning`.
+- Provenance graph tooling for compact origin/impact traces and explicit typed links, including first-class rejected alternatives from ledger decisions.
+- MCP tools for `provenance_trace`, `provenance_link`, `question_raise`, `question_resolve`, `integrity_verify`, `handoff_create`, `handoff_resume`, `reconcile_resolve`, and `note_reasoning`.
+
+### Changed
+- `unit_checkout` now includes epistemic class groupings and open questions.
+- Teleport remains available as the heavyweight full-database migration path, while manifest handoff is the compact default path.
+- Deprecated search/audit aliases remain callable for compatibility but are retired from the public tool registry to keep the exposed tool count capped.
+
+### Fixed
+- `CognitiveUnit` now carries the `unit_type` and epistemic fields used by stores and tools.
+- Teleport bundle signing now preserves cognitive units when returning the signed copy.
+- Eval harness retrieval and efficiency suites accept omitted id maps for backwards-compatible lifecycle tests.
+
 ## [0.2.0] - 2026-06-26
 
 ### Added

@@ -1,24 +1,3 @@
-"""SQLite schema migrations for Cognex.
-
-Design principles
------------------
-1. **Forward-only, version-tracked.** Each migration has a monotonically
-   increasing version number recorded in ``schema_version``.  Only
-   pending migrations (version > current max) are executed.
-
-2. **Savepoint-wrapped.** Every migration runs inside a SQLite SAVEPOINT
-   so that a failure can be rolled back cleanly without leaving the
-   database in a partially-migrated state.
-
-3. **Checkpoint snapshots.** Before executing a migration, the current
-   DDL of the affected tables is captured in ``migration_checkpoints``.
-   A developer can inspect these records to reconstruct the pre-migration
-   schema if a manual recovery is ever needed.
-
-4. **Idempotent statements.** Every DDL statement uses ``IF NOT EXISTS``
-   / ``IF EXISTS`` guards so that re-running the same migration (e.g.
-   after a partial failure) does not raise errors.
-"""
 
 from __future__ import annotations
 
@@ -28,17 +7,8 @@ from sqlite3 import Connection
 
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
-# Migration list
-#
-# Each entry is a 3-tuple:
-#   (version: int, description: str, statements: list[str])
-#
-# Statements are executed in order inside a single savepoint transaction.
-# A statement that raises an OperationalError is silently skipped when the
-# error looks like "duplicate column" or "already exists" — this handles
-# the case where a migration was partially applied before a crash.
-# ---------------------------------------------------------------------------
+# Each migration is a (version, description, statements) tuple.
+# Statements run in a savepoint; "already exists" errors are tolerated.
 
 MIGRATIONS: list[tuple[int, str, list[str]]] = [
     # v1 — baseline (tables already created by _init_db)
@@ -245,15 +215,127 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
         "CREATE INDEX IF NOT EXISTS idx_arcs_project      ON session_arcs(project)",
         "CREATE INDEX IF NOT EXISTS idx_arcs_last_session ON session_arcs(last_session_at DESC)",
     ]),
+
+    # v16 — large memory support
+    #
+    # Long memories are split into overlapping chunks for FTS5 retrieval;
+    # search matches at chunk level but returns the parent memory.  A
+    # one-line gist column powers compact search listings.
+    (16, "add memory_chunks, memory_chunks_fts, and gist column", [
+        "ALTER TABLE memories ADD COLUMN gist TEXT DEFAULT ''",
+        """CREATE TABLE IF NOT EXISTS memory_chunks (
+            chunk_id    TEXT PRIMARY KEY,
+            memory_id   TEXT NOT NULL,
+            chunk_index INTEGER NOT NULL,
+            text        TEXT NOT NULL,
+            FOREIGN KEY (memory_id) REFERENCES memories(id) ON DELETE CASCADE
+        )""",
+        "CREATE INDEX IF NOT EXISTS idx_chunks_memory_id ON memory_chunks(memory_id)",
+        """CREATE VIRTUAL TABLE IF NOT EXISTS memory_chunks_fts
+           USING fts5(text, content='memory_chunks', content_rowid='rowid')""",
+        """CREATE TRIGGER IF NOT EXISTS chunks_fts_insert
+           AFTER INSERT ON memory_chunks BEGIN
+               INSERT INTO memory_chunks_fts(rowid, text)
+               VALUES (new.rowid, new.text);
+           END""",
+        """CREATE TRIGGER IF NOT EXISTS chunks_fts_delete
+           AFTER DELETE ON memory_chunks BEGIN
+               DELETE FROM memory_chunks_fts WHERE rowid = old.rowid;
+           END""",
+        """CREATE TRIGGER IF NOT EXISTS chunks_fts_update
+           AFTER UPDATE ON memory_chunks BEGIN
+               DELETE FROM memory_chunks_fts WHERE rowid = old.rowid;
+               INSERT INTO memory_chunks_fts(rowid, text)
+               VALUES (new.rowid, new.text);
+           END""",
+        # Backfill gist for existing rows (first <=120 chars of content).
+        "UPDATE memories SET gist = substr(content, 1, 120) WHERE gist = '' AND content != ''",
+    ]),
+
+    # v17 — provenance graph substrate
+    (17, "add provenance graph tables", [
+        """CREATE TABLE IF NOT EXISTS provenance_nodes (
+            node_id    TEXT PRIMARY KEY,
+            node_type  TEXT NOT NULL,
+            ref_table  TEXT NOT NULL,
+            ref_id     TEXT NOT NULL,
+            project    TEXT DEFAULT '',
+            created_at TEXT NOT NULL,
+            session_id TEXT DEFAULT ''
+        )""",
+        """CREATE TABLE IF NOT EXISTS provenance_edges (
+            edge_id    TEXT PRIMARY KEY,
+            from_node  TEXT NOT NULL,
+            to_node    TEXT NOT NULL,
+            edge_type  TEXT NOT NULL,
+            rationale  TEXT DEFAULT '',
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (from_node) REFERENCES provenance_nodes(node_id),
+            FOREIGN KEY (to_node) REFERENCES provenance_nodes(node_id)
+        )""",
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_prov_nodes_ref ON provenance_nodes(ref_table, ref_id, node_type)",
+        "CREATE INDEX IF NOT EXISTS idx_prov_nodes_project_type ON provenance_nodes(project, node_type)",
+        "CREATE INDEX IF NOT EXISTS idx_prov_edges_from ON provenance_edges(from_node)",
+        "CREATE INDEX IF NOT EXISTS idx_prov_edges_to ON provenance_edges(to_node)",
+    ]),
+
+    # v18 — explicit epistemic state and known unknowns
+    (18, "add epistemic state columns and open questions", [
+        "ALTER TABLE cognitive_units ADD COLUMN epistemic_status TEXT DEFAULT 'assumed'",
+        "ALTER TABLE cognitive_units ADD COLUMN verification_condition TEXT DEFAULT ''",
+        "ALTER TABLE cognitive_units ADD COLUMN depends_on TEXT DEFAULT '[]'",
+        "ALTER TABLE cognitive_units ADD COLUMN staleness_deadline TEXT",
+        """CREATE TABLE IF NOT EXISTS open_questions (
+            question_id       TEXT PRIMARY KEY,
+            content           TEXT NOT NULL,
+            project           TEXT DEFAULT '',
+            scope             TEXT DEFAULT '',
+            raised_in_session TEXT DEFAULT '',
+            status            TEXT DEFAULT 'open',
+            answer_ref        TEXT,
+            created_at        TEXT NOT NULL
+        )""",
+        "CREATE INDEX IF NOT EXISTS idx_open_questions_project_status ON open_questions(project, status)",
+    ]),
+
+    # v19 — Merkle integrity snapshots
+    (19, "add integrity root snapshots", [
+        """CREATE TABLE IF NOT EXISTS integrity_roots (
+            root_hash    TEXT PRIMARY KEY,
+            project      TEXT NOT NULL,
+            computed_at  TEXT NOT NULL,
+            record_count INTEGER NOT NULL,
+            signature    TEXT DEFAULT '',
+            key_fingerprint TEXT DEFAULT ''
+        )""",
+        "CREATE INDEX IF NOT EXISTS idx_integrity_roots_project_time ON integrity_roots(project, computed_at DESC)",
+    ]),
+
+    # v20 — reconciliation conflict journal
+    (20, "add reconciliation conflicts", [
+        """CREATE TABLE IF NOT EXISTS reconciliation_conflicts (
+            conflict_id   TEXT PRIMARY KEY,
+            item_class    TEXT NOT NULL,
+            local_ref     TEXT DEFAULT '',
+            incoming_ref  TEXT DEFAULT '',
+            project       TEXT DEFAULT '',
+            scope         TEXT DEFAULT '',
+            local_line    TEXT DEFAULT '',
+            incoming_line TEXT DEFAULT '',
+            resolution    TEXT DEFAULT '',
+            rationale     TEXT DEFAULT '',
+            created_at    TEXT NOT NULL,
+            resolved_at   TEXT
+        )""",
+        "CREATE INDEX IF NOT EXISTS idx_reconcile_project ON reconciliation_conflicts(project, resolution)",
+    ]),
 ]
 
 
-# ---------------------------------------------------------------------------
 # Checkpoint helpers
-# ---------------------------------------------------------------------------
 
 def _ensure_checkpoint_table(conn: Connection) -> None:
-    """Create migration_checkpoints table if it does not yet exist."""
+
     conn.execute("""
         CREATE TABLE IF NOT EXISTS migration_checkpoints (
             version          INTEGER PRIMARY KEY,
@@ -264,12 +346,6 @@ def _ensure_checkpoint_table(conn: Connection) -> None:
 
 
 def _capture_checkpoint(conn: Connection, version: int) -> None:
-    """Snapshot DDL of every table before running *version*.
-
-    The snapshot is a JSON object mapping table name → CREATE TABLE DDL.
-    It is stored in ``migration_checkpoints`` so a developer can inspect
-    it later and manually reconstruct the schema if needed.
-    """
     rows = conn.execute(
         "SELECT name, sql FROM sqlite_master WHERE type = 'table' AND sql IS NOT NULL"
     ).fetchall()
@@ -281,12 +357,9 @@ def _capture_checkpoint(conn: Connection, version: int) -> None:
     )
 
 
-# ---------------------------------------------------------------------------
 # Version management
-# ---------------------------------------------------------------------------
 
 def get_current_version(conn: Connection) -> int:
-    """Return the highest applied migration version (0 if none)."""
     try:
         conn.execute(
             "CREATE TABLE IF NOT EXISTS schema_version "
@@ -298,19 +371,9 @@ def get_current_version(conn: Connection) -> int:
         return 0
 
 
-# ---------------------------------------------------------------------------
 # Main entry point
-# ---------------------------------------------------------------------------
 
 def run_migrations(conn: Connection) -> None:
-    """Apply all pending migrations in ascending version order.
-
-    Each migration is wrapped in a SQLite SAVEPOINT so that a failure
-    rolls back only that migration, leaving the database in the last
-    successfully migrated state.  This replaces the previous behaviour
-    where a mid-migration failure could leave the schema partially
-    updated with no clean recovery path.
-    """
     _ensure_checkpoint_table(conn)
 
     current = get_current_version(conn)
@@ -340,7 +403,6 @@ def run_migrations(conn: Connection) -> None:
                     else:
                         raise
 
-            # Record the applied version.
             conn.execute(
                 "INSERT INTO schema_version(version, applied_at) VALUES (?, datetime('now'))",
                 (version,),

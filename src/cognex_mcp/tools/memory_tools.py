@@ -1,4 +1,3 @@
-"""Memory tools - add, search, get context, decay."""
 
 from typing import Any
 
@@ -27,7 +26,6 @@ async def memory_add(
     tags: list[str] | None = None,
     context: str = "",
 ) -> dict[str, Any]:
-    """Add a memory to the cognex engine."""
     # Sanitize inputs — pass memory_type for per-type length limits (P0.1)
     content = sanitize_content(content, memory_type=memory_type)
     project = sanitize_project(project)
@@ -41,7 +39,6 @@ async def memory_add(
 
     tags_tuple = tuple(tags_list)
 
-    # Convert string to enum
     try:
         mem_type = MemoryType[memory_type.upper()]
     except KeyError:
@@ -60,6 +57,14 @@ async def memory_add(
         tags=tags_tuple,
         context=context,
     )
+    node_type = "claim" if mem_type.value in {"fact", "decision", "lesson"} else "evidence"
+    ctx.provenance.ensure_node(
+        node_type=node_type,
+        ref_table="memories",
+        ref_id=entry.id,
+        project=entry.project,
+        session_id=ctx.engine.current_session or "",
+    )
 
     result = {
         "id": entry.id,
@@ -69,7 +74,6 @@ async def memory_add(
         "created_at": entry.created_at.isoformat(),
     }
 
-    # Warn if no active session
     if not ctx.engine.current_session:
         result["warning"] = "no active session — call cognex_start_session first"
 
@@ -86,18 +90,6 @@ async def memory_search(
     boost_project: str = "",
     recency_days: int = 0,
 ) -> dict[str, Any]:
-    """Search memories with filters.
-
-    Args:
-        query: Free-text search query.
-        memory_type: Filter by memory type.
-        project: Filter by project name.
-        scope: Filter by scope.
-        tags: Require all listed tags.
-        limit: Max results (capped at 50).
-        boost_project: When non-empty, results from this project are sorted first.
-        recency_days: When > 0, results from the last N days are sorted first.
-    """
     query = sanitize_query(query or "")
     project = sanitize_project(project)
     boost_project = sanitize_project(boost_project)
@@ -159,19 +151,9 @@ async def memory_get_context(
     limit: int = 5,
     format: str = "medium",
 ) -> dict[str, Any]:
-    """Get relevant context memories for a query.
-
-    Args:
-        query: Search query for finding relevant memories
-        project: Filter to specific project
-        limit: Max memories to return (capped at 10)
-        format: Output format - 'minimal', 'medium', or 'full'
-    """
-    # Sanitize inputs
     query = sanitize_query(query or "")
     project = sanitize_project(project)
 
-    # Apply hard limit
     limit = min(int(limit), MAX_CONTEXT_LIMIT)
 
     ctx = CognexContext.get_instance()
@@ -180,7 +162,6 @@ async def memory_get_context(
         ctx.engine.get_context, query=query, project=project, limit=limit
     )
 
-    # Detect which search type was actually used
     search_type = await run_in_thread(ctx.engine.store.get_search_type, query=query)
 
     # Strip common filler prefixes to compress content
@@ -211,12 +192,10 @@ async def memory_get_context(
     }
 
     if format == "minimal":
-        # Group by type, merge into single dense lines
         groups: dict[str, list[str]] = {}
         for m in memories:
             ts = type_short_map.get(m.type.value or "fact", "fact")
             content = strip_filler(m.content)
-            # Truncate to keyword-length phrase
             words = content.split()[:6]
             phrase = " ".join(words)
             groups.setdefault(ts, []).append(phrase)
@@ -231,7 +210,6 @@ async def memory_get_context(
         }
 
     elif format == "medium":
-        # Group by type, return compact dict — no score, no id, no timestamps
         groups: dict[str, list[str]] = {}
         for m in memories:
             ts = type_short_map.get(m.type.value or "fact", "fact")
@@ -264,7 +242,6 @@ async def memory_get_context(
 async def memory_decay(
     factor: float = 0.95,
 ) -> dict[str, Any]:
-    """Apply aging/decay to all memories."""
     ctx = CognexContext.get_instance()
 
     if not isinstance(factor, (int, float)):

@@ -1,22 +1,3 @@
-"""Cognex Context — manages singleton instances of all cognex components.
-
-Lifecycle
----------
-The previous implementation had a race window between the ``_initialized``
-flag check and the actual component construction.  Two threads arriving
-simultaneously could both see ``_initialized = False`` and race to construct
-duplicate instances, leaving one set orphaned with open database connections.
-
-This version uses an explicit per-instance ``_init_lock`` threading.Lock so
-that only one thread can execute ``_ensure_initialized()`` at a time.  All
-subsequent threads block until initialisation is complete, then proceed with
-the guarantee that ``_initialized = True`` and all components are ready.
-
-Additionally, ``startup()`` is provided as an explicit, eager initialisation
-path.  The MCP server's ``lifespan`` handler should call ``startup()`` before
-accepting any tool requests, so that the first real request is never delayed
-by database I/O and migration execution.
-"""
 
 from __future__ import annotations
 
@@ -31,24 +12,25 @@ from typing import Optional
 
 from cognex import (
     CognexEngine,
-    TrustGradientEngine,
+    TrustEngine,
     DecisionLedger,
-    TeleportProtocol,
-    IntentCompiler,
-    CHPProtocol,
+    StateTransfer,
+    TaskPlanner,
+    ChannelProtocol,
 )
 from cognex.audit import AuditLog
-from cognex.units import CognitiveUnitStore
+from cognex.handoff import HandoffStore
+from cognex.integrity import IntegrityStore
+from cognex.provenance import ProvenanceStore
+from cognex.reconcile import Reconciler
+from cognex.units import StateUnitStore
 
 logger = logging.getLogger("cognex-context")
 
 
-# ---------------------------------------------------------------------------
 # SQLite capability probe
-# ---------------------------------------------------------------------------
 
 def check_fts5_available() -> bool:
-    """Return True if this SQLite build has FTS5 compiled in."""
     conn = sqlite3.connect(":memory:")
     try:
         result = conn.execute(
@@ -62,23 +44,9 @@ def check_fts5_available() -> bool:
         conn.close()
 
 
-# ---------------------------------------------------------------------------
 # CognexContext
-# ---------------------------------------------------------------------------
 
 class CognexContext:
-    """Thread-safe singleton manager for all cognex components.
-
-    Provides shared access to:
-    - ``engine``      — CognexEngine (memory store + session tracking)
-    - ``trust``       — TrustGradientEngine (permission learning)
-    - ``ledger``      — DecisionLedger (decision history)
-    - ``teleport``    — TeleportProtocol (bundle import/export)
-    - ``swarm``       — IntentCompiler (multi-agent coordination)
-    - ``unit_store``  — CognitiveUnitStore (long-lived cognitive units)
-    - ``audit``       — AuditLog (tamper-evident event log)
-    - ``chp``         — CHPProtocol (cross-session handoff state)
-    """
 
     _instance: Optional["CognexContext"] = None
     _class_lock = threading.Lock()  # Guards _instance creation only.
@@ -95,13 +63,17 @@ class CognexContext:
 
         # Components — None until _ensure_initialized() is called.
         self._engine: Optional[CognexEngine] = None
-        self._trust: Optional[TrustGradientEngine] = None
+        self._trust: Optional[TrustEngine] = None
         self._ledger: Optional[DecisionLedger] = None
-        self._teleport: Optional[TeleportProtocol] = None
-        self._swarm: Optional[IntentCompiler] = None
-        self._unit_store: Optional[CognitiveUnitStore] = None
+        self._teleport: Optional[StateTransfer] = None
+        self._swarm: Optional[TaskPlanner] = None
+        self._unit_store: Optional[StateUnitStore] = None
         self._audit: Optional[AuditLog] = None
-        self._chp: Optional[CHPProtocol] = None
+        self._chp: Optional[ChannelProtocol] = None
+        self._provenance: Optional[ProvenanceStore] = None
+        self._integrity: Optional[IntegrityStore] = None
+        self._handoff: Optional[HandoffStore] = None
+        self._reconciler: Optional[Reconciler] = None
         self._initialized = False
 
         # Guards _ensure_initialized() from concurrent double-init.
@@ -111,7 +83,6 @@ class CognexContext:
         self._startup_at: Optional[datetime] = None
         self._db_file: Optional[Path] = None
 
-    # ── Singleton factory ─────────────────────────────────────────────────
 
     @classmethod
     def get_instance(
@@ -120,7 +91,6 @@ class CognexContext:
         project: str = "default",
         pool_size: int | None = None,
     ) -> "CognexContext":
-        """Return the singleton instance, creating it if necessary."""
         with cls._class_lock:
             if cls._instance is None:
                 cls._instance = cls(
@@ -130,20 +100,13 @@ class CognexContext:
 
     @classmethod
     def reset_instance(cls) -> None:
-        """Destroy the singleton.  Required in tests to prevent state leakage."""
         with cls._class_lock:
             if cls._instance is not None:
                 cls._instance.close()
             cls._instance = None
 
-    # ── Explicit startup ──────────────────────────────────────────────────
 
     def startup(self) -> None:
-        """Eagerly initialise all components.
-
-        Call this from the MCP server's lifespan handler so that the first
-        tool request is not delayed by database I/O and migration execution.
-        """
         self._ensure_initialized()
         logger.info(
             "Cognex engine started (db=%s, project=%s, migrations=complete)",
@@ -151,17 +114,8 @@ class CognexContext:
             self._project,
         )
 
-    # ── Lazy initialisation ───────────────────────────────────────────────
 
     def _ensure_initialized(self) -> None:
-        """Initialise all components exactly once, regardless of thread count.
-
-        The double-checked locking pattern here is correct in CPython because
-        reading ``self._initialized`` under the GIL gives a consistent view.
-        The lock is only taken when initialisation is actually required, and
-        the flag is set *after* all components are fully constructed so that
-        no thread can observe a partial state.
-        """
         if self._initialized:
             return
 
@@ -173,7 +127,6 @@ class CognexContext:
             self._do_init()
 
     def _do_init(self) -> None:
-        """Construct all components.  Called with self._init_lock held."""
         if not check_fts5_available():
             logger.warning(
                 "FTS5 is not compiled into this SQLite build. "
@@ -199,18 +152,21 @@ class CognexContext:
 
         # Construct components.  All share the same on-disk database file.
         self._engine  = CognexEngine(db_path=str(db_file), pool_size=self._pool_size)
-        self._trust      = TrustGradientEngine(db_path=str(db_file))
+        self._trust      = TrustEngine(db_path=str(db_file))
         self._ledger     = DecisionLedger(db_path=str(db_file))
-        self._teleport   = TeleportProtocol()      # stateless, no db_path
-        self._swarm      = IntentCompiler()
-        self._unit_store = CognitiveUnitStore(db_path=str(db_file))
+        self._teleport   = StateTransfer()      # stateless, no db_path
+        self._swarm      = TaskPlanner()
+        self._unit_store = StateUnitStore(db_path=str(db_file))
         self._audit      = AuditLog(db_path=str(db_file))
-        self._chp        = CHPProtocol()           # in-memory shared state
+        self._chp        = ChannelProtocol()           # in-memory shared state
+        self._provenance = ProvenanceStore(db_path=str(db_file))
+        self._integrity  = IntegrityStore(db_path=str(db_file))
+        self._handoff    = HandoffStore(db_path=str(db_file))
+        self._reconciler = Reconciler(db_path=str(db_file))
 
         self._startup_at  = datetime.now(timezone.utc)
         self._initialized = True                   # Set last — visible to other threads.
 
-    # ── Properties ────────────────────────────────────────────────────────
 
     @property
     def engine(self) -> CognexEngine:
@@ -219,7 +175,7 @@ class CognexContext:
         return self._engine
 
     @property
-    def trust(self) -> TrustGradientEngine:
+    def trust(self) -> TrustEngine:
         self._ensure_initialized()
         assert self._trust is not None
         return self._trust
@@ -231,19 +187,19 @@ class CognexContext:
         return self._ledger
 
     @property
-    def teleport(self) -> TeleportProtocol:
+    def teleport(self) -> StateTransfer:
         self._ensure_initialized()
         assert self._teleport is not None
         return self._teleport
 
     @property
-    def swarm(self) -> IntentCompiler:
+    def swarm(self) -> TaskPlanner:
         self._ensure_initialized()
         assert self._swarm is not None
         return self._swarm
 
     @property
-    def unit_store(self) -> CognitiveUnitStore:
+    def unit_store(self) -> StateUnitStore:
         self._ensure_initialized()
         assert self._unit_store is not None
         return self._unit_store
@@ -255,44 +211,43 @@ class CognexContext:
         return self._audit
 
     @property
-    def chp(self) -> CHPProtocol:
-        """Shared CHPProtocol instance.
-
-        Must be shared rather than constructed per-call — CHP holds in-memory
-        entanglement state that must persist across tool calls for a handoff
-        to complete.  A fresh instance created per request would lose all
-        pending handoffs.
-        """
+    def chp(self) -> ChannelProtocol:
         self._ensure_initialized()
         assert self._chp is not None
         return self._chp
 
     @property
+    def provenance(self) -> ProvenanceStore:
+        self._ensure_initialized()
+        assert self._provenance is not None
+        return self._provenance
+
+    @property
+    def integrity(self) -> IntegrityStore:
+        self._ensure_initialized()
+        assert self._integrity is not None
+        return self._integrity
+
+    @property
+    def handoff(self) -> HandoffStore:
+        self._ensure_initialized()
+        assert self._handoff is not None
+        return self._handoff
+
+    @property
+    def reconciler(self) -> Reconciler:
+        self._ensure_initialized()
+        assert self._reconciler is not None
+        return self._reconciler
+
+    @property
     def db_path(self) -> str:
-        """The resolved database file path (used for health reporting)."""
         if self._db_file:
             return str(self._db_file)
         return self._db_path or str(Path.home() / ".cognex.db" / "cognex.db")
 
-    # ── Health ────────────────────────────────────────────────────────────
 
     def health_check(self) -> dict:
-        """Return a dict describing the current health of all components.
-
-        Used by the ``cognex_health`` MCP tool.
-
-        Returns:
-            Dict with keys:
-            - ``status``           — ``"ok"`` or ``"degraded"``
-            - ``initialized``      — bool
-            - ``db_path``          — str
-            - ``db_reachable``     — bool (can execute a simple query)
-            - ``fts5_available``   — bool
-            - ``memory_count``     — int | None
-            - ``startup_at``       — ISO-8601 str | None
-            - ``uptime_seconds``   — float | None
-            - ``components``       — dict mapping component name → "ok"/"missing"
-        """
         db_reachable = False
         memory_count: int | None = None
         components: dict[str, str] = {}
@@ -313,6 +268,10 @@ class CognexContext:
                 ("unit_store", self._unit_store),
                 ("audit",      self._audit),
                 ("chp",        self._chp),
+                ("provenance", self._provenance),
+                ("integrity",  self._integrity),
+                ("handoff",    self._handoff),
+                ("reconciler", self._reconciler),
             ]:
                 components[name] = "ok" if obj is not None else "missing"
 
@@ -334,10 +293,8 @@ class CognexContext:
             "components":     components,
         }
 
-    # ── Lifecycle ─────────────────────────────────────────────────────────
 
     def close(self) -> None:
-        """Close all component resources and release database connections."""
         if self._engine:
             try:
                 self._engine.store.close()
@@ -359,5 +316,17 @@ class CognexContext:
             self._audit.close()
             self._audit = None
         self._chp = None       # In-memory only, GC handles it.
+        if self._provenance:
+            self._provenance.close()
+            self._provenance = None
+        if self._integrity:
+            self._integrity.close()
+            self._integrity = None
+        if self._handoff:
+            self._handoff.close()
+            self._handoff = None
+        if self._reconciler:
+            self._reconciler.close()
+            self._reconciler = None
 
         self._initialized = False

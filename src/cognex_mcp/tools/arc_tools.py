@@ -1,4 +1,3 @@
-"""Session Arc tools - exposes MCP tools for session arc management."""
 
 from typing import Any
 
@@ -10,7 +9,6 @@ from cognex_mcp.tools.dispatcher import run_in_thread
 async def arc_start(
     project: str,
 ) -> dict[str, Any]:
-    """Start or retrieve the active session arc for a project."""
     project = sanitize_project(project)
     if not project:
         raise ValueError("project is required")
@@ -35,7 +33,6 @@ async def arc_start(
 async def arc_close(
     arc_id: str,
 ) -> dict[str, Any]:
-    """Close an active session arc and generate its narrative summary."""
     if not arc_id:
         raise ValueError("arc_id is required")
 
@@ -74,7 +71,6 @@ async def arc_close(
 async def arc_get_context(
     project: str,
 ) -> dict[str, Any]:
-    """Get the active session arc narrative for a project."""
     project = sanitize_project(project)
     if not project:
         raise ValueError("project is required")

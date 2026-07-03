@@ -1,4 +1,3 @@
-"""Consolidator tools - exposes the memory consolidation MCP tool."""
 
 from typing import Any
 
@@ -11,7 +10,6 @@ async def memory_consolidate(
     project: str = "",
     min_cluster_size: int = 5,
 ) -> dict[str, Any]:
-    """Consolidate episodic memories into clusters and promote stable ones to schemas."""
     project = sanitize_project(project)
     min_cluster_size = int(min_cluster_size)
 

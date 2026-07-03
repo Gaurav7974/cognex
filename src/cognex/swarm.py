@@ -1,4 +1,3 @@
-"""Intent-to-Swarm Compiler — natural language → decompose → spawn → synthesize."""
 
 from __future__ import annotations
 
@@ -26,20 +25,18 @@ class AgentRole(enum.Enum):
 
 @dataclass(frozen=True)
 class SubTask:
-    """A decomposed piece of the original intent."""
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])
     description: str = ""
     role: AgentRole = AgentRole.BUILDER
-    depends_on: tuple[str, ...] = ()  # SubTask IDs this depends on
     status: TaskStatus = TaskStatus.PENDING
     result: str = ""
     error: str = ""
     started_at: datetime | None = None
     completed_at: datetime | None = None
+    depends_on: tuple[str, ...] = ()
 
     @property
     def is_ready(self) -> bool:
-        """Can this task start? (all dependencies done)"""
         return self.status == TaskStatus.PENDING and all(
             # In practice, check a task registry
             True for _ in self.depends_on
@@ -47,8 +44,7 @@ class SubTask:
 
 
 @dataclass(frozen=True)
-class SwarmPlan:
-    """The decomposed plan for an intent."""
+class TaskPlan:
     plan_id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
     original_intent: str = ""
     subtasks: tuple[SubTask, ...] = ()
@@ -94,20 +90,8 @@ class SwarmPlan:
         return "\n".join(lines)
 
 
-class IntentCompiler:
-    """Compiles natural language intent into a swarm plan.
+class TaskPlanner:
 
-    Uses pattern matching as the base layer. In production, this would
-    be backed by an LLM call for intelligent decomposition.
-
-    Usage:
-        compiler = IntentCompiler()
-        plan = compiler.compile("Build a REST API with authentication")
-        print(plan.as_text())
-        # Shows decomposed tasks with roles and dependencies
-    """
-
-    # Intent patterns and their decomposition templates
     _PATTERNS = [
         {
             "keywords": ["build", "create", "make", "develop", "implement"],
@@ -165,21 +149,17 @@ class IntentCompiler:
         },
     ]
 
-    def compile(self, intent: str, project: str = "") -> SwarmPlan:
-        """Compile natural language intent into a swarm plan."""
+    def compile(self, intent: str, project: str = "") -> TaskPlan:
         intent_lower = intent.lower()
 
-        # Try each pattern
         best_match = None
         best_score = 0
 
         for pattern in self._PATTERNS:
             score = 0
-            # Keyword matches
             for kw in pattern["keywords"]:
                 if kw in intent_lower:
                     score += 2
-            # Context keyword matches
             for kw in pattern.get("context_keywords", []):
                 if kw in intent_lower:
                     score += 1
@@ -188,11 +168,9 @@ class IntentCompiler:
                 best_score = score
                 best_match = pattern
 
-        # Decompose
         if best_match and best_score > 0:
             subtasks = best_match["decompose"](intent)
         else:
-            # Generic decomposition for unknown intents
             subtasks = [
                 SubTask(description="Understand the request and gather context", role=AgentRole.EXPLORER),
                 SubTask(description="Plan the approach", role=AgentRole.PLANNER, depends_on=("task-1",)),
@@ -200,7 +178,6 @@ class IntentCompiler:
                 SubTask(description="Verify the result", role=AgentRole.VERIFIER, depends_on=("task-3",)),
             ]
 
-        # Assign task IDs
         numbered = []
         for i, t in enumerate(subtasks, 1):
             numbered.append(SubTask(
@@ -208,14 +185,13 @@ class IntentCompiler:
                 role=t.role, depends_on=t.depends_on,
             ))
 
-        return SwarmPlan(
+        return TaskPlan(
             original_intent=intent,
             subtasks=tuple(numbered),
             project=project,
         )
 
     def suggest_role(self, intent: str) -> AgentRole:
-        """Suggest which agent role is best for a given intent."""
         intent_lower = intent.lower()
         if any(w in intent_lower for w in ["explore", "find", "search", "map", "discover"]):
             return AgentRole.EXPLORER

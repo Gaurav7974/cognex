@@ -1,4 +1,3 @@
-"""TCP sync server daemon for Cognex delta replication."""
 
 from __future__ import annotations
 
@@ -22,7 +21,6 @@ logger = logging.getLogger(__name__)
 
 
 class SyncServer:
-    """Asyncio TCP server that authenticates peers and sends delta updates."""
 
     def __init__(
         self,
@@ -36,14 +34,12 @@ class SyncServer:
         self.server: asyncio.Server | None = None
 
     async def start(self) -> None:
-        """Start listening for peer connections."""
         self.server = await asyncio.start_server(
             self._handle_connection, self.host, self.port
         )
         logger.info("Sync server listening on %s:%s", self.host, self.port)
 
     async def stop(self) -> None:
-        """Stop the sync server."""
         if self.server:
             self.server.close()
             await self.server.wait_closed()
@@ -65,11 +61,9 @@ class SyncServer:
 
         ctx = CognexContext.get_instance()
         try:
-            # 1. Send cryptographic challenge
             challenge = os.urandom(16).hex()
             await send_msg(writer, {"type": "challenge", "challenge": challenge})
 
-            # 2. Receive authentication signature
             auth = await recv_msg(reader)
             if not auth or auth.get("type") != "auth":
                 await send_msg(
@@ -94,7 +88,6 @@ class SyncServer:
                 writer.close()
                 return
 
-            # Verify client's signature of our challenge
             if not verify_signature(challenge, signature, public_key):
                 await send_msg(
                     writer,
@@ -105,7 +98,6 @@ class SyncServer:
 
             fingerprint = get_key_fingerprint(public_key)
 
-            # Check if this peer is trusted in the database
             trust_record = ctx.trust.get_trust(
                 tool_name="sync", context=fingerprint
             )
@@ -131,7 +123,6 @@ class SyncServer:
                     writer.close()
                     return
 
-            # Auth succeeded
             await send_msg(
                 writer,
                 {
@@ -143,7 +134,6 @@ class SyncServer:
                 },
             )
 
-            # 3. Receive client request
             req = await recv_msg(reader)
             if not req:
                 writer.close()
@@ -153,7 +143,6 @@ class SyncServer:
             if req_type == "get_delta":
                 since = req.get("since", "1970-01-01T00:00:00Z")
 
-                # 4. Compute and send delta payload
                 delta = DeltaComputer.compute_delta(
                     ctx.engine.store, ctx.ledger, ctx.unit_store, since
                 )
@@ -205,7 +194,6 @@ class SyncServer:
 
 
 def main() -> None:
-    """CLI entry point to start the sync server."""
     import argparse
     import sys
 
@@ -219,7 +207,6 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    # Configure basic logging to stdout
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -229,7 +216,6 @@ def main() -> None:
     allowed_ips = [ip.strip() for ip in args.allowed_ips.split(",") if ip.strip()]
 
     async def run() -> None:
-        # Initialize CognexContext
         from cognex_mcp.context import CognexContext
         ctx = CognexContext.get_instance()
         ctx._ensure_initialized()
@@ -237,7 +223,6 @@ def main() -> None:
         server = SyncServer(host=args.host, port=args.port, allowed_ips=allowed_ips)
         await server.start()
         try:
-            # Keep server running until interrupted
             while True:
                 await asyncio.sleep(3600)
         except (KeyboardInterrupt, asyncio.CancelledError):

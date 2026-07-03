@@ -1,6 +1,3 @@
-"""
-Ledger tools - decision recording and outcome tracking.
-"""
 
 from typing import Any
 
@@ -17,7 +14,6 @@ async def ledger_record(
     session_id: str | None = None,
     tags: list[str] | None = None,
 ) -> dict[str, Any]:
-    """Record a decision in the ledger."""
     if not tool_used:
         raise ValueError("tool_used is required")
 
@@ -32,6 +28,28 @@ async def ledger_record(
         session_id=session_id or "",
         tags=tuple(tags or []),
     )
+    decision_node = ctx.provenance.ensure_node(
+        node_type="claim",
+        ref_table="decisions",
+        ref_id=entry.id,
+        project=entry.project,
+        session_id=entry.session_id,
+    )
+    for idx, alternative in enumerate(entry.alternatives):
+        alt_ref = f"{entry.id}:alt:{idx}"
+        alt_node = ctx.provenance.ensure_node(
+            node_type="alternative",
+            ref_table="decisions",
+            ref_id=alt_ref,
+            project=entry.project,
+            session_id=entry.session_id,
+        )
+        ctx.provenance.link(
+            alt_node,
+            decision_node,
+            "rejected_because",
+            f"{alternative}: {entry.reasoning}".strip(": "),
+        )
 
     result = {
         "decision_id": entry.id,
@@ -41,7 +59,6 @@ async def ledger_record(
         "timestamp": entry.timestamp.isoformat(),
     }
 
-    # Warn if no active session
     if not ctx.engine.current_session:
         result["warning"] = "no active session — call cognex_start_session first"
 
@@ -53,7 +70,6 @@ async def ledger_outcome(
     outcome: str,
     success: bool | None = None,
 ) -> dict[str, Any]:
-    """Record outcome for a decision."""
     ctx = CognexContext.get_instance()
 
     entry = ctx.ledger.record_outcome(
@@ -89,12 +105,6 @@ async def ledger_find_similar(
     project: str | None = None,
     limit: int = 5,
 ) -> dict[str, Any]:
-    """Find similar past decisions.
-
-    Sanitizes the query to prevent LIKE injection and wildcard abuse
-    (e.g., "100%" matching every record).
-    """
-    # Sanitize query to prevent injection
     query = sanitize_query(query)
     if not query:
         raise ValueError("query is required and cannot be empty")

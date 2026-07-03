@@ -1,8 +1,3 @@
-"""
-Cognex — Persistent Memory for AI Agents
-
-An AI that remembers you. The foundation everything else sits on.
-"""
 
 try:
     from importlib.metadata import version
@@ -17,12 +12,12 @@ from .extractor import MemoryExtractor, ExtractionResult
 from .retriever import MemoryRetriever
 from .cognex import CognexEngine, CognexReport
 from .audit import AuditLog
-from .trust import TrustGradientEngine, TrustRecord, TrustLevel, PermissionDecision
+from .trust import TrustEngine, TrustRecord, TrustLevel, PermissionDecision
 from .ledger import DecisionLedger, DecisionEntry
-from .teleport import TeleportProtocol, TeleportBundle
-from .swarm import IntentCompiler, SwarmPlan, SubTask, AgentRole, TaskStatus
+from .teleport import StateTransfer, StateBundle
+from .swarm import TaskPlanner, TaskPlan, SubTask, AgentRole, TaskStatus
 from .patterns import PatternAnalyzer, PatternInsight
-from .chp import CHPProtocol
+from .chp import ChannelProtocol
 
 __all__ = [
     "__version__",
@@ -37,20 +32,20 @@ __all__ = [
     "CognexEngine",
     "CognexReport",
     "AuditLog",
-    "TrustGradientEngine",
+    "TrustEngine",
     "TrustRecord",
     "TrustLevel",
     "PermissionDecision",
     "DecisionLedger",
     "DecisionEntry",
-    "TeleportProtocol",
-    "TeleportBundle",
-    "IntentCompiler",
-    "SwarmPlan",
+    "StateTransfer",
+    "StateBundle",
+    "TaskPlanner",
+    "TaskPlan",
     "SubTask",
     "AgentRole",
     "TaskStatus",
     "PatternAnalyzer",
     "PatternInsight",
-    "CHPProtocol",
+    "ChannelProtocol",
 ]

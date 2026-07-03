@@ -1,4 +1,3 @@
-"""Core data models for the Cognex Engine."""
 
 from __future__ import annotations
 
@@ -9,7 +8,6 @@ from datetime import datetime, timezone
 
 
 class MemoryType(enum.Enum):
-    """What kind of memory this is."""
 
     FACT = "fact"  # A piece of knowledge learned
     PREFERENCE = "preference"  # A user preference discovered
@@ -20,7 +18,6 @@ class MemoryType(enum.Enum):
 
 
 class MemoryScope(enum.Enum):
-    """Who this memory belongs to."""
 
     PRIVATE = "private"  # Only this user
     PROJECT = "project"  # Shared across users of this project
@@ -29,22 +26,21 @@ class MemoryScope(enum.Enum):
 
 @dataclass(frozen=True)
 class MemoryEntry:
-    """A single memory unit — a fact, preference, decision, pattern, etc."""
 
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
     type: MemoryType = MemoryType.FACT
     scope: MemoryScope = MemoryScope.PRIVATE
     content: str = ""
-    context: str = ""  # Where/when this was learned
-    relevance_score: float = 1.0  # Starts at 1.0, decays over time
+    context: str = ""
+    relevance_score: float = 1.0
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     last_accessed: datetime | None = None
     access_count: int = 0
-    project: str = ""  # Which project this belongs to (if any)
+    project: str = ""
     tags: tuple[str, ...] = ()
+    gist: str = ""
 
     def touch(self) -> MemoryEntry:
-        """Mark as accessed — boosts relevance."""
         return MemoryEntry(
             id=self.id,
             type=self.type,
@@ -57,10 +53,10 @@ class MemoryEntry:
             access_count=self.access_count + 1,
             project=self.project,
             tags=self.tags,
+            gist=self.gist,
         )
 
     def decay(self, factor: float = 0.95) -> MemoryEntry:
-        """Age the memory — unused memories fade."""
         return MemoryEntry(
             id=self.id,
             type=self.type,
@@ -73,6 +69,7 @@ class MemoryEntry:
             access_count=self.access_count,
             project=self.project,
             tags=self.tags,
+            gist=self.gist,
         )
 
     def as_dict(self) -> dict:
@@ -90,6 +87,7 @@ class MemoryEntry:
             "access_count": self.access_count,
             "project": self.project,
             "tags": list(self.tags),
+            "gist": self.gist,
         }
 
     @classmethod
@@ -108,12 +106,12 @@ class MemoryEntry:
             access_count=d["access_count"],
             project=d.get("project", ""),
             tags=tuple(d.get("tags", [])),
+            gist=d.get("gist", ""),
         )
 
 
 @dataclass(frozen=True)
 class SessionSnapshot:
-    """Compressed summary of a session — stored for future recall."""
 
     session_id: str
     project: str = ""
@@ -161,8 +159,7 @@ class SessionSnapshot:
         )
 
 
-class CognitiveUnitType(enum.Enum):
-    """Type of cognitive unit."""
+class StateUnitType(enum.Enum):
 
     DECISION = "decision"
     CONSTRAINT = "constraint"
@@ -171,25 +168,24 @@ class CognitiveUnitType(enum.Enum):
 
 
 @dataclass(frozen=True)
-class CognitiveUnit:
-    """A cognitive unit — captures what, why, scope, and confidence.
-
-    This is the foundation of CHP (Cognitive Handoff Protocol) support.
-    Captures not just what was decided but why, scope, and confidence.
-    """
+class StateUnit:
 
     unit_id: str = field(default_factory=lambda: uuid.uuid4().hex[:16])
-    unit_type: str = "decision"  # CognitiveUnitType value
-    content: str = ""  # the what
-    rationale: str = ""  # the why — key new field
-    scope: str = ""  # which project/module/subsystem this belongs to
-    confidence: float = 1.0  # 0.0–1.0, decays when overridden
+    unit_type: str = "decision"
+    content: str = ""
+    rationale: str = ""
+    scope: str = ""
+    confidence: float = 1.0
     tags: tuple[str, ...] = ()
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     session_id: str = ""
     project: str = ""
-    override_count: int = 0  # incremented when downstream contradicts
+    override_count: int = 0
     last_verified: datetime | None = None
+    epistemic_status: str = "assumed"
+    verification_condition: str = ""
+    depends_on: tuple[str, ...] = ()
+    staleness_deadline: datetime | None = None
 
     def as_dict(self) -> dict:
         return {
@@ -207,10 +203,16 @@ class CognitiveUnit:
             "last_verified": self.last_verified.isoformat()
             if self.last_verified
             else None,
+            "epistemic_status": self.epistemic_status,
+            "verification_condition": self.verification_condition,
+            "depends_on": list(self.depends_on),
+            "staleness_deadline": self.staleness_deadline.isoformat()
+            if self.staleness_deadline
+            else None,
         }
 
     @classmethod
-    def from_dict(cls, d: dict) -> CognitiveUnit:
+    def from_dict(cls, d: dict) -> StateUnit:
         return cls(
             unit_id=d["unit_id"],
             unit_type=d.get("unit_type", "decision"),
@@ -225,5 +227,11 @@ class CognitiveUnit:
             override_count=d.get("override_count", 0),
             last_verified=datetime.fromisoformat(d["last_verified"])
             if d.get("last_verified")
+            else None,
+            epistemic_status=d.get("epistemic_status", "assumed"),
+            verification_condition=d.get("verification_condition", ""),
+            depends_on=tuple(d.get("depends_on", [])),
+            staleness_deadline=datetime.fromisoformat(d["staleness_deadline"])
+            if d.get("staleness_deadline")
             else None,
         )

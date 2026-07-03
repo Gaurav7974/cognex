@@ -1,11 +1,3 @@
-"""
-Cognex Engine MCP Server
-
-Exposes the Cognex Engine as MCP tools for use with Claude Code,
-OpenCode, Cursor, Codex, and any MCP-compatible AI coding assistant.
-
-Uses stdio transport for local tool integration.
-"""
 
 import asyncio
 import importlib.metadata
@@ -45,25 +37,20 @@ def create_server(name: str = "cognex-engine") -> Server:
     async def handle_list_tools(
         params: types.ListToolsRequest,
     ) -> types.ListToolsResult:
-        """List all available MCP tools."""
         return types.ListToolsResult(tools=list_all_tools())
 
     @server.call_tool()
     async def handle_call_tool(
         name: str, arguments: dict | None
     ) -> types.CallToolResult:
-        """Execute tool calls with error handling."""
         try:
-            # Validate arguments exist
             if not arguments:
                 raise McpError(
                     ErrorData(code=INVALID_PARAMS, message="Missing tool arguments")
                 )
 
-            # Delegate to tool handler
             result = await handle_tool_call(name, arguments)
 
-            # Format result as text content
             if isinstance(result, dict):
                 text = json.dumps(result, indent=2, default=str)
             else:
@@ -74,7 +61,6 @@ def create_server(name: str = "cognex-engine") -> Server:
             )
 
         except McpError:
-            # Re-raise MCP errors as-is
             raise
         except ValueError as e:
             # Convert ValueError to MCP error
@@ -88,7 +74,6 @@ def create_server(name: str = "cognex-engine") -> Server:
 
     @server.list_prompts()
     async def handle_list_prompts() -> list[types.Prompt]:
-        """List all available MCP prompts."""
         return [
             types.Prompt(
                 name="start-session",
@@ -103,8 +88,19 @@ def create_server(name: str = "cognex-engine") -> Server:
             ),
             types.Prompt(
                 name="end-session",
-                description="End current session, save key decisions and memories, generate summary",
+                description="End current session and create a compact signed handoff manifest",
                 arguments=[],
+            ),
+            types.Prompt(
+                name="resume-handoff",
+                description="Resume from a signed Cognex handoff manifest",
+                arguments=[
+                    types.PromptArgument(
+                        name="manifest_json",
+                        description="Signed handoff manifest JSON",
+                        required=True,
+                    )
+                ],
             ),
             types.Prompt(
                 name="export-brain",
@@ -133,24 +129,31 @@ def create_server(name: str = "cognex-engine") -> Server:
     async def handle_get_prompt(
         name: str, arguments: dict | None
     ) -> types.GetPromptResult:
-        """Get a specific prompt by name."""
         project = (arguments or {}).get("project", "")
         topic = (arguments or {}).get("topic", "")
+        manifest_json = (arguments or {}).get("manifest_json", "")
 
         prompts = {
             "start-session": f"""
 Please start a new Cognex session now.
 1. Call cognex_start_session with a unique session_id (use current timestamp) and project="{project}"
-2. Call memory_get_context with query="current work preferences decisions" and project="{project}"
-3. Summarize what you found — preferences, recent decisions, patterns
+2. Call recall with query="current work preferences decisions" and project="{project}"
+3. Use note_reasoning at decision points for decisions, assumptions, rejected options, constraints, and questions
 4. Tell me what context you loaded so I know what you remember
 """,
             "end-session": """
 Please end the current Cognex session now.
-1. Call memory_add for each important fact, preference, or pattern from this session
-2. Call ledger_record for each significant decision made
-3. Call cognex_end_session with a clear summary and list of key decisions
-4. Tell me what you saved so I can verify nothing important was missed
+1. Call note_reasoning for any important unsaved decision, assumption, rejection, constraint, or question
+2. Call cognex_end_session with a short summary and list of key decision ids
+3. Call handoff_create with the active project, ordered goal_stack, in_flight_ops, and concise notes
+4. Return the manifest id, baseline marker, and open questions
+""",
+            "resume-handoff": f"""
+Please resume work from this Cognex handoff manifest.
+1. Call handoff_resume with manifest_json={manifest_json!r}
+2. Review the goal stack, must-not-revisit counterfactuals, open questions, and stale units
+3. Pull details on demand with recall and provenance_trace; do not eagerly load full content
+4. Continue by calling note_reasoning at new decision points
 """,
             "export-brain": """
 Please export my entire Cognex brain now.
@@ -195,12 +198,9 @@ async def run_server(
     project: str = "default",
     server_name: str = "cognex-engine",
 ) -> None:
-    """Run the MCP server."""
-    # Initialize context
     ctx = CognexContext.get_instance(db_path=db_path, project=project)
     logger.info(f"Starting Cognex Engine MCP Server (db: {ctx.db_path})")
 
-    # Health check: verify database is accessible
     try:
         count = ctx.engine.store.count()
         logger.info(f"Database health check passed: {count} memories")
@@ -213,10 +213,8 @@ async def run_server(
         logger.error(f"Database health check failed: {e}")
         raise RuntimeError(f"Cannot start server: database not accessible - {e}")
 
-    # Create server
     server = create_server(server_name)
 
-    # Run with stdio transport
     async with stdio_server() as (read_stream, write_stream):
         init_options = InitializationOptions(
             server_name=server_name,
@@ -230,23 +228,17 @@ async def run_server(
 
 
 def print_status(db_path: Optional[str] = None, project: str = "default") -> None:
-    # Print cognex status without starting the server
-    # Get context (don't start server)
     ctx = CognexContext.get_instance(db_path=db_path, project=project)
 
     print("Cognex status")
-
-    # DB path
     print(f"Database: {ctx.db_path}")
 
-    # Memory count
     try:
         memory_count = ctx.engine.store.count()
         print(f"Memories: {memory_count}")
     except Exception as e:
         print(f"Memories: ERROR - {e}")
 
-    # Decision count
     try:
         from cognex.ledger import DecisionLedger
 
@@ -256,17 +248,15 @@ def print_status(db_path: Optional[str] = None, project: str = "default") -> Non
     except Exception as e:
         print(f"Decisions: ERROR - {e}")
 
-    # Trust records
     try:
-        from cognex.trust import TrustGradientEngine
+        from cognex.trust import TrustEngine
 
-        trust = TrustGradientEngine(ctx.db_path)
+        trust = TrustEngine(ctx.db_path)
         trust_summary = trust.get_trust_summary()
         print(f"Trust Records: {len(trust_summary)}")
     except Exception as e:
         print(f"Trust Records: ERROR - {e}")
 
-    # AI tools configured
     print("Configured AI tools:")
     from cognex_mcp.installer import detect_installed_platforms
 
@@ -279,7 +269,6 @@ def print_status(db_path: Optional[str] = None, project: str = "default") -> Non
 
 
 def main() -> None:
-    """Main entry point for the MCP server."""
     import argparse
 
     parser = argparse.ArgumentParser(description="Cognex Engine MCP Server")
@@ -320,14 +309,12 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    # Handle install command
     if args.install:
         from cognex_mcp.installer import run_install
 
         run_install(platform=args.platform, dry_run=args.dry_run)
         return
 
-    # Handle status command
     if args.status:
         print_status(db_path=args.db_path, project=args.project)
         return
@@ -335,7 +322,6 @@ def main() -> None:
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
-    # Run server
     try:
         asyncio.run(
             run_server(

@@ -1,10 +1,3 @@
-"""Consolidates episodic memories into clusters and procedural schemas.
-
-Implements the Three-Tier Memory Hierarchy:
-- Tier 1: Episodic memories (raw facts, preferences, decisions, etc.)
-- Tier 2: Semantic clusters (synthesized themes from groups of episodic memories)
-- Tier 3: Procedural schemas (durable, non-decaying behavioral patterns)
-"""
 
 from __future__ import annotations
 
@@ -21,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 
 class MemoryConsolidator:
-    """Consolidates episodic memories into higher-level semantic representations."""
 
     @classmethod
     def consolidate(
@@ -30,11 +22,8 @@ class MemoryConsolidator:
         project: str = "",
         min_cluster_size: int = 5,
     ) -> list[dict[str, Any]]:
-        """Group episodic memories by tag and project, and synthesize clusters."""
-        # 1. Fetch all memories for the project
         memories = store.search(project=project, limit=5000)
 
-        # 2. Group memories by (project, tag)
         groups: dict[tuple[str, str], list[str]] = {}
         memories_by_id = {m.id: m for m in memories}
 
@@ -53,7 +42,6 @@ class MemoryConsolidator:
 
                 theme = f"Consolidated memories under tag '{tag}'"
 
-                # Extractive summary: combine first sentences of episodic memories
                 contents = []
                 for mid in ids:
                     m = memories_by_id[mid]
@@ -65,7 +53,6 @@ class MemoryConsolidator:
 
                 cluster_id = uuid.uuid4().hex[:12]
 
-                # Check if cluster already exists for this theme and project
                 try:
                     existing = conn.execute(
                         "SELECT cluster_id FROM memory_clusters WHERE project = ? AND theme = ? LIMIT 1",
@@ -134,7 +121,6 @@ class MemoryConsolidator:
         store: MemoryStore,
         force: bool = False,
     ) -> dict[str, Any] | None:
-        """Promote a stable cluster to a procedural schema."""
         with store._connect() as conn:
             try:
                 row = conn.execute(
@@ -168,7 +154,6 @@ class MemoryConsolidator:
             source_cluster_ids = json.dumps([cluster_id])
             now_str = datetime.now(timezone.utc).isoformat()
 
-            # Check if schema already exists
             existing = conn.execute(
                 "SELECT schema_id FROM memory_schemas WHERE project = ? AND name = ? LIMIT 1",
                 (row["project"], name),

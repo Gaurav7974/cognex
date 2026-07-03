@@ -1,4 +1,3 @@
-"""TCP sync client for Cognex delta replication."""
 
 from __future__ import annotations
 
@@ -12,9 +11,8 @@ from cognex_mcp.context import CognexContext
 from cognex.teleport import (
     sign_bundle,
     get_or_create_keys,
-    get_key_fingerprint,
 )
-from cognex.models import MemoryEntry, CognitiveUnit
+from cognex.models import MemoryEntry, StateUnit
 from cognex.ledger import DecisionEntry
 from .protocol import send_msg, recv_msg
 from .delta import DeltaComputer, MergeResolver
@@ -23,26 +21,22 @@ logger = logging.getLogger(__name__)
 
 
 class SyncClient:
-    """Sync client that connects to a peer server, pulls deltas, and merges them."""
 
     def __init__(self, host: str, port: int = 7474) -> None:
         self.host = host
         self.port = port
 
     async def pull_and_merge(self) -> dict[str, Any]:
-        """Connect to the peer, fetch its deltas, and merge into local databases."""
         ctx = CognexContext.get_instance()
         reader, writer = await asyncio.open_connection(self.host, self.port)
 
         try:
-            # 1. Read cryptographic challenge
             challenge_msg = await recv_msg(reader)
             if not challenge_msg or challenge_msg.get("type") != "challenge":
                 raise RuntimeError("Invalid handshake: challenge missing")
 
             challenge = challenge_msg["challenge"]
 
-            # 2. Sign challenge and authenticate
             private_bytes, public_pem = get_or_create_keys()
             signature = sign_bundle(challenge, private_bytes)
 
@@ -53,7 +47,6 @@ class SyncClient:
             }
             await send_msg(writer, auth_msg)
 
-            # 3. Read auth status
             status_msg = await recv_msg(reader)
             if not status_msg or not status_msg.get("success"):
                 err = (
@@ -63,16 +56,13 @@ class SyncClient:
                 )
                 raise PermissionError(f"Sync connection rejected: {err}")
 
-            # 4. Find since timestamp from local clocks
             clocks = DeltaComputer.compute_vector_clock(
                 ctx.engine.store, ctx.ledger, ctx.unit_store
             )
             since = min(clocks.values())
 
-            # 5. Send request
             await send_msg(writer, {"type": "get_delta", "since": since})
 
-            # 6. Receive delta response
             response = await recv_msg(reader)
             if not response or response.get("type") != "delta":
                 raise RuntimeError("Invalid delta response from peer")
@@ -80,10 +70,8 @@ class SyncClient:
             delta = response["delta"]
             peer_clocks = response["vector_clock"]
 
-            # 7. Merge deltas
             stats = {"memories": 0, "decisions": 0, "cognitive_units": 0, "conflicts": 0}
 
-            # Merge memories
             for m_dict in delta.get("memories", []):
                 remote_mem = MemoryEntry.from_dict(m_dict)
                 local_mem = ctx.engine.store.get(remote_mem.id)
@@ -109,7 +97,6 @@ class SyncClient:
                     ctx.engine.store.save(remote_mem)
                     stats["memories"] += 1
 
-            # Merge decisions
             for d_dict in delta.get("decisions", []):
                 remote_dec = DecisionEntry.from_dict(d_dict)
                 local_dec = ctx.ledger.get(remote_dec.id)
@@ -134,9 +121,8 @@ class SyncClient:
                     ctx.ledger._save(remote_dec)
                     stats["decisions"] += 1
 
-            # Merge cognitive units
             for u_dict in delta.get("cognitive_units", []):
-                remote_unit = CognitiveUnit(
+                remote_unit = StateUnit(
                     unit_id=u_dict["unit_id"],
                     unit_type=u_dict["unit_type"],
                     content=u_dict["content"],
@@ -185,19 +171,16 @@ class SyncClient:
             await writer.wait_closed()
 
     async def push(self) -> dict[str, Any]:
-        """Connect to the peer, fetch its vector clock, compile local changes, and push them."""
         ctx = CognexContext.get_instance()
         reader, writer = await asyncio.open_connection(self.host, self.port)
 
         try:
-            # 1. Read cryptographic challenge
             challenge_msg = await recv_msg(reader)
             if not challenge_msg or challenge_msg.get("type") != "challenge":
                 raise RuntimeError("Invalid handshake: challenge missing")
 
             challenge = challenge_msg["challenge"]
 
-            # 2. Sign challenge and authenticate
             private_bytes, public_pem = get_or_create_keys()
             signature = sign_bundle(challenge, private_bytes)
 
@@ -208,7 +191,6 @@ class SyncClient:
             }
             await send_msg(writer, auth_msg)
 
-            # 3. Read auth status
             status_msg = await recv_msg(reader)
             if not status_msg or not status_msg.get("success"):
                 err = (
@@ -218,19 +200,15 @@ class SyncClient:
                 )
                 raise PermissionError(f"Sync connection rejected: {err}")
 
-            # 4. Peer clock is in the auth success payload
             peer_clocks = status_msg["vector_clock"]
             since = min(peer_clocks.values())
 
-            # 5. Compile local delta
             local_delta = DeltaComputer.compute_delta(
                 ctx.engine.store, ctx.ledger, ctx.unit_store, since
             )
 
-            # 6. Send post_delta request
             await send_msg(writer, {"type": "post_delta", "delta": local_delta})
 
-            # 7. Receive status response
             response = await recv_msg(reader)
             if not response or response.get("type") != "status" or not response.get("success"):
                 err = response.get("error") if response else "Unknown error"

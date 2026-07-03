@@ -1,6 +1,3 @@
-"""
-Teleport tools - state serialization and transfer.
-"""
 
 import json
 from typing import Any
@@ -17,10 +14,6 @@ async def teleport_create_bundle(
     model_name: str | None = None,
     tool_claims: list[str] | None = None,
 ) -> dict[str, Any]:
-    """Create a teleport bundle for state transfer.
-
-    v2.0: Now includes full memory and decision content for cross-machine transfer.
-    """
     ctx = CognexContext.get_instance()
 
     bundle = ctx.teleport.create_bundle(
@@ -33,6 +26,7 @@ async def teleport_create_bundle(
         tool_claims=tuple(tool_claims or []),
         trust_engine=ctx.trust,
         decision_ledger=ctx.ledger,
+        unit_store=ctx.unit_store,
     )
 
     # Audit log (direct call - AuditLog is thread-safe)
@@ -58,16 +52,12 @@ async def teleport_create_bundle(
 
 
 async def teleport_rehydrate(bundle_json: str | dict) -> dict[str, Any]:
-    """Rehydrate engine state from a bundle.
-
-    v2.0: Now restores full memory and decision content for cross-machine transfer.
-    """
     ctx = CognexContext.get_instance()
 
-    from cognex import TeleportBundle
+    from cognex import StateBundle
 
     # Handle multiple input forms:
-    # 1. Raw serialized bundle string (from TeleportBundle.serialize())
+    # 1. Raw serialized bundle string (from StateBundle.serialize())
     # 2. JSON string of the wrapper dict from teleport_create_bundle
     # 3. Dict object from teleport_create_bundle
     if isinstance(bundle_json, dict):
@@ -98,15 +88,38 @@ async def teleport_rehydrate(bundle_json: str | dict) -> dict[str, Any]:
         )
 
     try:
-        bundle = TeleportBundle.deserialize(bundle_json)
+        bundle = StateBundle.deserialize(bundle_json)
     except (json.JSONDecodeError, KeyError, TypeError) as e:
         raise ValueError(f"Invalid bundle format: {e}")
+
+    memory_conflicts = ctx.reconciler.classify_memories(list(bundle.memories))
+    unit_conflicts = ctx.reconciler.classify_units(list(bundle.cognitive_units))
+    if memory_conflicts["conflicts"] or unit_conflicts["conflicts"]:
+        ctx.audit.append(
+            event_type="bundle_rehydrate_conflicts",
+            session_id=ctx.engine.get_current_session(),
+            project=bundle.project,
+            agent_id=None,
+            payload={
+                "bundle_id": bundle.bundle_id,
+                "memory_conflicts": len(memory_conflicts["conflicts"]),
+                "unit_conflicts": len(unit_conflicts["conflicts"]),
+            },
+        )
+        return {
+            "status": "conflicts",
+            "bundle_id": bundle.bundle_id,
+            "memory_conflicts": memory_conflicts["conflicts"],
+            "unit_conflicts": unit_conflicts["conflicts"],
+            "message": "Conflicted items were not imported; resolve with reconcile_resolve.",
+        }
 
     report = ctx.teleport.rehydrate(
         bundle=bundle,
         engine=ctx.engine,
         trust_engine=ctx.trust,
         decision_ledger=ctx.ledger,
+        unit_store=ctx.unit_store,
     )
 
     # Audit log (direct call - AuditLog is thread-safe)
@@ -125,5 +138,16 @@ async def teleport_rehydrate(bundle_json: str | dict) -> dict[str, Any]:
         "decisions_restored": report.get("decisions_restored", 0),
         "sessions_restored": report.get("sessions_restored", 0),
         "trust_restored": report.get("trust_restored", False),
+        "units_restored": report.get("units_restored", 0),
+        "reconciliation": {
+            "memories": {
+                "new": len(memory_conflicts["new"]),
+                "identical": len(memory_conflicts["identical"]),
+            },
+            "units": {
+                "new": len(unit_conflicts["new"]),
+                "identical": len(unit_conflicts["identical"]),
+            },
+        },
         "bundle_id": report.get("bundle_id", ""),
     }

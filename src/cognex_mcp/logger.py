@@ -1,7 +1,3 @@
-"""Logging utilities for Cognex MCP server and tests.
-
-Provides standardized logging configuration for CLI, tests, and production use.
-"""
 
 import logging
 import sys
@@ -13,16 +9,6 @@ def setup_logger(
     level: int = logging.INFO,
     format_str: Optional[str] = None,
 ) -> logging.Logger:
-    """Set up a logger with standard formatting.
-
-    Args:
-        name: Logger name (typically __name__)
-        level: Logging level (default: INFO)
-        format_str: Custom format string (uses default if None)
-
-    Returns:
-        Configured logger instance
-    """
     if format_str is None:
         format_str = "%(levelname)-8s | %(name)s | %(message)s"
 

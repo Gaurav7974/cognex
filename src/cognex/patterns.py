@@ -1,4 +1,3 @@
-# Pattern detection from decision history using SQL aggregation.
 
 from __future__ import annotations
 
@@ -29,6 +28,7 @@ class PatternInsight:
 
 
 class PatternAnalyzer:
+
     MIN_SAMPLES = 5
     SIGNIFICANT_RATIO = 1.5
 
@@ -70,7 +70,6 @@ class PatternAnalyzer:
         if len(rows) < 2:
             return []
 
-        # Build period stats
         periods = {}
         total_decisions = 0
         for period, total, failures in rows:
@@ -81,16 +80,13 @@ class PatternAnalyzer:
             }
             total_decisions += total
 
-        # Find best and worst
         sorted_periods = sorted(periods.items(), key=lambda x: x[1]["rate"])
         best_period, best_data = sorted_periods[0]
         worst_period, worst_data = sorted_periods[-1]
 
-        # Need meaningful difference
         if worst_data["rate"] == best_data["rate"]:
             return []
 
-        # Calculate ratio (handle zero best rate)
         if best_data["rate"] == 0:
             ratio = float("inf") if worst_data["rate"] > 0 else 1.0
         else:
@@ -99,7 +95,6 @@ class PatternAnalyzer:
         if ratio < self.SIGNIFICANT_RATIO:
             return []
 
-        # Cap ratio for display
         display_ratio = min(ratio, 10.0)
         confidence = min(1.0, total_decisions / 50)
 
@@ -140,7 +135,6 @@ class PatternAnalyzer:
         if not rows:
             return []
 
-        # Baseline failure rate
         total_all = sum(r[1] for r in rows)
         failures_all = sum(r[2] for r in rows)
         baseline = failures_all / total_all if total_all > 0 else 0
@@ -149,7 +143,6 @@ class PatternAnalyzer:
         for tool, total, failures in rows:
             rate = failures / total
 
-            # High failure tool
             if rate > 0.2 and rate >= baseline * self.SIGNIFICANT_RATIO:
                 insights.append(
                     PatternInsight(
@@ -161,7 +154,6 @@ class PatternAnalyzer:
                     )
                 )
 
-            # Reliable tool
             elif rate < 0.1 and total >= 10 and baseline > 0.15:
                 insights.append(
                     PatternInsight(

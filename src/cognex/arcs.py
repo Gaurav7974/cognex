@@ -1,14 +1,7 @@
-"""Session Arc Manager for grouping related sessions over time.
-
-This module supports temporal context windows (session arcs) to track
-multi-session progress narratives and help agents maintain context over
-days or weeks of separate sessions.
-"""
 
 from __future__ import annotations
 
 import json
-import logging
 import sqlite3
 import uuid
 from datetime import datetime, timezone, timedelta
@@ -16,22 +9,18 @@ from typing import Any
 
 from .store import MemoryStore
 
-logger = logging.getLogger(__name__)
 
 
 class SessionArcManager:
-    """Manages session arcs to represent multi-session context narratives."""
 
     @classmethod
     def get_or_create_arc(
         cls, session_id: str, project: str, store: MemoryStore
     ) -> dict[str, Any]:
-        """Find the most recent active arc for a project within 7 days, or create one."""
         now = datetime.now(timezone.utc)
         now_str = now.isoformat()
 
         with store._connect() as conn:
-            # Find the most recent active arc for project
             try:
                 row = conn.execute(
                     """
@@ -48,7 +37,6 @@ class SessionArcManager:
             if row:
                 last_session_at = datetime.fromisoformat(row["last_session_at"])
                 if now - last_session_at <= timedelta(days=7):
-                    # Within 7 days, append session_id
                     session_ids = json.loads(row["session_ids"])
                     if session_id and session_id not in session_ids:
                         session_ids.append(session_id)
@@ -73,7 +61,6 @@ class SessionArcManager:
                         "status": "active",
                     }
 
-            # Create new arc
             arc_id = uuid.uuid4().hex[:12]
             session_ids = [session_id] if session_id else []
             try:
@@ -100,7 +87,6 @@ class SessionArcManager:
 
     @classmethod
     def close_arc(cls, arc_id: str, store: MemoryStore) -> bool:
-        """Mark an arc as closed and compile its final summary narrative."""
         summary = cls.summarize_arc(arc_id, store)
         with store._connect() as conn:
             try:
@@ -120,7 +106,6 @@ class SessionArcManager:
 
     @classmethod
     def get_active_arc(cls, project: str, store: MemoryStore) -> dict[str, Any] | None:
-        """Get the current active session arc for a project."""
         with store._connect() as conn:
             try:
                 row = conn.execute(
@@ -151,7 +136,6 @@ class SessionArcManager:
 
     @classmethod
     def summarize_arc(cls, arc_id: str, store: MemoryStore) -> str:
-        """Compile a narrative combining all session summaries in this arc."""
         with store._connect() as conn:
             try:
                 row = conn.execute(

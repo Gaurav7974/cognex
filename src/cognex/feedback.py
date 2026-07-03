@@ -1,9 +1,3 @@
-"""Outcome feedback and semantic decay modifier calculations.
-
-Allows the system to adjust memory relevance scores retroactively based on
-the success or failure of decisions made in a session, and to adjust decay rates
-based on how semantically unique a memory is.
-"""
 
 from __future__ import annotations
 
@@ -18,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class OutcomeFeedback:
-    """Retroactively adjusts memory relevance based on outcome success."""
 
     @classmethod
     def apply_outcome_feedback(
@@ -29,7 +22,6 @@ class OutcomeFeedback:
         ledger,
         audit,
     ) -> None:
-        """Trace memories accessed in session_id and adjust their relevance."""
         if not session_id or session_id == "unknown":
             return
 
@@ -49,7 +41,6 @@ class OutcomeFeedback:
 
         memory_ids = [r["memory_id"] for r in rows]
 
-        # Apply adjustments
         delta = 0.05 if success else 0.03
         for mid in memory_ids:
             if success:
@@ -57,7 +48,6 @@ class OutcomeFeedback:
             else:
                 store.penalize_relevance(mid, delta=delta)
 
-        # Log to audit log
         try:
             audit.append(
                 event_type="outcome_feedback",
@@ -75,11 +65,6 @@ class OutcomeFeedback:
     def compute_uniqueness_modifiers(
         cls, store: MemoryStore, project: str = ""
     ) -> dict[str, float]:
-        """Compute per-memory decay modifiers based on semantic uniqueness.
-
-        Unique memories (low similarity to neighbors) decay slower (modifier < 1.0).
-        Redundant memories (high similarity to neighbors) decay faster (modifier > 1.0).
-        """
         from .embeddings import EmbeddingEngine
 
         if not EmbeddingEngine.AVAILABLE:
@@ -108,7 +93,6 @@ class OutcomeFeedback:
             # Not enough memories to compute meaningful density/similarity
             return {}
 
-        # Unpack all embeddings
         embeddings = {}
         for r in rows:
             blob: bytes = r["embedding"]
@@ -135,7 +119,6 @@ class OutcomeFeedback:
             if not similarities:
                 continue
 
-            # Find similarity to 5 nearest neighbors
             similarities.sort(reverse=True)
             k = min(5, len(similarities))
             avg_sim = sum(similarities[:k]) / k

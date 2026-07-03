@@ -1,11 +1,3 @@
-"""Decision Ledger — records every significant choice with alternatives and outcomes.
-
-Migration from bare sqlite3.connect()
---------------------------------------
-Previous implementation used a bare ``sqlite3.connect()`` on every call
-with no WAL mode, busy timeout, or connection reuse.  This module now uses
-the shared ``_pool.ConnectionPool`` for consistent connection quality.
-"""
 
 from __future__ import annotations
 
@@ -20,7 +12,6 @@ from ._pool import ConnectionPool, execute_with_retry
 
 @dataclass(frozen=True)
 class DecisionEntry:
-    """A single decision the agent made."""
     id:              str                  = field(default_factory=lambda: uuid.uuid4().hex[:12])
     tool_used:       str                  = ""
     alternatives:    tuple[str, ...]      = ()
@@ -72,20 +63,6 @@ class DecisionEntry:
 
 
 class DecisionLedger:
-    """Records and retrieves agent decisions with full context.
-
-    Usage::
-
-        ledger = DecisionLedger()
-        entry = ledger.record(
-            tool_used="BashTool",
-            alternatives=["FileEditTool"],
-            reasoning="40% faster for bulk ops",
-            project="api",
-        )
-        ledger.record_outcome(entry.id, outcome="All files migrated", success=True)
-        similar = ledger.find_similar("migrating config files")
-    """
 
     def __init__(self, db_path: str | Path | None = None) -> None:
         self.db_path = Path(db_path) if db_path else Path.home() / ".cognex.db" / "cognex.db"
@@ -116,7 +93,6 @@ class DecisionLedger:
                 CREATE INDEX IF NOT EXISTS idx_decisions_success   ON decisions(outcome_success);
             """)
 
-    # ── Write ─────────────────────────────────────────────────────────────
 
     def record(
         self,
@@ -153,7 +129,6 @@ class DecisionLedger:
         self._save(updated)
         return updated
 
-    # ── Read ──────────────────────────────────────────────────────────────
 
     def get(self, decision_id: str) -> DecisionEntry | None:
         with self._pool.get_connection() as conn:
@@ -237,7 +212,6 @@ class DecisionLedger:
         with self._pool.get_connection() as conn:
             return conn.execute("SELECT COUNT(*) FROM decisions").fetchone()[0]
 
-    # ── Internal ──────────────────────────────────────────────────────────
 
     def _save(self, entry: DecisionEntry) -> None:
         with self._pool.get_connection() as conn:

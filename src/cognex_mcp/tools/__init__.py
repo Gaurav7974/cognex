@@ -1,4 +1,3 @@
-"""Tool registry - imports all tool implementations and provides dispatcher."""
 
 from cognex_mcp.tools.registry import list_all_tools
 from cognex_mcp.tools.dispatcher import handle_tool_call, run_in_thread
