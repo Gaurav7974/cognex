@@ -4,37 +4,33 @@ All notable changes to Cognex are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Versioning follows [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.2.0] - 2026-07-04
 
 ### Added
-- Cognitive state replication architecture across phases 2-6: explicit epistemic state on cognitive units, open questions, signed Merkle integrity roots, compact manifest handoff/resume, reconciliation conflict tracking, and low-friction `note_reasoning`.
-- Provenance graph tooling for compact origin/impact traces and explicit typed links, including first-class rejected alternatives from ledger decisions.
-- MCP tools for `provenance_trace`, `provenance_link`, `question_raise`, `question_resolve`, `integrity_verify`, `handoff_create`, `handoff_resume`, `reconcile_resolve`, and `note_reasoning`.
+- Three-Tier Memory Hierarchy: episodic memories consolidate into clusters (`memory_clusters`) and promote to behavioral schemas (`memory_schemas`).
+- Session Arc Abstraction: sessions within 7 days grouped into arcs (`session_arcs`) with multi-session narrative summaries.
+- Peer-to-Peer Sync (`cognex_sync`): delta sync over TCP with `pull_and_merge` and `push`, Ed25519 challenge-response auth for peer verification.
+- Trust-gated conflict resolution: last-writer-wins and confidence-weighted merge rules for memories, decisions, and state units.
+- Hybrid Retrieval (RRF): BM25 + semantic vector search merged via Reciprocal Rank Fusion.
+- Local Embeddings: offline `sentence-transformers` + `sqlite-vec` integration for semantic search.
+- Outcome Feedback: retroactive memory relevance adjustment based on ledger decision outcomes.
+- Cognitive State Replication: explicit epistemic status on state units, open questions, signed Merkle integrity roots, compact handoff/resume manifests, and reconciliation conflict tracking.
+- Provenance graph: origin/impact traces with `provenance_trace`, `provenance_link` MCP tools.
+- New MCP tools: `question_raise`, `question_resolve`, `integrity_verify`, `handoff_create`, `handoff_resume`, `reconcile_resolve`, `note_reasoning`.
+- LongMemEval harness: 50-case retrieval evaluation suite with R@5 = 97.1% baseline.
 
 ### Changed
 - `unit_checkout` now includes epistemic class groupings and open questions.
-- Teleport remains available as the heavyweight full-database migration path, while manifest handoff is the compact default path.
-- Deprecated search/audit aliases remain callable for compatibility but are retired from the public tool registry to keep the exposed tool count capped.
+- Handoff manifest is now the compact default path; teleport remains for full cross-machine DB migration.
+- Deprecated tool aliases retired from the public registry (callable for compat, not exposed).
+- Internal class renames: `CognitiveUnit` → `StateUnit`, `TeleportProtocol` → `StateTransfer`, `TeleportBundle` → `StateBundle`, `TrustGradientEngine` → `TrustEngine`, `CHPProtocol` → `ChannelProtocol`.
+- Codebase-wide removal of decorative comments and docstring noise.
 
 ### Fixed
-- `CognitiveUnit` now carries the `unit_type` and epistemic fields used by stores and tools.
-- Teleport bundle signing now preserves cognitive units when returning the signed copy.
-- Eval harness retrieval and efficiency suites accept omitted id maps for backwards-compatible lifecycle tests.
-
-## [0.2.0] - 2026-06-26
-
-### Added
-- Three-Tier Memory Hierarchy: consolidation of episodic memories into clusters (`memory_clusters`) and promotion to behavioral schemas (`memory_schemas`).
-- Session Arc Abstraction: grouping of sessions within 7 days into session arcs (`session_arcs`) with multi-session narrative summaries.
-- Peer-to-Peer Cognex Sync: content-addressed delta sync over TCP supporting `pull_and_merge` and `push` client-server replication.
-- Cryptographic Handshake: Ed25519 signature verification on TCP sync server challenge messages to authenticate remote peers.
-- Trust-Gated Merge & Conflict Resolution: last-writer-wins and confidence-weighted conflict resolution rules for merging memories, decisions, and cognitive units.
-- Local Embedding Integration: offline vector embeddings via `sentence-transformers` and `sqlite-vec` integration.
-- Reciprocal Rank Fusion (RRF): hybrid retrieval merging lexical (BM25) and semantic channels.
-- Outcome-Conditioned Feedback Loops: retroactive memory relevance adjustment based on decision success/failure in ledger outcomes.
-- Configurable Semaphore Backpressure: queue depth control and server-busy feedback for tool calls.
-- Paginated Memory Decay: cursor-based batched decay commits to minimize SQLite locking duration.
-- Explicit lifecycle initialization and dynamic imports for optional tools.
+- Teleport bundle signing now correctly preserves state units in the signed copy.
+- Broken `json_loads` fallback in sync delta — was re-raising instead of recovering.
+- `memory_add` via MCP now constructs `MemoryEntry` directly without indirection.
+- Eval harness accepts omitted id maps for backwards-compatible lifecycle tests.
 
 ## [0.1.7] - 2026-05-03
 
