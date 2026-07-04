@@ -97,3 +97,6 @@ credentials/
 .env.local
 .env.*.local
 *.gpg
+
+# Antigravity artifacts
+scratch/
