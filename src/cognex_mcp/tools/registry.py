@@ -495,7 +495,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
         "inputSchema": {
             "type": "object",
             "properties": {
-                "project": {"type": "string", "description": "Project name"},
+                "project": {"type": "string", "description": "Project name (empty = all projects)", "default": ""},
                 "scope": {"type": "string", "description": "Scope filter (optional)"},
                 "unit_type_filter": {
                     "type": "string",
@@ -503,7 +503,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
                     "enum": ["decision", "constraint", "progress", "task_state"],
                 },
             },
-            "required": ["project"],
+            "required": [],
         },
     },
     {
@@ -660,14 +660,14 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
         "inputSchema": {
             "type": "object",
             "properties": {
-                "project": {"type": "string", "description": "Project name to filter by"},
+                "project": {"type": "string", "description": "Project name to filter by (empty = all projects)", "default": ""},
                 "limit": {
                     "type": "integer",
                     "description": "Max number of entries to return",
                     "default": 50,
                 },
             },
-            "required": ["project"],
+            "required": [],
         },
     },
     {
@@ -810,14 +810,12 @@ _RETIRED_TOOL_NAMES = {
 _STATE_TOOL_DEFINITIONS: list[dict[str, Any]] = [
     {
         "name": "trust_query",
-        "description": "Consolidated trust query for checking approval posture or retrieving trust summaries.",
+        "description": "Consolidated trust query. Omit tool_name to get a full summary of all tools.",
         "inputSchema": {
             "type": "object",
             "properties": {
-                "tool_name": {"type": "string"},
-                "operation": {"type": "string"},
+                "tool_name": {"type": "string", "description": "Tool to query (omit for summary)"},
                 "project": {"type": "string"},
-                "mode": {"type": "string", "enum": ["check", "get", "summary"], "default": "check"},
             },
         },
     },
@@ -839,14 +837,14 @@ _STATE_TOOL_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "name": "recall",
-        "description": "Consolidated retrieval across memories, cognitive units, and decisions with compact or full detail.",
+        "description": "Consolidated retrieval across memories, cognitive units, and decisions.",
         "inputSchema": {
             "type": "object",
             "properties": {
-                "query": {"type": "string"},
+                "query": {"type": "string", "default": ""},
                 "kind": {"type": "string", "enum": ["all", "memory", "unit", "decision"], "default": "all"},
-                "detail": {"type": "string", "enum": ["compact", "full"], "default": "compact"},
-                "filters": {"type": "object"},
+                "detail": {"type": "string", "enum": ["ids", "snippets", "full"], "default": "snippets"},
+                "filters": {"type": "object", "properties": {"project": {"type": "string"}, "type": {"type": "string"}, "tags": {"type": "array", "items": {"type": "string"}}}},
                 "limit": {"type": "integer", "default": 10},
             },
         },
@@ -985,6 +983,10 @@ _STATE_TOOL_DEFINITIONS: list[dict[str, Any]] = [
 TOOL_DEFINITIONS = [
     tool for tool in TOOL_DEFINITIONS if tool["name"] not in _RETIRED_TOOL_NAMES
 ] + _STATE_TOOL_DEFINITIONS
+
+# MCP spec: every tool must explicitly declare its required fields.
+for _td in TOOL_DEFINITIONS:
+    _td["inputSchema"].setdefault("required", [])
 
 
 def list_all_tools() -> list[types.Tool]:

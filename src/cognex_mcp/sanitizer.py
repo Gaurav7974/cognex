@@ -32,10 +32,9 @@ MAX_RATIONALE_LENGTH = 2000
 def sanitize_content(content: str, memory_type: str | None = None) -> str:
     if not content:
         return ""
-    # Strip C0/C1 control characters except LF (\\x0a) and HT (\\x09).
     content = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", content)
     limit = _CONTENT_LENGTH_BY_TYPE.get(memory_type or "", _DEFAULT_CONTENT_LENGTH)
-    return content.lower()[:limit].strip()
+    return content[:limit].strip()
 
 
 def sanitize_rationale(rationale: str) -> str:
@@ -52,9 +51,12 @@ def sanitize_project(project: str) -> str:
     return project[:MAX_PROJECT_LENGTH]
 
 
-def sanitize_tags(tags: list) -> list[str]:
+def sanitize_tags(tags) -> list[str]:
+    """Accept list or comma-separated string (some harnesses send either)."""
     if not tags:
         return []
+    if isinstance(tags, str):
+        tags = [t.strip() for t in tags.split(",") if t.strip()]
     clean: list[str] = []
     for raw_tag in tags[:MAX_TAGS]:
         tag = re.sub(r"[^a-zA-Z0-9\-_]", "", str(raw_tag))

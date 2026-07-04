@@ -346,27 +346,16 @@ if _EXPERIMENTAL:
 
 # Dispatcher
 
-async def handle_tool_call(tool_name: str, arguments: dict[str, Any]) -> Any:
+async def handle_tool_call(tool_name: str, arguments: dict[str, Any] | None) -> Any:
+    arguments = arguments or {}
     if tool_name not in TOOL_HANDLERS:
-        raise ValueError(
-            f"Unknown tool: {tool_name!r}. "
-            f"Available: {', '.join(sorted(TOOL_HANDLERS))}"
-        )
+        raise ValueError(f"Unknown tool: {tool_name!r}. Call list_tools to see available tools.")
 
     handler = TOOL_HANDLERS[tool_name]
 
-    # Apply backpressure: block if too many calls are in-flight.
-    # Use a non-blocking acquire first to give a fast error for grossly
-    # overloaded servers rather than letting every caller pile up.
-    if not _semaphore._value and _semaphore.locked():  # noqa: SLF001
-        # Still try to acquire — this gives a more honest wait vs. error.
-        pass
-
     async with _semaphore:
         try:
-            return await asyncio.wait_for(
-                handler(**arguments), timeout=25.0
-            )
+            return await asyncio.wait_for(handler(**arguments), timeout=25.0)
         except asyncio.TimeoutError:
             raise ValueError(
                 f"Tool {tool_name!r} timed out after 25 s. "

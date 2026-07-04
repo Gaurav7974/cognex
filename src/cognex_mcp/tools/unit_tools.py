@@ -6,6 +6,17 @@ from cognex_mcp.sanitizer import sanitize_content, sanitize_project, sanitize_ta
 from cognex_mcp.tools.dispatcher import run_in_thread
 VALID_UNIT_TYPES = {'decision', 'constraint', 'progress', 'task_state'}
 
+
+def _fetch_open_questions(store, project: str) -> list:
+    """Run on thread-pool to avoid blocking the async event loop."""
+    with store._connect() as conn:
+        return conn.execute(
+            "SELECT question_id, content, scope FROM open_questions "
+            "WHERE project=? AND status='open' ORDER BY created_at DESC LIMIT 25",
+            (project,),
+        ).fetchall()
+
+
 async def unit_commit(content: str, rationale: str='', unit_type: str='decision', scope: str='', confidence: float=1.0, tags: list[str] | None=None, project: str='', epistemic_status: str='assumed', verification_condition: str='', depends_on: list[str] | None=None, staleness_deadline: str | None=None) -> dict[str, Any]:
     content = sanitize_content(content)
     rationale = sanitize_content(rationale)
@@ -27,18 +38,15 @@ async def unit_commit(content: str, rationale: str='', unit_type: str='decision'
     ctx.audit.append(event_type='unit_commit', session_id=session_id or None, project=project, agent_id=None, payload={'unit_id': unit.unit_id, 'unit_type': unit_type, 'project': project})
     return {'unit_id': unit.unit_id, 'unit_type': unit.unit_type, 'content': unit.content, 'rationale': unit.rationale, 'scope': unit.scope, 'confidence': unit.confidence, 'epistemic_status': unit.epistemic_status, 'verification_condition': unit.verification_condition, 'depends_on': list(unit.depends_on), 'created_at': unit.created_at.isoformat()}
 
-async def unit_checkout(project: str, scope: str | None=None, unit_type_filter: str | None=None, session_summary: str='') -> dict[str, Any]:
+async def unit_checkout(project: str = '', scope: str | None=None, unit_type_filter: str | None=None, session_summary: str='') -> dict[str, Any]:
     project = sanitize_project(project)
-    if not project:
-        raise ValueError('project is required')
     ctx = CognexContext.get_instance()
     snapshot = await run_in_thread(ctx.unit_store.export_snapshot, project, session_summary, scope)
     all_units = await run_in_thread(ctx.unit_store.get_bundle, project, scope, True)
     grouped: dict[str, list[dict[str, Any]]] = {}
     for unit in all_units:
         grouped.setdefault(unit.epistemic_status, []).append({'unit_id': unit.unit_id, 'unit_type': unit.unit_type, 'content': unit.content[:160], 'scope': unit.scope, 'confidence': unit.confidence, 'verification_condition': unit.verification_condition})
-    with ctx.unit_store._connect() as conn:
-        q_rows = conn.execute("SELECT question_id, content, scope FROM open_questions WHERE project = ? AND status = 'open' ORDER BY created_at DESC LIMIT 25", (project,)).fetchall()
+    q_rows = await run_in_thread(_fetch_open_questions, ctx.unit_store, project)
     snapshot['epistemic_classes'] = grouped
     snapshot['open_questions'] = [{'question_id': r['question_id'], 'content': r['content'][:160], 'scope': r['scope']} for r in q_rows]
     if unit_type_filter:

@@ -8,6 +8,35 @@ from cognex_mcp.context import CognexContext
 from cognex_mcp.sanitizer import sanitize_content, sanitize_project
 from cognex_mcp.tools.dispatcher import run_in_thread
 
+
+def _insert_question(store, question_id: str, content: str, project: str, scope: str, session_id: str, now: str) -> None:
+    """Run on thread-pool — keeps DB writes off the async event loop."""
+    with store._connect() as conn:
+        conn.execute(
+            "INSERT INTO open_questions "
+            "(question_id, content, project, scope, raised_in_session, status, created_at) "
+            "VALUES (?, ?, ?, ?, ?, 'open', ?)",
+            (question_id, content, project, scope, session_id, now),
+        )
+        conn.commit()
+
+
+def _fetch_and_resolve_question(store, question_id: str, answer_ref: str):
+    """Run on thread-pool — fetch, validate, and update in one DB round-trip."""
+    with store._connect() as conn:
+        row = conn.execute(
+            "SELECT * FROM open_questions WHERE question_id = ?", (question_id,)
+        ).fetchone()
+        if not row:
+            raise ValueError(f"Question not found: {question_id}")
+        conn.execute(
+            "UPDATE open_questions SET status='answered', answer_ref=? WHERE question_id=?",
+            (answer_ref, question_id),
+        )
+        conn.commit()
+    return row
+
+
 async def provenance_trace(node_or_ref_id: str, direction: str='origins', depth: int=3) -> dict[str, Any]:
     if direction not in {'origins', 'impacts'}:
         direction = 'origins'
@@ -27,9 +56,7 @@ async def question_raise(content: str, project: str='', scope: str='') -> dict[s
     ctx = CognexContext.get_instance()
     question_id = uuid.uuid4().hex[:16]
     now = datetime.now(timezone.utc).isoformat()
-    with ctx.unit_store._connect() as conn:
-        conn.execute("\n            INSERT INTO open_questions\n            (question_id, content, project, scope, raised_in_session, status, created_at)\n            VALUES (?, ?, ?, ?, ?, 'open', ?)\n            ", (question_id, content, project, scope, ctx.engine.current_session or '', now))
-        conn.commit()
+    await run_in_thread(_insert_question, ctx.unit_store, question_id, content, project, scope, ctx.engine.current_session or '', now)
     ctx.provenance.ensure_node('question', 'open_questions', question_id, project, ctx.engine.current_session or '')
     return {'question_id': question_id, 'status': 'open', 'created_at': now}
 
@@ -37,17 +64,10 @@ async def question_resolve(question_id: str, answer_ref: str) -> dict[str, Any]:
     if not question_id or not answer_ref:
         raise ValueError('question_id and answer_ref are required')
     ctx = CognexContext.get_instance()
-    with ctx.unit_store._connect() as conn:
-        row = conn.execute('SELECT * FROM open_questions WHERE question_id = ?', (question_id,)).fetchone()
-        if not row:
-            raise ValueError(f'Question not found: {question_id}')
-        conn.execute("UPDATE open_questions SET status = 'answered', answer_ref = ? WHERE question_id = ?", (answer_ref, question_id))
-        conn.commit()
+    row = await run_in_thread(_fetch_and_resolve_question, ctx.unit_store, question_id, answer_ref)
     q_node = ctx.provenance.ensure_node('question', 'open_questions', question_id, row['project'], row['raised_in_session'])
     answer_node = ctx.provenance.resolve_ref(answer_ref)
-    edge_id = ''
-    if answer_node:
-        edge_id = ctx.provenance.link(answer_node, q_node, 'answers', 'question resolved')
+    edge_id = ctx.provenance.link(answer_node, q_node, 'answers', 'question resolved') if answer_node else ''
     return {'question_id': question_id, 'status': 'answered', 'answer_ref': answer_ref, 'edge_id': edge_id}
 
 async def integrity_verify(project: str, ref_ids: list[str] | None=None) -> dict[str, Any]:

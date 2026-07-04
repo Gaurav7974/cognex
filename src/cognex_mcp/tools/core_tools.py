@@ -32,20 +32,17 @@ async def cognex_start_session(
         SessionArcManager.get_active_arc, project=project, store=ctx.engine.store
     )
 
-    return {
+    result = {
         "session_id": session_id,
         "project": project,
         "context_memories": [
-            {
-                "id": m.id,
-                "content": m.content,
-                "type": m.type.value,
-                "tags": list(m.tags),
-            }
+            {"id": m.id, "content": m.content, "type": m.type.value, "tags": list(m.tags)}
             for m in memories
         ],
-        "active_arc": arc_info,
     }
+    if arc_info:
+        result["active_arc"] = arc_info
+    return result
 
 
 async def cognex_end_session(

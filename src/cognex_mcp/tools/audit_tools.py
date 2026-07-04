@@ -5,21 +5,17 @@ from cognex_mcp.context import CognexContext
 
 
 async def audit_get_recent(
-    project: str,
+    project: str = "",
     limit: int = 50,
 ) -> dict[str, Any]:
-    if not project:
-        raise ValueError("project is required")
-
     limit = max(1, min(limit, 100))
     ctx = CognexContext.get_instance()
-    entries = ctx.audit.get_recent(project=project, limit=limit)
-
+    entries = ctx.audit.get_recent(project=project or None, limit=limit)
     return {
-        "project":        project,
-        "limit":          limit,
-        "entries_count":  len(entries),
-        "entries":        entries,
+        "project": project or "all",
+        "limit": limit,
+        "entries_count": len(entries),
+        "entries": entries,
     }
 
 
